@@ -12,8 +12,8 @@
  */
 package fixture.testviews2;
 
-import uk.co.q3c.v7.base.view.LoginView;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
+import uk.co.q3c.v7.base.view.std.LoginView;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;

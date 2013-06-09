@@ -53,7 +53,7 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 	@Override
 	protected Injector getInjector() {
 
-		injector = Guice.createInjector(new IniModule(), new DefaultShiroWebModule(ctx.get()));
+		injector = Guice.createInjector(new IniModule(), new I18NModule(), new DefaultShiroWebModule(ctx.get()));
 
 		injector.createChildInjector(getModules());
 
@@ -82,7 +82,6 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 		baseModules.add(new ThreadScopeModule());
 		baseModules.add(new UIScopeModule());
 		baseModules.add(new OrientDbModule(ini));
-		baseModules.add(new I18NModule());
 		baseModules.add(new StandardViewModule());
 		addAppModules(baseModules);
 		return baseModules;

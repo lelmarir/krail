@@ -21,7 +21,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
-import uk.co.q3c.v7.base.view.LoginView;
+import uk.co.q3c.v7.base.view.std.LoginView;
 
 /**
  * Implementations should handle all Shiro exceptions captured during the login process.

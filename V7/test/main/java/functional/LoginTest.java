@@ -13,8 +13,8 @@ import uk.co.q3c.v7.base.navigate.StandardPageKeys;
 import uk.co.q3c.v7.base.shiro.V7ShiroVaadinModule;
 import uk.co.q3c.v7.base.ui.BasicUI;
 import uk.co.q3c.v7.base.view.ApplicationViewModule;
-import uk.co.q3c.v7.base.view.LoginView;
 import uk.co.q3c.v7.base.view.StandardViewModule;
+import uk.co.q3c.v7.base.view.std.LoginView;
 import uk.co.q3c.v7.demo.view.DemoModule;
 import uk.co.q3c.v7.demo.view.View1;
 
@@ -45,7 +45,7 @@ public class LoginTest extends UITestBase {
 
 		// given
 
-		navigatorPro.get().navigateTo(StandardPageKeys.login);
+		navigatorPro.get().navigateTo(StandardPageKeys.Login);
 		LoginView loginView = (LoginView) ui.getView();
 		loginView.setUsername(username);
 		loginView.setPassword(password);
@@ -64,7 +64,7 @@ public class LoginTest extends UITestBase {
 
 		// given
 		navigatorPro.get().navigateTo(view1);
-		navigatorPro.get().navigateTo(StandardPageKeys.login);
+		navigatorPro.get().navigateTo(StandardPageKeys.Login);
 		LoginView loginView = (LoginView) ui.getView();
 		loginView.setUsername(username);
 		loginView.setPassword(password);
@@ -83,7 +83,7 @@ public class LoginTest extends UITestBase {
 		// given
 
 		// when
-		navigatorPro.get().navigateTo(StandardPageKeys.login);
+		navigatorPro.get().navigateTo(StandardPageKeys.Login);
 
 		// then
 		assertThat(ui.getView()).isInstanceOf(LoginView.class);
@@ -105,7 +105,7 @@ public class LoginTest extends UITestBase {
 	public void exceedLogins() {
 
 		// given
-		navigatorPro.get().navigateTo(StandardPageKeys.login);
+		navigatorPro.get().navigateTo(StandardPageKeys.Login);
 		LoginView loginView = (LoginView) ui.getView();
 		loginView.setUsername(username);
 		loginView.setPassword(badpassword);

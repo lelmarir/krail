@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.co.q3c.v7.base.view.V7View;
+import uk.co.q3c.v7.i18n.CurrentLocale;
 import uk.co.q3c.v7.i18n.I18NKeys;
 
 import com.google.common.base.Strings;
@@ -48,7 +49,6 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		options,
 		redirects,
 		viewPackages,
-		standardPages,
 		map;
 	}
 
@@ -64,6 +64,7 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 
 	private boolean appendView;
 
+	private Set<String> missingEnumLabels;
 	private Set<String> missingEnums;
 	private Set<String> invalidViewClasses;
 	private Set<String> undeclaredViewClasses;
@@ -85,18 +86,21 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 	private boolean labelClassMissing = true;
 	private String labelClassName;
 
-	private String defaultAccountView;
+	// private String defaultAccountView;
 	private File sourceFile;
+	private final CurrentLocale currentLocale;
 
 	@Inject
-	public TextReaderSitemapProvider() {
+	public TextReaderSitemapProvider(CurrentLocale currentLocale) {
 		super();
+		this.currentLocale = currentLocale;
 	}
 
 	private void init() {
 		startTime = DateTime.now();
 		endTime = null;
 		missingEnums = new HashSet<>();
+		missingEnumLabels = new HashSet<>();
 		invalidViewClasses = new HashSet<>();
 		undeclaredViewClasses = new HashSet<>();
 		indentationErrors = new HashSet<>();
@@ -107,7 +111,7 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		unrecognisedOptions = new HashSet<>();
 		redirectErrors = new HashSet<>();
 
-		sitemap = new Sitemap();
+		sitemap = new Sitemap(currentLocale);
 		sections = new HashMap<>();
 		labelClassNotI18N = false;
 		labelClassNonExistent = false;
@@ -154,11 +158,15 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		// can only process if ALL required sections are present
 		if (missingSections().size() == 0) {
 			processOptions();
+
+			processMap2();
+			checkStandardPages();
 			processRedirects();
-			processMap();
-			processStandardPages();
 			validateRedirects();
-			checkLabelKeys();
+			// processMap();
+			// processStandardPages();
+
+			// checkLabelKeys();
 
 			log.info("Sitemap loaded successfully");
 
@@ -173,13 +181,61 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		sitemap.setReport(getReport().toString());
 	}
 
-	private void checkLabelKeys() {
-		for (SitemapNode node : sitemap.getAllNodes()) {
-			if (node.getLabelKey() == null) {
-				labelKeyForName(null, node, true);
+	/**
+	 * Make sure all standard pages have an entry, or create one if not. If pages are missing they are placed at the
+	 * following locations:
+	 * 
+	 * -public<br>
+	 * --public-home --login<br>
+	 * --logout<br>
+	 * --system-account<br>
+	 * ---refresh-account<br>
+	 * ---unlock-account<br>
+	 * ---request-account<br>
+	 * ---reset-account<br>
+	 * ---enable-account<br>
+	 * -secure<br>
+	 * --secure-home<br>
+	 */
+	private void checkStandardPages() {
+		for (StandardPageKeys key : StandardPageKeys.values()) {
+			// if key missing, provide a default page
+			if (!(standardPages().containsKey(key))) {
+				String parentUrl = null;
+				switch (key) {
+				case Public_Home:
+				case System_Account:
+				case Login:
+				case Logout:
+					parentUrl = "public";
+					break;
+				case Secure_Home:
+					parentUrl = "secure";
+					break;
+				case Refresh_Account:
+				case Enable_Account:
+				case Unlock_Account:
+				case Request_Account:
+				case Reset_Account:
+					parentUrl = "public/system-account";
+					break;
+				}
+				SitemapNode node = sitemap.append(parentUrl + "/" + key.name());
+				node.setUrlSegment(key.name());
+				node.setLabelKey(key);
+				viewForName(node, viewFromSegment(node.getUrlSegment()), true);
+
 			}
 		}
 	}
+
+	// private void checkLabelKeys() {
+	// for (SitemapNode node : sitemap.getAllNodes()) {
+	// if (node.getLabelKey() == null) {
+	// labelKeyForName(null, node, true);
+	// }
+	// }
+	// }
 
 	/**
 	 * Ensure that redirection targets exist, and that no loops can be created
@@ -200,87 +256,88 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 
 	}
 
-	/**
-	 * Standard pages are added after the page map has been built. This may cause a duplication of urls - if so, that is
-	 * captured in {@link #duplicateURLs}. As the map is built from the standard page URLs, it may also cause
-	 * intermediate nodes to have no View assigned. This is checked and captured in {@link #viewlessURLs}
-	 */
-	private void processStandardPages() {
+	// /**
+	// * Standard pages are added after the page map has been built. This may cause a duplication of urls - if so, that
+	// is
+	// * captured in {@link #duplicateURLs}. As the map is built from the standard page URLs, it may also cause
+	// * intermediate nodes to have no View assigned. This is checked and captured in {@link #viewlessURLs}
+	// */
+	// private void processStandardPages() {
+	//
+	// List<String> lines = sections.get(SectionName.standardPages);
+	// int i = 1;
+	//
+	// for (String line : lines) {
+	//
+	// StandardPageKeys pageKey = null;
+	// String toUrl = null;
+	// String viewName = null;
+	//
+	// if (!line.contains("=")) {
+	// propertyErrors
+	// .add("Property must contain an '=' sign at line " + linenum(SectionName.standardPages, i));
+	// } else {
+	// String[] pair = StringUtils.split(line, "=");
+	// String pageKeyName = pair[0].trim();
+	//
+	// try {
+	// pageKey = StandardPageKeys.valueOf(pageKeyName);
+	// if (pair.length > 1) {
+	// if (pair[1].contains(":")) {
+	// String[] urlView = StringUtils.split(pair[1], ":");
+	// if (pair[1].startsWith(":")) {
+	// toUrl = "";
+	// viewName = pair[1].replace(":", "");
+	// } else {
+	// toUrl = urlView[0].trim();
+	// if (urlView.length > 1) {
+	// viewName = urlView[1].trim();
+	// }
+	// }
+	//
+	// } else {
+	// toUrl = pair[1].trim();
+	// }
+	//
+	// standardPages().put(pageKey, toUrl);
+	// } else {
+	// standardPages().put(pageKey, "");
+	// }
+	// } catch (Exception e) {
+	// propertyErrors.add(pageKeyName + " is not a valid " + StandardPageKeys.class.getSimpleName()
+	// + linenum(SectionName.standardPages, i));
+	//
+	// }
+	//
+	// }
+	//
+	// // we now have defined a node, add it to the map
+	// // bu but only if url is there
+	// if (toUrl != null) {
+	// SitemapNode node = sitemap.append(toUrl);
+	// node.setLabelKey(pageKey);
+	// // and set the view
+	// if (Strings.isNullOrEmpty(viewName)) {
+	// viewName = defaultAccountView;
+	// }
+	// findView(node, node.getUrlSegment(), viewName);
+	// }
+	// i++;
+	// }
+	//
+	// // check for missing standard pages
+	// for (StandardPageKeys spk : StandardPageKeys.values()) {
+	// if (!standardPages().containsKey(spk)) {
+	// missingPages.add(spk.name());
+	// sitemap.error();
+	// }
+	// }
+	//
+	// }
 
-		List<String> lines = sections.get(SectionName.standardPages);
-		int i = 1;
-
-		for (String line : lines) {
-
-			StandardPageKeys pageKey = null;
-			String toUrl = null;
-			String viewName = null;
-
-			if (!line.contains("=")) {
-				propertyErrors
-						.add("Property must contain an '=' sign at line " + linenum(SectionName.standardPages, i));
-			} else {
-				String[] pair = StringUtils.split(line, "=");
-				String pageKeyName = pair[0].trim();
-
-				try {
-					pageKey = StandardPageKeys.valueOf(pageKeyName);
-					if (pair.length > 1) {
-						if (pair[1].contains(":")) {
-							String[] urlView = StringUtils.split(pair[1], ":");
-							if (pair[1].startsWith(":")) {
-								toUrl = "";
-								viewName = pair[1].replace(":", "");
-							} else {
-								toUrl = urlView[0].trim();
-								if (urlView.length > 1) {
-									viewName = urlView[1].trim();
-								}
-							}
-
-						} else {
-							toUrl = pair[1].trim();
-						}
-
-						standardPages().put(pageKey, toUrl);
-					} else {
-						standardPages().put(pageKey, "");
-					}
-				} catch (Exception e) {
-					propertyErrors.add(pageKeyName + " is not a valid " + StandardPageKeys.class.getSimpleName()
-							+ linenum(SectionName.standardPages, i));
-
-				}
-
-			}
-
-			// we now have defined a node, add it to the map
-			// bu but only if url is there
-			if (toUrl != null) {
-				SitemapNode node = sitemap.append(toUrl);
-				node.setLabelKey(pageKey);
-				// and set the view
-				if (Strings.isNullOrEmpty(viewName)) {
-					viewName = defaultAccountView;
-				}
-				findView(node, node.getUrlSegment(), viewName);
-			}
-			i++;
-		}
-
-		// check for missing standard pages
-		for (StandardPageKeys spk : StandardPageKeys.values()) {
-			if (!standardPages().containsKey(spk)) {
-				missingPages.add(spk.name());
-				sitemap.error();
-			}
-		}
-
-	}
-
-	private String linenum(SectionName sectionName, int i) {
-		return "at line " + i + " in the " + sectionName + " section";
-	}
+	// private String linenum(SectionName sectionName, int i) {
+	// return "at line " + i + " in the " + sectionName + " section";
+	// }
 
 	@Override
 	public void parse(File file) {
@@ -371,9 +428,7 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		case "appendView":
 			appendView = "true".equals(value);
 			break;
-		case "defaultAccountView":
-			defaultAccountView = value;
-			break;
+
 		default:
 			log.warn("unrecognised option '{}' in site map", key);
 			unrecognisedOptions.add(key);
@@ -417,58 +472,31 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		return sections.get(SectionName.viewPackages);
 	}
 
-	private void processMap() {
+	private void processMap2() {
 		List<String> sectionLines = sections.get(SectionName.map);
 		int i = 0;
-		SitemapNode currentNode = null;
 		int currentLevel = 0;
+		SitemapNode currentNode = null;
 		for (String line : sectionLines) {
-			if (line.startsWith("-")) {
-				int treeLevel = lastIndent(line);
-				int viewStart = line.indexOf(":");
-				int labelStart = line.indexOf("~");
-				String segment = null;
-				String view = null;
-				String labelKeyName = null;
-				if ((labelStart > 0) && (viewStart > 0)) {
-					if (viewStart < labelStart) {
-						segment = line.substring(treeLevel, viewStart);
-						view = line.substring(viewStart + 1, labelStart);
-						labelKeyName = line.substring(labelStart + 1);
-					} else {
-						segment = line.substring(treeLevel, labelStart);
-						labelKeyName = line.substring(labelStart + 1, viewStart);
-						view = line.substring(viewStart + 1);
-					}
-				} else {
-					// only label
-					if (labelStart > 0) {
-						segment = line.substring(treeLevel, labelStart);
-						labelKeyName = line.substring(labelStart + 1);
-					}// only view
-					else if (viewStart > 0) {
-						segment = line.substring(treeLevel, viewStart);
-						view = line.substring(viewStart + 1);
-					}
-					// only segment
-					else {
-						segment = line.substring(treeLevel);
-					}
+			SitemapLineParser slp = new SitemapLineParser(sitemap, line, i);
+			if (slp.errorCount() > 0) {
+				if (slp.isMissingHyphen()) {
+					indentationErrors.add(slp.errorMsg_missingHyphen());
 				}
-
-				// segment has been set, view & label may be null
+			} else {
 				SitemapNode node = new SitemapNode();
-				node.setUrlSegment(segment);
-
-				// do structure before labels
-				// labels are not needed for redirected pages
-				// but we cannot get full url until structure done
-
-				// add the node
+				node.setUrlSegment(slp.segment());
+				System.out.println(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>. " + slp.segment() + " (" + slp.level() + ")");
+				viewForName(node, slp.view(), appendView);
+				String labelKeyName = slp.key();
+				keyForName(node, labelKeyName);
+				int treeLevel = slp.level();
 				if (treeLevel == 1) {
-					// at level 1 each becomes a 'root' (technically the site tree is a forest)
-					sitemap.addNode(node);
+					// at level 1 each becomes a 'root' (technically the site map is a forest)
+					sitemap.addNodeInBuild(node);
 					currentNode = node;
+					System.out.println(" >>>>>>>>>>>>> addNode " + node.getUrlSegment() + "  cn = "
+							+ sitemap.url(currentNode));
 					currentLevel = treeLevel;
 				} else {
 					// if indent going back up tree, walk up from current node to the parent level needed
@@ -478,12 +506,16 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 							currentNode = sitemap.getParent(currentNode);
 							currentLevel--;
 						}
-						sitemap.addChild(currentNode, node);
+						sitemap.addChildInBuild(currentNode, node);
 						currentNode = node;
+						System.out.println(" >>>>>>>>>>>>> addChildNode " + currentNode.getUrlSegment() + " : "
+								+ node.getUrlSegment() + "  cn = " + sitemap.url(currentNode));
 						currentLevel++;
 					} else if (treeLevel == currentLevel) {
 						SitemapNode parentNode = sitemap.getParent(currentNode);
 						sitemap.addChild(parentNode, node);
+						System.out.println(" >>>>>>>>>>>>> addChildNode " + parentNode.getUrlSegment() + " : "
+								+ node.getUrlSegment() + "  cn = " + sitemap.url(currentNode));
 					} else if (treeLevel > currentLevel) {
 						if (treeLevel - currentLevel > 1) {
 							log.warn(
@@ -493,70 +525,33 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 						}
 						sitemap.addChild(currentNode, node);
 						currentNode = node;
+						System.out.println(" >>>>>>>>>>>>> addChildNode " + currentNode.getUrlSegment() + " : "
+								+ node.getUrlSegment() + "  cn = " + sitemap.url(currentNode));
 						currentLevel++;
 					}
 
 				}
 
-				String url = sitemap.url(node);
-				// do the view
-				if (!getRedirects().containsKey(url)) {
-					findView(node, segment, view);
+				if (node.getLabelKey() instanceof StandardPageKeys) {
+					standardPages().put((StandardPageKeys) node.getLabelKey(), sitemap.url(node));
 				}
-
-				// do the label, don't flag as missing till final check
-				labelKeyForName(labelKeyName, node, true);
-
-			} else {
-				log.warn("line in map must start with a'-', line " + i);
-				sitemap.error();
 			}
 		}
-
-	}
-
-	@SuppressWarnings("unchecked")
-	private void labelKeyForName(String labelKeyName, SitemapNode node, boolean flagAsMissing) {
-		try {
-
-			if (labelKeyName == null) {
-				labelKeyName = WordUtils.capitalize(node.getUrlSegment());
-				// hyphen not valid in enum, but may be used in segment
-				labelKeyName = labelKeyName.replace("-", "_");
-			}
-
-			@SuppressWarnings({ "rawtypes" })
-			Enum labelKey = Enum.valueOf(labelKeysClass, labelKeyName);
-			node.setLabelKey(labelKey);
-		} catch (Exception e) {
-			if (flagAsMissing) {
-				missingEnums.add(labelKeyName);
-				sitemap.error();
-			}
-		}
-
 	}
 
 	/**
-	 * Updates the node with the required view. If {@link #appendView} is true the 'View' is appended to the
-	 * {@code viewName} before attempting to find its class declaration. If no class can be found, {@code viewName} is
-	 * added to {@link #undeclaredViewClasses}
+	 * Looks up the View class for the {@code viewName} given. Raises an error if no View class can be identified in the
+	 * view packages specified (see {@link #getViewPackages()}).
 	 * 
 	 * @param node
-	 * @param segment
-	 * @param viewName
+	 * @param forceAppendView
+	 *            if true, appends 'View' regardless of the value of the appendView option
+	 * @param view
 	 */
 	@SuppressWarnings("unchecked")
-	private void findView(SitemapNode node, String segment, String viewName) {
-		// if view is null use the segment
-		if (viewName == null) {
-			viewName = StringUtils.capitalize(segment);
-		}
-
+	private void viewForName(SitemapNode node, String baseViewName, boolean forceAppendView) {
 		// user option whether to append 'View' or not
-		if (appendView) {
-			viewName = viewName + "View";
-		}
+		String viewName = (appendView || forceAppendView) ? baseViewName + "View" : baseViewName;
 
 		// try and find the view in the specified packages
 		for (String pkg : getViewPackages()) {
@@ -571,26 +566,235 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 					sitemap.error();
 				}
 			} catch (ClassNotFoundException e) {
-				// don't need to do anything
+				// don't need to do anything, null view recorded below
 			}
 
 		}
 
 		// record for report if view not found
 		if (node.getViewClass() == null) {
-			undeclaredViewClasses.add(viewName);
+			viewNotFoundError(viewName);
+		}
+	}
+
+	private void viewNotFoundError(String viewName) {
+		undeclaredViewClasses.add(viewName);
+		sitemap.error();
+
+	}
+
+	/**
+	 * Looks for StandardPageKey first, then tries the {@link #labelKeysClass}. Sets the value of
+	 * {@link SitemapNode#setLabelKey(Enum)}. If no key found records an error using {@link #keyNotFoundError(String)}
+	 * 
+	 * @param labelKeyName
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private void keyForName(SitemapNode node, String labelKeyName) {
+		Enum<? extends I18NKeys<?>> key = null;
+		try {
+			key = StandardPageKeys.valueOf(labelKeyName);
+		} catch (Exception e) {
+			try {
+				key = Enum.valueOf(labelKeysClass, labelKeyName);
+			} catch (Exception e1) {
+				keyNotFoundError(labelKeyName);
+				return;
+			}
+		}
+		node.setLabelKey(key);
+		I18NKeys<?> k = (I18NKeys<?>) key;
+		String label = k.getValue(currentLocale.getLocale());
+		if (label == null) {
+			missingEnumLabels.add(labelKeyName);
 			sitemap.error();
+			node.setLabel("error");
+		} else {
+			node.setLabel(label);
 		}
 
 	}
 
-	private int lastIndent(String line) {
-		int index = 0;
-		while (line.charAt(index) == '-') {
-			index++;
-		}
-		return index;
+	private void keyNotFoundError(String labelKeyName) {
+		missingEnums.add(labelKeyName);
+		sitemap.error();
 	}
+
+	// private void processMap() {
+	// List<String> sectionLines = sections.get(SectionName.map);
+	// int i = 0;
+	// SitemapNode currentNode = null;
+	// int currentLevel = 0;
+	// for (String line : sectionLines) {
+	// if (line.startsWith("-")) {
+	// int treeLevel = lastIndent(line);
+	// int viewStart = line.indexOf(":");
+	// int labelStart = line.indexOf("~");
+	// String segment = null;
+	// String view = null;
+	// String labelKeyName = null;
+	// if ((labelStart > 0) && (viewStart > 0)) {
+	// if (viewStart < labelStart) {
+	// segment = line.substring(treeLevel, viewStart);
+	// view = line.substring(viewStart + 1, labelStart);
+	// labelKeyName = line.substring(labelStart + 1);
+	// } else {
+	// segment = line.substring(treeLevel, labelStart);
+	// labelKeyName = line.substring(labelStart + 1, viewStart);
+	// view = line.substring(viewStart + 1);
+	// }
+	// } else {
+	// // only label
+	// if (labelStart > 0) {
+	// segment = line.substring(treeLevel, labelStart);
+	// labelKeyName = line.substring(labelStart + 1);
+	// }// only view
+	// else if (viewStart > 0) {
+	// segment = line.substring(treeLevel, viewStart);
+	// view = line.substring(viewStart + 1);
+	// }
+	// // only segment
+	// else {
+	// segment = line.substring(treeLevel);
+	// }
+	// }
+	//
+	// // segment has been set, view & label may be null
+	// SitemapNode node = new SitemapNode();
+	// node.setUrlSegment(segment);
+	//
+	// // do structure before labels
+	// // labels are not needed for redirected pages
+	// // but we cannot get full url until structure done
+	//
+	// // add the node
+	// if (treeLevel == 1) {
+	// // at level 1 each becomes a 'root' (technically the site map is a forest)
+	// sitemap.addNode(node);
+	// currentNode = node;
+	// currentLevel = treeLevel;
+	// } else {
+	// // if indent going back up tree, walk up from current node to the parent level needed
+	// if (treeLevel < currentLevel) {
+	// int retraceLevels = currentLevel - treeLevel;
+	// for (int k = 1; k <= retraceLevels; k++) {
+	// currentNode = sitemap.getParent(currentNode);
+	// currentLevel--;
+	// }
+	// sitemap.addChild(currentNode, node);
+	// currentNode = node;
+	// currentLevel++;
+	// } else if (treeLevel == currentLevel) {
+	// SitemapNode parentNode = sitemap.getParent(currentNode);
+	// sitemap.addChild(parentNode, node);
+	// } else if (treeLevel > currentLevel) {
+	// if (treeLevel - currentLevel > 1) {
+	// log.warn(
+	// "indentation for {} line is too great.  It should be a maximum of 1 greater than its predecessor",
+	// node.getUrlSegment());
+	// indentationErrors.add(node.getUrlSegment());
+	// }
+	// sitemap.addChild(currentNode, node);
+	// currentNode = node;
+	// currentLevel++;
+	// }
+	//
+	// }
+	//
+	// String url = sitemap.url(node);
+	// // do the view
+	// if (!getRedirects().containsKey(url)) {
+	// findView(node, segment, view);
+	// }
+	//
+	// // do the label, don't flag as missing till final check
+	// labelKeyForName(labelKeyName, node, true);
+	//
+	// } else {
+	// log.warn("line in map must start with a'-', line " + i);
+	// sitemap.error();
+	// }
+	// }
+	//
+	// }
+
+	// @SuppressWarnings("unchecked")
+	// private void labelKeyForName(String labelKeyName, SitemapNode node, boolean flagAsMissing) {
+	// try {
+	//
+	// if (labelKeyName == null) {
+	// labelKeyName = WordUtils.capitalize(node.getUrlSegment());
+	// // hyphen not valid in enum, but may be used in segment
+	// labelKeyName = labelKeyName.replace("-", "_");
+	// }
+	//
+	// @SuppressWarnings({ "rawtypes" })
+	// Enum labelKey = Enum.valueOf(labelKeysClass, labelKeyName);
+	// node.setLabelKey(labelKey);
+	// } catch (Exception e) {
+	// if (flagAsMissing) {
+	// missingEnums.add(labelKeyName);
+	// sitemap.error();
+	// }
+	// }
+	//
+	// }
+
+	// /**
+	// * Updates the node with the required view. If {@link #appendView} is true the 'View' is appended to the
+	// * {@code viewName} before attempting to find its class declaration. If no class can be found, {@code viewName} is
+	// * added to {@link #undeclaredViewClasses}
+	// *
+	// * @param node
+	// * @param segment
+	// * @param viewName
+	// */
+	// @SuppressWarnings("unchecked")
+	// private void findView(SitemapNode node, String segment, String viewName) {
+	// // if view is null use the segment
+	// if (viewName == null) {
+	// viewName = StringUtils.capitalize(segment);
+	// }
+	//
+	// // user option whether to append 'View' or not
+	// if (appendView) {
+	// viewName = viewName + "View";
+	// }
+	//
+	// // try and find the view in the specified packages
+	// for (String pkg : getViewPackages()) {
+	// String fullViewName = pkg + "." + viewName;
+	// try {
+	// Class<?> viewClass = Class.forName(fullViewName);
+	// if (V7View.class.isAssignableFrom(viewClass)) {
+	// node.setViewClass((Class<V7View>) viewClass);
+	// break;
+	// } else {
+	// invalidViewClasses.add(fullViewName);
+	// sitemap.error();
+	// }
+	// } catch (ClassNotFoundException e) {
+	// // don't need to do anything
+	// }
+	//
+	// }
+	//
+	// // record for report if view not found
+	// if (node.getViewClass() == null) {
+	// undeclaredViewClasses.add(viewName);
+	// sitemap.error();
+	// }
+	//
+	// }
+
+	// private int lastIndent(String line) {
+	// int index = 0;
+	// while (line.charAt(index) == '-') {
+	// index++;
+	// }
+	// return index;
+	// }
 
 	/**
 	 * process a line of text from the file into the appropriate section
@@ -780,6 +984,17 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 		}
 		report.append("\n");
 
+		report.append("missing enum labels:\t");
+		report.append(missingEnumLabels.size());
+		report.append("  (you must provide labels for your I18N enums)");
+		report.append("\n");
+		if (missingEnumLabels.size() > 0) {
+			report.append("  -- ");
+			report.append(missingEnumLabels);
+			report.append("\n");
+		}
+		report.append("\n");
+
 		report.append("invalid view classes:\t\t");
 		report.append(invalidViewClasses.size());
 		report.append("  (invalid because they do not implement V7View)\n");
@@ -910,7 +1125,13 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 				parse("classpath:sitemap.properties");
 			}
 		}
-
+		if (sitemap.hasErrors()) {
+			buildReport();
+			log.error("Sitemap has errors:\n\n" + report);
+			throw new SiteMapException("Sitemap has errors:\n\n" + report);
+		} else {
+			log.info("Sitemap loaded without errors");
+		}
 		return getSitemap();
 	}
 
@@ -985,6 +1206,16 @@ public class TextReaderSitemapProvider implements SitemapProvider {
 
 	public Set<String> getRedirectErrors() {
 		return redirectErrors;
+	}
+
+	public String viewFromSegment(String segment) {
+		if (segment.isEmpty()) {
+			return "Home";
+		}
+		String s = segment.replace("-", " ").replace("_", " ");
+		s = WordUtils.capitalizeFully(s);
+		return s.replace(" ", "");
+
 	}
 
 }

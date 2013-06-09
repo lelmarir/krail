@@ -19,41 +19,17 @@ import uk.co.q3c.v7.i18n.I18NKeys;
 
 public enum StandardPageKeys implements I18NKeys<StandardPageLabels> {
 
-	publicHome, // The home page for non-authenticated users
-	secureHome, // The home page for authenticated users
-	login, // the login page
-	logout, // the page to go to after logging out
-	resetAccount, // page for the user to request an account reset
-	unlockAccount, // the page to go to for the user to request their account be unlocked
-	refreshAccount, // the page to go to for the user to refresh their account after credentials have expired
-	requestAccount, // the page to go to for the user to request an account (Equivalent to 'register')
-	enableAccount // the page to go to for the user to request that their account is enabled
+	Public_Home, // The home page for non-authenticated users
+	Secure_Home, // The home page for authenticated users
+	Login, // the login page
+	Logout, // the page to go to after logging out
+	System_Account, // typical page to collect all the following account related functions together
+	Reset_Account, // page for the user to request an account reset
+	Unlock_Account, // the page to go to for the user to request their account be unlocked
+	Refresh_Account, // the page to go to for the user to refresh their account after credentials have expired
+	Request_Account, // the page to go to for the user to request an account (Equivalent to 'register')
+	Enable_Account // the page to go to for the user to request that their account is enabled
 	;
-
-	private static String pageDefault(StandardPageKeys key) {
-		switch (key) {
-		case publicHome:
-			return "public/home";
-		case secureHome:
-			return "secure/home";
-		case login:
-			return "public/login";
-		case logout:
-			return "public/logout";
-		case resetAccount:
-			return "public/reset-account";
-		case unlockAccount:
-			return "public/unlock-account";
-		case refreshAccount:
-			return "public/refresh-account";
-		case requestAccount:
-			return "public/request-account";
-		case enableAccount:
-			return "public/enable-account";
-		default:
-			return "unknown";
-		}
-	}
 
 	@Override
 	public StandardPageLabels getBundle(Locale locale) {
@@ -63,11 +39,19 @@ public enum StandardPageKeys implements I18NKeys<StandardPageLabels> {
 
 	@Override
 	public String getValue(Locale locale) {
-		return getBundle(locale).getValue(this);
+		String value = getBundle(locale).getValue(this);
+		if (value == null) {
+			value = name().replace("_", " ");
+		}
+		return value;
 	}
 
 	@Override
 	public boolean isNullKey() {
 		return false;
+	}
+
+	public String segment() {
+		return name().replace("_", "-");
 	}
 }

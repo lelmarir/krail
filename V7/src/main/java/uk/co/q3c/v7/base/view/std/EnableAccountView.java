@@ -10,25 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.co.q3c.v7.base.view.testviews;
+package uk.co.q3c.v7.base.view.std;
 
 import uk.co.q3c.v7.base.view.V7View;
-import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
 
-import com.vaadin.ui.Component;
-
-public class SecureHomeView implements V7View {
-
-	@Override
-	public void enter(V7ViewChangeEvent event) {
-		//
-		throw new RuntimeException("not yet implemented");
-	}
-
-	@Override
-	public Component getUiComponent() {
-		// return null;
-		throw new RuntimeException("not yet implemented");
-	}
+public interface EnableAccountView extends V7View {
 
 }

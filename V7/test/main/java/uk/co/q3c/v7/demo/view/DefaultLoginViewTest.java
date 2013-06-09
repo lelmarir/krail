@@ -19,8 +19,8 @@ import uk.co.q3c.v7.base.shiro.DefaultLoginExceptionHandler;
 import uk.co.q3c.v7.base.shiro.V7ShiroVaadinModule;
 import uk.co.q3c.v7.base.ui.BasicUI;
 import uk.co.q3c.v7.base.view.ApplicationViewModule;
-import uk.co.q3c.v7.base.view.LoginView;
 import uk.co.q3c.v7.base.view.StandardViewModule;
+import uk.co.q3c.v7.base.view.std.LoginView;
 import uk.co.q3c.v7.demo.view.TestRealm.Response;
 
 import com.mycila.testing.junit.MycilaJunitRunner;
@@ -51,7 +51,7 @@ public class DefaultLoginViewTest extends UITestBase {
 	@Before
 	public void setup() {
 		super.setup();
-		navigatorPro.get().navigateTo(StandardPageKeys.login);
+		navigatorPro.get().navigateTo(StandardPageKeys.Login);
 		loginView = (LoginView) ui.getView();
 	}
 
@@ -65,7 +65,7 @@ public class DefaultLoginViewTest extends UITestBase {
 		loginView.getSubmitButton().click();
 		// then
 		assertThat(navigatorPro.get().getNavigationState()).isEqualTo(
-				sitemap.standardPageURI(StandardPageKeys.enableAccount));
+				sitemap.standardPageURI(StandardPageKeys.Enable_Account));
 
 	}
 
@@ -79,7 +79,7 @@ public class DefaultLoginViewTest extends UITestBase {
 		loginView.getSubmitButton().click();
 		// then
 		assertThat(navigatorPro.get().getNavigationState()).isEqualTo(
-				sitemap.standardPageURI(StandardPageKeys.resetAccount));
+				sitemap.standardPageURI(StandardPageKeys.Reset_Account));
 
 	}
 
@@ -93,7 +93,7 @@ public class DefaultLoginViewTest extends UITestBase {
 		loginView.getSubmitButton().click();
 		// then
 		assertThat(navigatorPro.get().getNavigationState()).isEqualTo(
-				sitemap.standardPageURI(StandardPageKeys.unlockAccount));
+				sitemap.standardPageURI(StandardPageKeys.Unlock_Account));
 
 	}
 
@@ -107,7 +107,7 @@ public class DefaultLoginViewTest extends UITestBase {
 		loginView.getSubmitButton().click();
 		// then
 		assertThat(navigatorPro.get().getNavigationState()).isEqualTo(
-				sitemap.standardPageURI(StandardPageKeys.enableAccount));
+				sitemap.standardPageURI(StandardPageKeys.Enable_Account));
 
 	}
 
@@ -134,7 +134,7 @@ public class DefaultLoginViewTest extends UITestBase {
 		loginView.getSubmitButton().click();
 		// then
 		assertThat(navigatorPro.get().getNavigationState()).isEqualTo(
-				sitemap.standardPageURI(StandardPageKeys.refreshAccount));
+				sitemap.standardPageURI(StandardPageKeys.Refresh_Account));
 
 	}
 

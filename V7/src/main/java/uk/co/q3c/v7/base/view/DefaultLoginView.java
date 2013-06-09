@@ -17,6 +17,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 
 import uk.co.q3c.v7.base.navigate.V7Navigator;
 import uk.co.q3c.v7.base.shiro.LoginExceptionHandler;
+import uk.co.q3c.v7.base.view.std.LoginView;
 import uk.co.q3c.v7.demo.view.components.HeaderBar;
 
 import com.vaadin.ui.Button;

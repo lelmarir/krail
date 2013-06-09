@@ -18,7 +18,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 
 import uk.co.q3c.v7.base.navigate.StandardPageKeys;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
-import uk.co.q3c.v7.base.view.LoginView;
+import uk.co.q3c.v7.base.view.std.LoginView;
 
 public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 	// TODO i18N
@@ -43,17 +43,17 @@ public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 
 	@Override
 	public void expiredCredentials(LoginView loginView, UsernamePasswordToken token) {
-		navigator.navigateTo(StandardPageKeys.refreshAccount);
+		navigator.navigateTo(StandardPageKeys.Refresh_Account);
 	}
 
 	@Override
 	public void accountLocked(LoginView loginView, UsernamePasswordToken token) {
-		navigator.navigateTo(StandardPageKeys.unlockAccount);
+		navigator.navigateTo(StandardPageKeys.Unlock_Account);
 	}
 
 	@Override
 	public void excessiveAttempts(LoginView loginView, UsernamePasswordToken token) {
-		navigator.navigateTo(StandardPageKeys.resetAccount);
+		navigator.navigateTo(StandardPageKeys.Reset_Account);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 
 	@Override
 	public void disabledAccount(LoginView loginView, UsernamePasswordToken token) {
-		navigator.navigateTo(StandardPageKeys.enableAccount);
+		navigator.navigateTo(StandardPageKeys.Enable_Account);
 	}
 
 }

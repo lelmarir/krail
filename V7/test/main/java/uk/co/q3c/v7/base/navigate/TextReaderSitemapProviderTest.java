@@ -29,8 +29,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import uk.co.q3c.v7.base.view.testviews.PublicHomeView;
-import uk.co.q3c.v7.base.view.testviews.SecureHomeView;
+import uk.co.q3c.v7.base.view.std.PublicHomeView;
+import uk.co.q3c.v7.base.view.std.PublicView;
+import uk.co.q3c.v7.base.view.std.SecureHomeView;
+import uk.co.q3c.v7.base.view.std.SystemAccountView;
 import uk.co.q3c.v7.base.view.testviews.subview.MoneyInOutView;
 import uk.co.q3c.v7.base.view.testviews.subview.NotV7View;
 import uk.co.q3c.v7.base.view.testviews.subview.TransferView;
@@ -76,7 +78,7 @@ public class TextReaderSitemapProviderTest {
 	public void parse_partialMap() throws IOException {
 
 		// given
-		String propFileName = "sitemap_good.properties";
+		String propFileName = "sitemap_partial.properties";
 		propFile = new File(propDir, propFileName);
 		DateTime start = DateTime.now();
 		// when
@@ -133,6 +135,86 @@ public class TextReaderSitemapProviderTest {
 		System.out.println(reader.getReport().toString());
 
 		System.out.println(reader.getSitemap());
+	}
+
+	/**
+	 * Map does defines every page, and therefore has predictable page ordering
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void parse_fullMap() throws IOException {
+
+		// given
+		String propFileName = "sitemap_full.properties";
+		propFile = new File(propDir, propFileName);
+		DateTime start = DateTime.now();
+		// when
+		assertThat(propFile.exists()).isTrue();
+		System.out.println(propFile.getAbsolutePath());
+		reader.parse(propFile);
+		// then
+		assertThat(reader.getSitemap()).isNotNull();
+		assertThat(reader.getCommentLines()).isEqualTo(21);
+		assertThat(reader.getBlankLines()).isEqualTo(9);
+		assertThat(reader.getSections()).containsOnly("viewPackages", "options", "map", "redirects");
+		assertThat(reader.isLabelClassMissing()).isFalse();
+		assertThat(reader.isLabelClassNonExistent()).isFalse();
+		assertThat(reader.isLabelClassNotI18N()).isFalse();
+		assertThat(reader.getLabelKeys()).isEqualTo("uk.co.q3c.v7.i18n.TestLabelKeys");
+		assertThat(reader.isAppendView()).isTrue();
+		assertThat(reader.getLabelKeysClass()).isEqualTo(TestLabelKeys.class);
+		assertThat(reader.getViewPackages()).containsOnly("fixture.testviews2", "uk.co.q3c.v7.base.view.testviews",
+				"uk.co.q3c.v7.base.view.std");
+		assertThat(reader.redirectEntries()).containsOnly(":public/home", "public:public/home", "secure:secure/home");
+		assertThat(reader.getMissingEnums()).isEmpty();
+
+		// assertThat(reader.getSitemap().getNodeCount()).isEqualTo(14);
+		assertThat(reader.missingSections().size()).isEqualTo(0);
+		assertThat(reader.isLabelClassNonExistent()).isFalse();
+		assertThat(reader.isLabelClassNotI18N()).isFalse();
+
+		assertThat(reader.getMissingEnums()).containsOnly();
+		assertThat(reader.getInvalidViewClasses()).containsOnly();
+		assertThat(reader.getUndeclaredViewClasses()).containsOnly();
+		assertThat(reader.getIndentationErrors()).containsOnly();
+
+		Sitemap tree = reader.getSitemap();
+		List<SitemapNode> roots = tree.getRoots();
+		assertThat(roots.size()).isEqualTo(2);
+
+		Collection<SitemapNode> nodes = reader.getSitemap().getEntries();
+		for (SitemapNode node : nodes) {
+			validateNode(tree, node);
+		}
+
+		assertThat(reader.getStartTime()).isNotNull();
+		assertThat(reader.getEndTime()).isNotNull();
+		assertThat(reader.getStartTime().getMillis()).isGreaterThanOrEqualTo(start.getMillis());
+		assertThat(reader.getEndTime().isAfter(reader.getStartTime())).isTrue();
+
+		assertThat(reader.getReport()).isNotNull();
+		assertThat(reader.getReport().toString()).isNotEmpty();
+
+		for (StandardPageKeys spk : StandardPageKeys.values()) {
+			assertThat(reader.standardPageUrl(spk)).isNotNull();
+		}
+		assertThat(reader.getSitemap().hasErrors()).isFalse();
+
+		outputModifiedFile();
+		outputSitemap();
+	}
+
+	@Test
+	public void standardPagesNotSpecified() {
+
+		// given
+
+		// when
+
+		// then
+		assertThat(false).isEqualTo(true);
+
 	}
 
 	@Test
@@ -257,15 +339,17 @@ public class TextReaderSitemapProviderTest {
 		// given
 		substitute("labelKeys=uk.co.q3c.v7.i18n.TestLabelKeys", "labelKeys=uk.co.q3c.v7.i18n.TestLabelKeys2");
 		prepFile();
+		outputModifiedFile();
 		// when
 		reader.parse(modifiedFile);
+
 		// then
 		assertThat(reader.isLabelClassMissing()).isFalse();
 		assertThat(reader.isLabelClassNonExistent()).isTrue();
 		assertThat(reader.isLabelClassNotI18N()).isFalse();
 		assertThat(reader.missingSections()).containsOnly();
 
-		assertThat(reader.getPagesDefined()).isEqualTo(14);
+		assertThat(reader.getPagesDefined()).isEqualTo(17);
 		assertThat(reader.getViewPackages()).containsOnly("fixture.testviews2", "uk.co.q3c.v7.base.view.testviews");
 		assertThat(reader.getMissingPages()).containsOnly();
 		assertThat(reader.getPropertyErrors()).containsOnly();
@@ -278,7 +362,7 @@ public class TextReaderSitemapProviderTest {
 		assertThat(reader.getSitemap().hasErrors()).isTrue();
 
 		System.out.println(reader.getReport());
-
+		outputSitemap();
 	}
 
 	/**
@@ -451,7 +535,7 @@ public class TextReaderSitemapProviderTest {
 		// when
 		reader.parse(modifiedFile);
 		// then
-		assertThat(reader.getSitemap().standardPageURI(StandardPageKeys.publicHome)).isEqualTo("");
+		assertThat(reader.getSitemap().standardPageURI(StandardPageKeys.Public_Home)).isEqualTo("");
 
 	}
 
@@ -511,12 +595,13 @@ public class TextReaderSitemapProviderTest {
 
 	private void validateNode(Sitemap tree, SitemapNode node) {
 		String url = tree.url(node);
+		System.out.println("validating node for " + url);
 		switch (url) {
 
 		case "public":
-			assertThat(tree.getChildCount(node)).isEqualTo(8);
+			assertThat(tree.getChildCount(node)).isEqualTo(4);
 			assertThat(node.getUrlSegment()).isEqualTo("public");
-			assertThat(node.getViewClass()).isEqualTo(null);
+			assertThat(node.getViewClass()).isEqualTo(PublicView.class);
 			assertThat(node.getLabelKey()).isNotNull();
 			break;
 
@@ -524,7 +609,7 @@ public class TextReaderSitemapProviderTest {
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getUrlSegment()).isEqualTo("home");
 			assertThat(node.getViewClass()).isEqualTo(PublicHomeView.class);
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.publicHome);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Public_Home);
 
 			break;
 		}
@@ -532,8 +617,8 @@ public class TextReaderSitemapProviderTest {
 		case "public/login": {
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getUrlSegment()).isEqualTo("login");
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Login);
 			assertThat(node.getViewClass()).isEqualTo(TestLoginView.class);
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.login);
 			break;
 		}
 
@@ -541,37 +626,37 @@ public class TextReaderSitemapProviderTest {
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getUrlSegment()).isEqualTo("logout");
 			assertThat(node.getViewClass()).isEqualTo(LogoutView.class);
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.logout);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Logout);
 			break;
 		}
 
-		case "public/enable-account":
+		case "public/system-account/enable-account":
 			assertThat(node.getUrlSegment()).isEqualTo("enable-account");
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.enableAccount);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Enable_Account);
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getViewClass()).isEqualTo(AlternateAccountView.class);
 			break;
-		case "public/request-account":
+		case "public/system-account/request-account":
 			assertThat(node.getUrlSegment()).isEqualTo("request-account");
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.requestAccount);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Request_Account);
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getViewClass()).isEqualTo(AlternateAccountView.class);
 			break;
-		case "public/refresh-account":
+		case "public/system-account/refresh-account":
 			assertThat(node.getUrlSegment()).isEqualTo("refresh-account");
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.refreshAccount);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Refresh_Account);
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getViewClass()).isEqualTo(AlternateAccountView.class);
 			break;
-		case "public/unlock-account":
+		case "public/system-account/unlock-account":
 			assertThat(node.getUrlSegment()).isEqualTo("unlock-account");
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.unlockAccount);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Unlock_Account);
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getViewClass()).isEqualTo(AlternateAccountView.class);
 			break;
-		case "public/reset-account": {
+		case "public/system-account/reset-account": {
 			assertThat(node.getUrlSegment()).isEqualTo("reset-account");
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.resetAccount);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Reset_Account);
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getViewClass()).isEqualTo(AlternateAccountView.class);
 			break;
@@ -588,7 +673,7 @@ public class TextReaderSitemapProviderTest {
 			assertThat(tree.getChildCount(node)).isEqualTo(0);
 			assertThat(node.getUrlSegment()).isEqualTo("home");
 			assertThat(node.getViewClass()).isEqualTo(SecureHomeView.class);
-			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.secureHome);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.Secure_Home);
 			break;
 
 		case "secure/transfers":
@@ -612,6 +697,13 @@ public class TextReaderSitemapProviderTest {
 			assertThat(node.getLabelKey()).isEqualTo(TestLabelKeys.Opt);
 			break;
 
+		case "public/system-account":
+			assertThat(tree.getChildCount(node)).isEqualTo(0);
+			assertThat(node.getUrlSegment()).isEqualTo("system-account");
+			assertThat(node.getViewClass()).isEqualTo(SystemAccountView.class);
+			assertThat(node.getLabelKey()).isEqualTo(StandardPageKeys.System_Account);
+			break;
+
 		default:
 			Fail.fail("unexpected url: '" + url + "'");
 		}
@@ -619,7 +711,7 @@ public class TextReaderSitemapProviderTest {
 
 	@SuppressWarnings("unchecked")
 	private void loadMasterFile() throws IOException {
-		propFile = new File(propDir, "sitemap_good.properties");
+		propFile = new File(propDir, "sitemap_partial.properties");
 		lines = FileUtils.readLines(propFile);
 	}
 
@@ -645,9 +737,15 @@ public class TextReaderSitemapProviderTest {
 	}
 
 	private void outputModifiedFile() {
+		System.out.println("/n===================== input file =================== ");
 		for (String line : lines) {
 			System.out.println(line);
 		}
+	}
+
+	private void outputSitemap() {
+		System.out.println("/n===================== sitemap =================== ");
+		System.out.println(reader.getSitemap().toString());
 	}
 
 }

@@ -10,24 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.co.q3c.v7.base.view.testviews;
+package uk.co.q3c.v7.base.navigate;
 
-import uk.co.q3c.v7.base.view.V7View;
-import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
+import java.text.Collator;
+import java.util.Comparator;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-
-public class PublicHomeView implements V7View {
-
-	@Override
-	public void enter(V7ViewChangeEvent event) {
-
-	}
+/**
+ * Locale sensitive comparator for {@link SitemapNode#getLabel()}
+ * 
+ * @author David Sowerby 8 Jun 2013
+ * 
+ */
+public class SitemapNodeLabelComparator implements Comparator<SitemapNode> {
 
 	@Override
-	public Component getUiComponent() {
-		return new Label("not used");
+	public int compare(SitemapNode node0, SitemapNode node1) {
+		Collator myCollator = Collator.getInstance();
+		return myCollator.compare(node0.getLabel(), node1.getLabel());
 	}
 
 }

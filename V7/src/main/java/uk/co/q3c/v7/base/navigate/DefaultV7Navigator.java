@@ -223,7 +223,7 @@ public class DefaultV7Navigator implements V7Navigator, LoginStatusListener {
 		if (previousView != null) {
 			navigateTo(previousView, previousViewName, previousFragment);
 		} else {
-			navigateTo(StandardPageKeys.secureHome);
+			navigateTo(StandardPageKeys.Secure_Home);
 		}
 	}
 

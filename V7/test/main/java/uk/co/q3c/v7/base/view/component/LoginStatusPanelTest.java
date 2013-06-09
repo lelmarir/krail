@@ -71,7 +71,7 @@ public class LoginStatusPanelTest {
 		// when
 		loginoutBtn.click();
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.login);
+		verify(navigator).navigateTo(StandardPageKeys.Login);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class LoginStatusPanelTest {
 		// when
 		loginoutBtn.click();
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.login);
+		verify(navigator).navigateTo(StandardPageKeys.Login);
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class LoginStatusPanelTest {
 		// when
 		loginoutBtn.click();
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.logout);
+		verify(navigator).navigateTo(StandardPageKeys.Logout);
 	}
 
 }

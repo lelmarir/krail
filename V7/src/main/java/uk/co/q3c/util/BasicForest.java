@@ -152,7 +152,7 @@ public class BasicForest<V> {
 	private void findLeaves(V parentNode, List<V> leaves) {
 		if (leaves == null)
 			return;
-		Collection<V> children = graph.getChildren(parentNode);
+		Collection<V> children = getChildren(parentNode);
 		if (children == null)
 			return;
 		if (children.size() == 0) {
@@ -267,6 +267,10 @@ public class BasicForest<V> {
 	 */
 	public List<V> getAllNodes() {
 		return Lists.newArrayList(graph.getVertices());
+	}
+
+	public int getEdgeCount() {
+		return edgeCount;
 	}
 
 }

@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import uk.co.q3c.v7.base.config.V7Ini;
 import uk.co.q3c.v7.base.navigate.StandardPageKeys;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
-import uk.co.q3c.v7.base.view.LoginView;
+import uk.co.q3c.v7.base.view.std.LoginView;
 
 import com.mycila.testing.junit.MycilaJunitRunner;
 import com.mycila.testing.plugin.guice.GuiceContext;
@@ -50,7 +50,7 @@ public class DefaultLoginExceptionHandlerTest {
 		// when
 		handler.accountLocked(loginView, token);
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.unlockAccount);
+		verify(navigator).navigateTo(StandardPageKeys.Unlock_Account);
 
 	}
 
@@ -83,7 +83,7 @@ public class DefaultLoginExceptionHandlerTest {
 		// when
 		handler.disabledAccount(loginView, token);
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.enableAccount);
+		verify(navigator).navigateTo(StandardPageKeys.Enable_Account);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class DefaultLoginExceptionHandlerTest {
 		// when
 		handler.excessiveAttempts(loginView, token);
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.resetAccount);
+		verify(navigator).navigateTo(StandardPageKeys.Reset_Account);
 	}
 
 	@Test
@@ -103,7 +103,7 @@ public class DefaultLoginExceptionHandlerTest {
 		// when
 		handler.expiredCredentials(loginView, token);
 		// then
-		verify(navigator).navigateTo(StandardPageKeys.refreshAccount);
+		verify(navigator).navigateTo(StandardPageKeys.Refresh_Account);
 	}
 
 	@Test

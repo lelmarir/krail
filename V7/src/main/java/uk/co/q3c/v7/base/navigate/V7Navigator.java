@@ -3,9 +3,9 @@ package uk.co.q3c.v7.base.navigate;
 import java.util.List;
 
 import uk.co.q3c.v7.base.ui.ScopedUI;
-import uk.co.q3c.v7.base.view.LoginView;
 import uk.co.q3c.v7.base.view.V7View;
 import uk.co.q3c.v7.base.view.V7ViewChangeListener;
+import uk.co.q3c.v7.base.view.std.LoginView;
 
 import com.vaadin.server.Page.UriFragmentChangedListener;
 

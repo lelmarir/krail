@@ -60,7 +60,10 @@
 		<dependency org="org.mockito" name="mockito-all" rev="1.9.0" />
 		<dependency org="junit" name="junit" rev="4.+" />
 		<dependency org="com.googlecode.jmockit" name="jmockit" rev="1.0" />
-
+		
+		<!-- Spreadsheet (used for testing)-->
+		<dependency org="org.apache.poi" name="poi" rev="3.9"/>
+		<dependency org="org.apache.poi" name="poi-ooxml" rev="3.9"/>
 
 		<!-- Date Time -->
 		<dependency org="joda-time" name="joda-time" rev="2.1" />

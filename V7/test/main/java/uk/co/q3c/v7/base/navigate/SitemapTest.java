@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import uk.co.q3c.v7.base.view.LoginView;
+import uk.co.q3c.v7.base.view.std.LoginView;
 import uk.co.q3c.v7.base.view.testviews.PublicHomeView;
 import uk.co.q3c.v7.demo.i18n.DemoLabelKeys;
 

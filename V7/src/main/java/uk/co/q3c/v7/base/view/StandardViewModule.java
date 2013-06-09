@@ -12,6 +12,9 @@
  */
 package uk.co.q3c.v7.base.view;
 
+import uk.co.q3c.v7.base.view.std.LoginView;
+import uk.co.q3c.v7.base.view.std.LogoutView;
+
 import com.google.inject.AbstractModule;
 
 /**

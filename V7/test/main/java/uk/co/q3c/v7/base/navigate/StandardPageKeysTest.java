@@ -21,16 +21,61 @@ import org.junit.Test;
 public class StandardPageKeysTest {
 
 	@Test
-	public void keyLabels() {
+	public void segmentAndLabel() {
 
 		// given
-
+		int i = 0;
 		// when
 
 		// then
-		for (StandardPageKeys key : StandardPageKeys.values()) {
-			assertThat(key.getValue(Locale.UK)).overridingErrorMessage(key.name()).isNotNull();
+		assertThat(StandardPageKeys.System_Account.segment()).isEqualTo("manage-account");
+		assertThat(StandardPageKeys.System_Account.getValue(Locale.UK)).isEqualTo("manage account");
+		i++;
 
+		assertThat(StandardPageKeys.Login.segment()).isEqualTo("login");
+		assertThat(StandardPageKeys.Login.getValue(Locale.UK)).isEqualTo("login");
+		i++;
+
+		assertThat(StandardPageKeys.Logout.segment()).isEqualTo("logout");
+		assertThat(StandardPageKeys.Logout.getValue(Locale.UK)).isEqualTo("logout");
+		i++;
+
+		assertThat(StandardPageKeys.Enable_Account.segment()).isEqualTo("enable-account");
+		assertThat(StandardPageKeys.Enable_Account.getValue(Locale.UK)).isEqualTo("enable account");
+		i++;
+
+		assertThat(StandardPageKeys.Request_Account.segment()).isEqualTo("request-account");
+		assertThat(StandardPageKeys.Request_Account.getValue(Locale.UK)).isEqualTo("request account");
+		i++;
+
+		assertThat(StandardPageKeys.Reset_Account.segment()).isEqualTo("reset-account");
+		assertThat(StandardPageKeys.Reset_Account.getValue(Locale.UK)).isEqualTo("reset account");
+		i++;
+
+		assertThat(StandardPageKeys.Refresh_Account.segment()).isEqualTo("refresh-account");
+		assertThat(StandardPageKeys.Refresh_Account.getValue(Locale.UK)).isEqualTo("refresh account");
+		i++;
+
+		assertThat(StandardPageKeys.Unlock_Account.segment()).isEqualTo("unlock-account");
+		assertThat(StandardPageKeys.Unlock_Account.getValue(Locale.UK)).isEqualTo("unlock account");
+		i++;
+
+		assertThat(StandardPageKeys.Public_Home.segment()).isEqualTo("public-home");
+		assertThat(StandardPageKeys.Public_Home.getValue(Locale.UK)).isEqualTo("home");
+		i++;
+
+		assertThat(StandardPageKeys.Secure_Home.segment()).isEqualTo("secure-home");
+		assertThat(StandardPageKeys.Secure_Home.getValue(Locale.UK)).isEqualTo("home");
+		i++;
+
+		assertThat(i).isEqualTo(StandardPageKeys.values().length);
+
+		for (StandardPageKeys spk : StandardPageKeys.values()) {
+			System.out.println(spk.segment());
+		}
+		System.out.println();
+		for (StandardPageKeys spk : StandardPageKeys.values()) {
+			System.out.println(spk.name());
 		}
 	}
 

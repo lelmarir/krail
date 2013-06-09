@@ -28,20 +28,50 @@ import com.mycila.testing.plugin.guice.GuiceContext;
 @GuiceContext({})
 public class BasicForestTest {
 
-	BasicForest<String> tree;
-	String s0 = new String("0");
-	String s1 = new String("1");
-	String s11 = new String("1.1");
-	String s12 = new String("1.2");
-	String s121 = new String("1.2.1");
-	String s111 = new String("1.1.1");
-	String s2 = new String("2");
-	String s21 = new String("2.1");
-	String s22 = new String("2.2");
+	BasicForest<String> forest;
+	BasicForest<TestNode> forest2;
+
+	String s0 = "0";
+	String s1 = "1";
+	String s11 = "1.1";
+	String s12 = "1.2";
+	String s121 = "1.2.1";
+	String s111 = "1.1.1";
+	String s2 = "2";
+	String s21 = "2.1";
+	String s22 = "2.2";
+	private TestNode tna;
+	private TestNode tnc;
+	private TestNode tnb;
+	private TestNode tnb1;
+	private TestNode tnb2;
+	private TestNode tnb3;
+	private TestNode tnb13;
+	private TestNode tnb12;
+	private TestNode tnb11;
+
+	class TestNode {
+		String s;
+		int i;
+
+		protected TestNode(String s, int i) {
+			super();
+			this.s = s;
+			this.i = i;
+
+		}
+
+		@Override
+		public String toString() {
+			return s + "," + i;
+		}
+
+	}
 
 	@Before
 	public void setup() {
-		tree = new BasicForest<>();
+		forest = new BasicForest<>();
+		forest2 = new BasicForest<>();
 	}
 
 	@Test
@@ -49,9 +79,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		tree.addNode(s1);
+		forest.addNode(s1);
 		// then
-		assertThat(tree.containsNode(s1)).isTrue();
+		assertThat(forest.containsNode(s1)).isTrue();
 	}
 
 	@Test
@@ -59,12 +89,12 @@ public class BasicForestTest {
 		// given
 
 		// when
-		tree.addNode(s1);
-		tree.addChild(s1, s11);
+		forest.addNode(s1);
+		forest.addChild(s1, s11);
 		// then
-		assertThat(tree.containsNode(s1)).isTrue();
-		assertThat(tree.containsNode(s11)).isTrue();
-		assertThat(tree.hasChild(s1, s11)).isTrue();
+		assertThat(forest.containsNode(s1)).isTrue();
+		assertThat(forest.containsNode(s11)).isTrue();
+		assertThat(forest.hasChild(s1, s11)).isTrue();
 	}
 
 	@Test
@@ -72,11 +102,11 @@ public class BasicForestTest {
 		// given
 
 		// when
-		tree.addChild(s1, s11);
+		forest.addChild(s1, s11);
 		// then
-		assertThat(tree.containsNode(s1)).isTrue();
-		assertThat(tree.containsNode(s11)).isTrue();
-		assertThat(tree.hasChild(s1, s11)).isTrue();
+		assertThat(forest.containsNode(s1)).isTrue();
+		assertThat(forest.containsNode(s11)).isTrue();
+		assertThat(forest.hasChild(s1, s11)).isTrue();
 	}
 
 	@Test
@@ -84,10 +114,10 @@ public class BasicForestTest {
 		// given
 
 		// when
-		tree.addNode(s1);
-		tree.addChild(s1, s11);
+		forest.addNode(s1);
+		forest.addChild(s1, s11);
 		// then
-		assertThat(tree.getParent(s11)).isEqualTo(s1);
+		assertThat(forest.getParent(s11)).isEqualTo(s1);
 	}
 
 	@Test
@@ -98,13 +128,13 @@ public class BasicForestTest {
 		branch.add(s11);
 		branch.add(s111);
 		// when
-		tree.addBranch(branch);
+		forest.addBranch(branch);
 		// then
-		assertThat(tree.containsNode(s1)).isTrue();
-		assertThat(tree.containsNode(s11)).isTrue();
-		assertThat(tree.containsNode(s111)).isTrue();
-		assertThat(tree.getParent(s11)).isEqualTo(s1);
-		assertThat(tree.getParent(s111)).isEqualTo(s11);
+		assertThat(forest.containsNode(s1)).isTrue();
+		assertThat(forest.containsNode(s11)).isTrue();
+		assertThat(forest.containsNode(s111)).isTrue();
+		assertThat(forest.getParent(s11)).isEqualTo(s1);
+		assertThat(forest.getParent(s111)).isEqualTo(s11);
 	}
 
 	@Test
@@ -115,9 +145,9 @@ public class BasicForestTest {
 		branch.add(s11);
 		branch.add(s111);
 		// when
-		tree.addBranch(branch);
+		forest.addBranch(branch);
 		// then
-		assertThat(tree.getNode(s11)).isEqualTo(s11);
+		assertThat(forest.getNode(s11)).isEqualTo(s11);
 	}
 
 	@Test
@@ -128,11 +158,11 @@ public class BasicForestTest {
 		branch.add(s11);
 		branch.add(s111);
 		// when
-		tree.addBranch(branch);
-		tree.addChild(s1, s12);
+		forest.addBranch(branch);
+		forest.addChild(s1, s12);
 		// then
-		assertThat(tree.getChildCount(s1)).isEqualTo(2);
-		assertThat(tree.getChildren(s1)).containsOnly(s11, s12);
+		assertThat(forest.getChildCount(s1)).isEqualTo(2);
+		assertThat(forest.getChildren(s1)).containsOnly(s11, s12);
 	}
 
 	@Test
@@ -140,9 +170,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.getSubtreeNodes(s1)).containsOnly(s1, s11, s111, s12, s121);
+		assertThat(forest.getSubtreeNodes(s1)).containsOnly(s1, s11, s111, s12, s121);
 	}
 
 	@Test
@@ -150,9 +180,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.findLeaves(s1)).containsOnly(s111, s121);
+		assertThat(forest.findLeaves(s1)).containsOnly(s111, s121);
 	}
 
 	@Test
@@ -160,9 +190,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.findLeaves()).containsOnly(s111, s121, s21, s22);
+		assertThat(forest.findLeaves()).containsOnly(s111, s121, s21, s22);
 	}
 
 	@Test
@@ -170,22 +200,22 @@ public class BasicForestTest {
 		// given
 
 		// when
-		tree.addNode(s1);
-		tree.addChild(s1, s11);
-		tree.addChild(s1, s12);
-		tree.addNode(s2);
+		forest.addNode(s1);
+		forest.addChild(s1, s11);
+		forest.addChild(s1, s12);
+		forest.addNode(s2);
 		// then
-		assertThat(tree.getEntries()).containsOnly(s1, s11, s12, s2);
+		assertThat(forest.getEntries()).containsOnly(s1, s11, s12, s2);
 	}
 
 	@Test
 	public void clear() {
 		// given
-		addAllNodes();
+		addStringNodes();
 		// when
-		tree.clear();
+		forest.clear();
 		// then
-		assertThat(tree.getEntries()).isEmpty();
+		assertThat(forest.getEntries()).isEmpty();
 	}
 
 	@Test
@@ -193,9 +223,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.getRoots()).containsOnly(s0);
+		assertThat(forest.getRoots()).containsOnly(s0);
 	}
 
 	/**
@@ -206,9 +236,10 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.toString()).isEqualTo("\n-0\n--2\n---2.1\n---2.2\n--1\n---1.2\n----1.2.1\n---1.1\n----1.1.1\n");
+		assertThat(forest.toString()).isEqualTo(
+				"\n-0\n--2\n---2.1\n---2.2\n--1\n---1.2\n----1.2.1\n---1.1\n----1.1.1\n");
 	}
 
 	@Test
@@ -216,8 +247,8 @@ public class BasicForestTest {
 		// given
 		StringBuilder buf = new StringBuilder();
 		// when
-		addAllNodes();
-		tree.text(s0, buf, 0);
+		addStringNodes();
+		forest.text(s0, buf, 0);
 		String s = buf.toString();
 		// then
 		assertThat(s).isEqualTo("-0\n--2\n---2.1\n---2.2\n--1\n---1.2\n----1.2.1\n---1.1\n----1.1.1\n");
@@ -228,10 +259,10 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.getChildCount(s0)).isEqualTo(2);
-		assertThat(tree.getChildCount(s111)).isEqualTo(0);
+		assertThat(forest.getChildCount(s0)).isEqualTo(2);
+		assertThat(forest.getChildCount(s111)).isEqualTo(0);
 	}
 
 	@Test
@@ -239,10 +270,10 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.hasChildren(s0)).isTrue();
-		assertThat(tree.hasChildren(s111)).isFalse();
+		assertThat(forest.hasChildren(s0)).isTrue();
+		assertThat(forest.hasChildren(s111)).isFalse();
 	}
 
 	@Test
@@ -250,9 +281,9 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.getRoot()).isEqualTo(s0);
+		assertThat(forest.getRoot()).isEqualTo(s0);
 	}
 
 	@Test
@@ -260,22 +291,69 @@ public class BasicForestTest {
 		// given
 
 		// when
-		addAllNodes();
+		addStringNodes();
 		// then
-		assertThat(tree.getNodeCount()).isEqualTo(9);
+		assertThat(forest.getNodeCount()).isEqualTo(9);
 	}
 
-	private void addAllNodes() {
+	// /**
+	// * Quite a few methods to test
+	// */
+	// @Test
+	// public void sortOrder() {
+	//
+	// // given
+	// addTestNodes();
+	// // when
+	// forest2.setSortOrderInsertion();
+	// // then
+	// assertThat(forest2.getRoot()).isEqualTo(tnc);
+	// assertThat(forest2.getRoots()).containsExactly(tnc, tna, tnb);
+	// assertThat(forest2.getChildren(tnb)).containsExactly(tnb2, tnb3, tnb1);
+	// assertThat(forest2.getSubtreeNodes(tnb)).containsExactly(tnb2, tnb3, tnb1, tnb12, tnb11, tnb13);
+	// assertThat(forest2.findLeaves()).containsExactly(tnc, tna, tnb2, tnb3, tnb12, tnb11, tnb13);
+	// assertThat(forest2.findLeaves(tnb)).containsExactly(tnb2, tnb3, tnb12, tnb11, tnb13);
+	// assertThat(forest2.getAllNodes()).containsExactly(tnc, tna, tnb, tnb2, tnb3, tnb12, tnb11, tnb13);
+	// assertThat(forest2.getEntries()).containsExactly(tnc, tna, tnb, tnb2, tnb3, tnb12, tnb11, tnb13);
+	// assertThat(forest2.toString()).isEqualTo("\n-c\n-a\n-b\n--b2\n--b3\n--b1\n---b12\n---b11\n---b13");
+	// }
 
-		tree.addNode(s0);
-		tree.addChild(s0, s1);
-		tree.addChild(s0, s2);
-		tree.addChild(s1, s11);
-		tree.addChild(s1, s12);
-		tree.addChild(s11, s111);
-		tree.addChild(s12, s121);
-		tree.addChild(s2, s21);
-		tree.addChild(s2, s22);
+	private void addStringNodes() {
+
+		forest.addNode(s0);
+		forest.addChild(s1, s12);
+		forest.addChild(s0, s1);
+		forest.addChild(s0, s2);
+		forest.addChild(s1, s11);
+		forest.addChild(s12, s121);
+		forest.addChild(s11, s111);
+		forest.addChild(s2, s21);
+		forest.addChild(s2, s22);
+	}
+
+	private void addTestNodes() {
+		createTestNodes();
+		forest2.addNode(tnc);
+		forest2.addNode(tna);
+		forest2.addChild(tnb, tnb2);
+		forest2.addChild(tnb, tnb3);
+		forest2.addChild(tnb, tnb1);
+		forest2.addChild(tnb1, tnb12);
+		forest2.addChild(tnb1, tnb11);
+		forest2.addChild(tnb1, tnb13);
 
 	}
+
+	private void createTestNodes() {
+		tna = new TestNode("a", 1);
+		tnb = new TestNode("b", 9);
+		tnc = new TestNode("c", 3);
+		tnb1 = new TestNode("b1", 4);
+		tnb2 = new TestNode("b2", 3);
+		tnb3 = new TestNode("b3", 2);
+		tnb11 = new TestNode("b11", 8);
+		tnb12 = new TestNode("b12", 16);
+		tnb13 = new TestNode("b13", 6);
+	}
+
 }

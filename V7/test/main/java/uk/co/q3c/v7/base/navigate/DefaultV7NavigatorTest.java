@@ -17,11 +17,11 @@ import uk.co.q3c.v7.base.config.V7Ini;
 import uk.co.q3c.v7.base.shiro.ShiroIntegrationTestBase;
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.view.ErrorView;
-import uk.co.q3c.v7.base.view.LoginView;
-import uk.co.q3c.v7.base.view.LogoutView;
 import uk.co.q3c.v7.base.view.V7View;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
 import uk.co.q3c.v7.base.view.V7ViewChangeListener;
+import uk.co.q3c.v7.base.view.std.LoginView;
+import uk.co.q3c.v7.base.view.std.LogoutView;
 
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -145,7 +145,7 @@ public class DefaultV7NavigatorTest extends ShiroIntegrationTestBase {
 		// given
 
 		// when
-		navigator.navigateTo(StandardPageKeys.logout);
+		navigator.navigateTo(StandardPageKeys.Logout);
 		// then
 		assertThat(navigator.getCurrentView()).isInstanceOf(LogoutView.class);
 		verify(scopedUI).changeView(null, logoutView);
@@ -168,7 +168,7 @@ public class DefaultV7NavigatorTest extends ShiroIntegrationTestBase {
 
 		// given
 		navigator.navigateTo("public/view2");
-		navigator.navigateTo(StandardPageKeys.login);
+		navigator.navigateTo(StandardPageKeys.Login);
 		// when
 		navigator.loginSuccessful();
 		// then
