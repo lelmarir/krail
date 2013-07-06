@@ -71,8 +71,9 @@
 		<!-- Validation -->
 		<dependency org="org.apache.bval" name="bval-jsr303" rev="0.5" />
 		<dependency org="org.apache.bval" name="bval-guice" rev="0.5" />
-		<dependency org="javax.validation" name="validation-api" rev="1.1.0.CR1" />
-
+	<!--	<dependency org="javax.validation" name="validation-api" rev="1.1.0.CR1" /> -->
+     	   <dependency org="javax.validation" name="validation-api" rev="1.1.0.Final"/> 
+            
 		<!-- Utility -->
 		<dependency org="com.google.guava" name="guava" rev="13.0.1" />
 		<!-- the easiest way to all the Jung parts -->
