@@ -12,16 +12,10 @@
  */
 package uk.co.q3c.v7.base.guice;
 
-import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.co.q3c.v7.base.ui.ScopedUIProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.SessionInitListener;
@@ -29,8 +23,9 @@ import com.vaadin.server.VaadinServlet;
 
 @Singleton
 public class BaseServlet extends VaadinServlet implements SessionInitListener {
-	private static Logger log = LoggerFactory.getLogger(BaseServlet.class);
-
+	
+	private static final long serialVersionUID = 4490881052475037408L;
+	
 	private final ScopedUIProvider uiProvider;
 
 	@Inject
@@ -46,52 +41,6 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 	@Override
 	public void sessionInit(SessionInitEvent event) throws ServiceException {
 		event.getSession().addUIProvider(uiProvider);
-	}
-
-	/**
-	 * This method captures the parameters from appropriate methods and sets the servlet parameters accordingly.
-	 * 
-	 * <pre>
-	 * vaadin {<br>
-	 * version vaadinVersion<br>
-	 * widgetset "uk.co.q3c.v7.demo.widgetset.V7demoWidgetset"<br>
-	 * }
-	 * </pre>
-	 * <p>
-	 * 
-	 * @see https://github.com/johndevs/gradle-vaadin-plugin
-	 * @see com.vaadin.server.VaadinServlet#createDeploymentConfiguration(java.util.Properties)
-	 */
-	@Override
-	protected DeploymentConfiguration createDeploymentConfiguration(Properties initParameters) {
-		log.debug("creating deployment configuration");
-
-		if (!widgetset().equals("default")) {
-			log.debug("Setting widgetset parameter to '{}'", widgetset());
-			initParameters.setProperty("widgetset", widgetset());
-		} else {
-			log.debug("Using default widgetset");
-		}
-		initParameters.setProperty("productionMode", Boolean.toString(productionMode()));
-		return super.createDeploymentConfiguration(initParameters);
-
-	}
-
-	/**
-	 * Returns the widgetset parameter for this servlet. If it is unchanged (that is, it returns 'default') then the
-	 * default widgetset is used. For any other value (as defined by a sub-class implementation), the related widgetset
-	 * must have been compiled - typically this means that the build definition will also contain an entry for the
-	 * widgetset. For example, using the Gradle Vaadin plugin, the build.gradle file would contain an entry like this:<br>
-	 * <p>
-	 * 
-	 * @return
-	 */
-	protected String widgetset() {
-		return "default";
-	}
-
-	protected boolean productionMode() {
-		return false;
 	}
 
 }
