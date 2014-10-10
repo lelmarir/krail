@@ -19,19 +19,19 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ChameleonTheme;
+
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+
 import uk.co.q3c.util.ID;
 import uk.co.q3c.v7.base.shiro.LoginExceptionHandler;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
-import uk.co.q3c.v7.base.user.status.UserStatus;
 import uk.co.q3c.v7.i18n.*;
 
 public class DefaultLoginView extends GridViewBase implements LoginView, ClickListener {
     private final LoginExceptionHandler loginExceptionHandler;
     private final Provider<Subject> subjectProvider;
     private final Translate translate;
-    private final UserStatus userStatus;
     private Label demoInfoLabel;
     private Label demoInfoLabel2;
     @I18NValue(value = LabelKey.Authentication)
@@ -44,12 +44,11 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
 
     @Inject
     protected DefaultLoginView(LoginExceptionHandler loginExceptionHandler, SubjectProvider subjectProvider,
-                               Translate translate, UserStatus userStatus) {
+                               Translate translate) {
         super();
         this.loginExceptionHandler = loginExceptionHandler;
         this.subjectProvider = subjectProvider;
         this.translate = translate;
-        this.userStatus = userStatus;
     }
 
     @Override
@@ -109,8 +108,7 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
         UsernamePasswordToken token = new UsernamePasswordToken(usernameBox.getValue(), passwordBox.getValue());
         try {
             subjectProvider.get()
-                           .login(token);
-            userStatus.statusChanged();
+                           .login(token);subjectProvider.get().logout();
         } catch (UnknownAccountException uae) {
             loginExceptionHandler.unknownAccount(this, token);
         } catch (IncorrectCredentialsException ice) {

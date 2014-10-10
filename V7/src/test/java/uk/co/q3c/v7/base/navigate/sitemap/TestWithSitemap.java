@@ -27,9 +27,9 @@ import uk.co.q3c.v7.base.navigate.URIFragmentHandler;
 import uk.co.q3c.v7.base.shiro.PageAccessControl;
 import uk.co.q3c.v7.base.shiro.PageAccessController;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.co.q3c.v7.base.user.opt.DefaultUserOption;
 import uk.co.q3c.v7.base.user.opt.UserOption;
-import uk.co.q3c.v7.base.user.status.UserStatus;
 import uk.co.q3c.v7.base.view.PublicHomeView;
 import uk.co.q3c.v7.i18n.CurrentLocale;
 import uk.co.q3c.v7.i18n.DefaultI18NProcessor;
@@ -70,7 +70,7 @@ public abstract class TestWithSitemap {
 	protected PageAccessController pageAccessController;
 
 	@Mock
-	UserStatus userStatus;
+	AuthenticationNotifier authenticationNotifier;
 
 	protected UserSitemapBuilder userSitemapBuilder;
 
@@ -239,7 +239,7 @@ public abstract class TestWithSitemap {
 		UserSitemapNodeModifier nodeModifier = new UserSitemapNodeModifier(subjectProvider, currentLocale,
 				masterSitemap, pageAccessController, translate);
 		UserSitemapCopyExtension copyExtension = new UserSitemapCopyExtension(masterSitemap, userSitemap);
-		userSitemapBuilder = new UserSitemapBuilder(masterSitemap, userSitemap, nodeModifier, copyExtension, userStatus);
+		userSitemapBuilder = new UserSitemapBuilder(masterSitemap, userSitemap, nodeModifier, copyExtension, authenticationNotifier);
 		userSitemapBuilder.build();
 
 		userNode1 = userSitemap.userNodeFor(masterNode1);

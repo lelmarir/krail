@@ -13,9 +13,12 @@
 package uk.co.q3c.v7.base.shiro;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.google.inject.Inject;
 
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.mgt.DefaultSecurityManager;
@@ -25,31 +28,85 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.co.q3c.v7.base.shiro.loginevent.AbstractAuthenticationEvent.SuccesfulLoginEventImpl;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
+import uk.co.q3c.v7.base.shiro.loginevent.AbstractAuthenticationEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.LogoutEvent;
+
 import com.vaadin.server.VaadinSession;
 
-public class V7SecurityManager extends DefaultSecurityManager {
-	private static Logger log = LoggerFactory.getLogger(V7SecurityManager.class);
+public class V7SecurityManager extends DefaultSecurityManager implements AuthenticationNotifier {
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(V7SecurityManager.class);
 
 	@Inject
 	private VaadinSessionProvider sessionProvider;
+	private List<AuthenticationListener> loginEventListeners;
 
 	public V7SecurityManager() {
 		super();
+		init();
 	}
 
 	public V7SecurityManager(Collection<Realm> realms) {
 		super(realms);
+		init();
+	}
+
+	private void init() {
+		loginEventListeners = new LinkedList<>();
 	}
 
 	@Override
-	protected void onSuccessfulLogin(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
+	protected void onSuccessfulLogin(AuthenticationToken token,
+			AuthenticationInfo info, Subject subject) {
 		super.onSuccessfulLogin(token, info, subject);
 		setSubject(subject);
+		fireSuccessfulLoginEvent(token, info, subject);
+	}
+
+	private void fireSuccessfulLoginEvent(AuthenticationToken token,
+			AuthenticationInfo info, Subject subject) {
+		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(subject, token, info);
+		for(AuthenticationListener l : loginEventListeners) {
+			l.onSuccess(event);
+		}
+	}
+
+	@Override
+	protected void onFailedLogin(AuthenticationToken token,
+			AuthenticationException ae, Subject subject) {
+		super.onFailedLogin(token, ae, subject);
+		fireFailedLoginEvent(token, ae, subject);
+	}
+	
+	private void fireFailedLoginEvent(AuthenticationToken token,
+			AuthenticationException ae, Subject subject) {
+		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(subject, token, ae);
+		for(AuthenticationListener l : loginEventListeners) {
+			l.onFailure(event);
+		}
+	}
+
+	@Override
+	protected void beforeLogout(Subject subject) {
+		super.beforeLogout(subject);
+		fireLogoutEvent(subject);
+	}
+
+	private void fireLogoutEvent(Subject subject) {
+		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(subject);
+		for(AuthenticationListener l : loginEventListeners) {
+			l.onLogout(event);
+		}
 	}
 
 	protected void setSubject(Subject subject) {
 		VaadinSession session = sessionProvider.get();
-		log.debug("storing Subject instance in VaadinSession");
+		LOGGER.debug("storing Subject instance in VaadinSession");
 		session.setAttribute(Subject.class, subject);
 	}
 
@@ -68,4 +125,13 @@ public class V7SecurityManager extends DefaultSecurityManager {
 		this.sessionProvider = sessionProvider;
 	}
 
+	@Override
+	public void addListener(AuthenticationListener listener) {
+		loginEventListeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(AuthenticationListener listener) {
+		loginEventListeners.remove(listener);
+	}
 }

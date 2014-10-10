@@ -30,7 +30,7 @@ import uk.co.q3c.v7.base.navigate.sitemap.StandardPageKey;
 import uk.co.q3c.v7.base.shiro.DefaultSubjectIdentifier;
 import uk.co.q3c.v7.base.shiro.SubjectIdentifier;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
-import uk.co.q3c.v7.base.user.status.UserStatus;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.co.q3c.v7.i18n.CurrentLocale;
 import uk.co.q3c.v7.i18n.I18NModule;
 import uk.co.q3c.v7.i18n.Translate;
@@ -58,7 +58,7 @@ public class DefaultUserStatusPanelTest {
 	SubjectProvider subjectProvider;
 
 	@Mock
-	UserStatus userStatus;
+	AuthenticationNotifier authenticationNotifier;
 
 	SubjectIdentifier subjectIdentifier;
 
@@ -74,7 +74,7 @@ public class DefaultUserStatusPanelTest {
 		when(subjectProvider.get()).thenReturn(subject);
 		subjectIdentifier = new DefaultSubjectIdentifier(subjectProvider, translate);
 
-		panel = new DefaultUserStatusPanel(navigator, subjectProvider, translate, subjectIdentifier, userStatus,
+		panel = new DefaultUserStatusPanel(navigator, subjectProvider, translate, subjectIdentifier, authenticationNotifier,
 				currentLocale);
 
 		loginoutBtn = panel.getLogin_logout_Button();

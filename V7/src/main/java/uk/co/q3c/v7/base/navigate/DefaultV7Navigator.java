@@ -18,18 +18,25 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.UriFragmentChangedEvent;
+
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.co.q3c.v7.base.navigate.sitemap.*;
 import uk.co.q3c.v7.base.shiro.PageAccessController;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
 import uk.co.q3c.v7.base.shiro.UnauthorizedExceptionHandler;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.LogoutEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.ui.ScopedUIProvider;
-import uk.co.q3c.v7.base.user.status.UserStatus;
 import uk.co.q3c.v7.base.view.*;
 
 import java.util.LinkedList;
@@ -71,7 +78,7 @@ public class DefaultV7Navigator implements V7Navigator {
     public DefaultV7Navigator(URIFragmentHandler uriHandler, SitemapService sitemapService,
                               SubjectProvider subjectProvider, PageAccessController pageAccessController,
                               ScopedUIProvider uiProvider, DefaultViewFactory viewFactory,
-                              UserSitemapBuilder userSitemapBuilder) {
+                              UserSitemapBuilder userSitemapBuilder, AuthenticationNotifier authenticationNotifier) {
         super();
         this.uriHandler = uriHandler;
         this.uiProvider = uiProvider;
@@ -80,7 +87,7 @@ public class DefaultV7Navigator implements V7Navigator {
         this.pageAccessController = pageAccessController;
         this.viewFactory = viewFactory;
         this.userSitemapBuilder = userSitemapBuilder;
-
+        authenticationNotifier.addListener(this);
     }
 
     @Override
@@ -358,26 +365,31 @@ public class DefaultV7Navigator implements V7Navigator {
      * they will be routed to the 'private home page' (the StandardPage for {@link StandardPageKey#Private_Home})
      */
     @Override
-    public void userStatusChanged() {
-        log.debug("user status changed, navigate to appropriate place");
-        if (subjectProvider.get()
-                           .isAuthenticated()) {
-            log.info("user logged in successfully, navigating to appropriate view");
-            // they have logged in
-            SitemapNode previousNode = userSitemap.nodeFor(previousNavigationState);
-            if (previousNode != null && previousNode != userSitemap.standardPageNode(StandardPageKey.Log_Out)) {
-                navigateTo(previousNavigationState);
-            } else {
-                navigateTo(StandardPageKey.Private_Home);
-            }
+	public void onSuccess(SuccesfulLoginEvent event) {
+    	assert event.getSubject().isAuthenticated();
+    	
+    	log.info("user logged in successfully, navigating to appropriate view");
+        // they have logged in
+        SitemapNode previousNode = userSitemap.nodeFor(previousNavigationState);
+        if (previousNode != null && previousNode != userSitemap.standardPageNode(StandardPageKey.Log_Out)) {
+            navigateTo(previousNavigationState);
         } else {
-            // they have logged out
-            log.info("logging out");
-            subjectProvider.get()
-                           .logout();
-            navigateTo(StandardPageKey.Log_Out);
+            navigateTo(StandardPageKey.Private_Home);
         }
-    }
+	}
+
+	@Override
+	public void onFailure(FailedLoginEvent event) {
+		;
+	}
+
+	@Override
+	public void onLogout(LogoutEvent event) {
+		log.info("logging out");
+        subjectProvider.get()
+                       .logout();
+        navigateTo(StandardPageKey.Log_Out);
+	}
 
     @Override
     public void navigateTo(StandardPageKey pageKey) {

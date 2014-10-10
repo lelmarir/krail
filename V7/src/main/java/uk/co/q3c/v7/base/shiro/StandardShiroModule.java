@@ -21,6 +21,8 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.Subject;
 
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
+
 import com.google.inject.binder.AnnotatedBindingBuilder;
 
 /**
@@ -39,6 +41,7 @@ public class StandardShiroModule extends ShiroModule {
 	protected void configureShiro() {
 
 		bindCredentialsMatcher();
+		bindAuthenticationNotifier();
 		bindLoginAttemptLog();
 		bindRealms();
 		bindSubjectIdentifier();
@@ -83,6 +86,11 @@ public class StandardShiroModule extends ShiroModule {
 					"This really shouldn't happen.  Either something has changed in Shiro, or there's a bug in ShiroModule.",
 					e);
 		}
+	}
+	
+	private void bindAuthenticationNotifier() {
+		bind(AuthenticationNotifier.class).to(V7SecurityManager.class);
+		expose(AuthenticationNotifier.class);
 	}
 
 	@Override

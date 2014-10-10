@@ -18,19 +18,23 @@ import org.slf4j.LoggerFactory;
 import uk.co.q3c.util.SourceTreeWrapper_BasicForest;
 import uk.co.q3c.util.TargetTreeWrapper_BasicForest;
 import uk.co.q3c.util.TreeCopy;
-import uk.co.q3c.v7.base.user.status.UserStatus;
-import uk.co.q3c.v7.base.user.status.UserStatusListener;
+import uk.co.q3c.v7.base.shiro.V7SecurityManager;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.LogoutEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 
 import com.google.inject.Inject;
 
-public class UserSitemapBuilder implements UserStatusListener {
+public class UserSitemapBuilder implements AuthenticationListener {
 	private static Logger log = LoggerFactory.getLogger(UserSitemapBuilder.class);
 	private final TreeCopy<MasterSitemapNode, UserSitemapNode> treeCopy;
 	private final UserSitemap userSitemap;
 
 	@Inject
 	protected UserSitemapBuilder(MasterSitemap masterSitemap, UserSitemap userSitemap,
-			UserSitemapNodeModifier nodeModifier, UserSitemapCopyExtension copyExtension, UserStatus userStatus) {
+			UserSitemapNodeModifier nodeModifier, UserSitemapCopyExtension copyExtension, AuthenticationNotifier authenticationNotifier) {
 
 		this.userSitemap = userSitemap;
 		TargetTreeWrapper_BasicForest<MasterSitemapNode, UserSitemapNode> target = new TargetTreeWrapper_BasicForest<>(
@@ -40,8 +44,7 @@ public class UserSitemapBuilder implements UserStatusListener {
 				masterSitemap.getForest());
 		treeCopy = new TreeCopy<>(source, target);
 		treeCopy.setExtension(copyExtension);
-		userStatus.addListener(this);
-
+		authenticationNotifier.addListener(this);
 	}
 
 	public synchronized void build() {
@@ -51,8 +54,22 @@ public class UserSitemapBuilder implements UserStatusListener {
 			userSitemap.setLoaded(true);
 		}
 	}
+	
+	@Override
+	public void onSuccess(SuccesfulLoginEvent event) {
+		userStatusChanged();
+	}
 
 	@Override
+	public void onFailure(FailedLoginEvent event) {
+		userStatusChanged();
+	}
+
+	@Override
+	public void onLogout(LogoutEvent event) {
+		userStatusChanged();
+	}
+	
 	public synchronized void userStatusChanged() {
 		log.debug("user status has changed, rebuild the userSitemap");
 		userSitemap.clear();

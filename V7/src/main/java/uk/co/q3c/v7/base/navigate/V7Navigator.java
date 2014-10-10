@@ -6,8 +6,8 @@ import uk.co.q3c.v7.base.navigate.sitemap.MasterSitemapNode;
 import uk.co.q3c.v7.base.navigate.sitemap.StandardPageKey;
 import uk.co.q3c.v7.base.navigate.sitemap.UserSitemap;
 import uk.co.q3c.v7.base.navigate.sitemap.UserSitemapNode;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
 import uk.co.q3c.v7.base.ui.ScopedUI;
-import uk.co.q3c.v7.base.user.status.UserStatusListener;
 import uk.co.q3c.v7.base.view.V7View;
 import uk.co.q3c.v7.base.view.V7ViewChangeListener;
 
@@ -32,7 +32,7 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
  * @author David Sowerby 20 Jan 2013
  *
  */
-public interface V7Navigator extends UriFragmentChangedListener, UserStatusListener {
+public interface V7Navigator extends UriFragmentChangedListener, AuthenticationListener {
 
 	void navigateTo(String navigationState);
 

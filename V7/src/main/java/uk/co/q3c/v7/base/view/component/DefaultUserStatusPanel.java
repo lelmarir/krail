@@ -18,16 +18,6 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.co.q3c.util.ID;
-import uk.co.q3c.v7.base.navigate.V7Navigator;
-import uk.co.q3c.v7.base.navigate.sitemap.StandardPageKey;
-import uk.co.q3c.v7.base.shiro.SubjectIdentifier;
-import uk.co.q3c.v7.base.shiro.SubjectProvider;
-import uk.co.q3c.v7.base.user.status.UserStatus;
-import uk.co.q3c.v7.i18n.CurrentLocale;
-import uk.co.q3c.v7.i18n.LabelKey;
-import uk.co.q3c.v7.i18n.Translate;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.ui.Button;
@@ -38,98 +28,125 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ChameleonTheme;
 
+import uk.co.q3c.util.ID;
+import uk.co.q3c.v7.base.navigate.V7Navigator;
+import uk.co.q3c.v7.base.navigate.sitemap.StandardPageKey;
+import uk.co.q3c.v7.base.shiro.SubjectIdentifier;
+import uk.co.q3c.v7.base.shiro.SubjectProvider;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.LogoutEvent;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
+import uk.co.q3c.v7.i18n.CurrentLocale;
+import uk.co.q3c.v7.i18n.LabelKey;
+import uk.co.q3c.v7.i18n.Translate;
+
 /**
  * Represents the "logged in" status of the current {@link Subject}.
- * <p>
- *
- *
+ * <p/>
  *
  * @author David Sowerby 16 Jan 2013
- *
  */
 // TODO I18N
-public class DefaultUserStatusPanel extends Panel implements UserStatusPanel, ClickListener {
-	private static Logger log = LoggerFactory.getLogger(DefaultUserStatusPanel.class);
-	private final Label usernameLabel;
-	private final Button login_logout_Button;
-	private final V7Navigator navigator;
-	private final Provider<Subject> subjectProvider;
-	private final Translate translate;
-	private final SubjectIdentifier subjectIdentifier;
-	private final UserStatus userStatus;
+public class DefaultUserStatusPanel extends Panel implements UserStatusPanel {
+	private static Logger log = LoggerFactory
+			.getLogger(DefaultUserStatusPanel.class);
+    private final Label usernameLabel;
+    private final Button login_logout_Button;
+    private final V7Navigator navigator;
+    private final Provider<Subject> subjectProvider;
+    private final Translate translate;
+    private final SubjectIdentifier subjectIdentifier;
 
-	@Inject
-	protected DefaultUserStatusPanel(V7Navigator navigator, SubjectProvider subjectProvider, Translate translate,
-			SubjectIdentifier subjectIdentifier, UserStatus userStatus, CurrentLocale currentLocale) {
-		super();
-		this.navigator = navigator;
-		this.subjectProvider = subjectProvider;
-		this.translate = translate;
-		this.subjectIdentifier = subjectIdentifier;
-		this.userStatus = userStatus;
-		currentLocale.addListener(this);
-		userStatus.addListener(this);
-		setSizeFull();
-		addStyleName(ChameleonTheme.PANEL_BORDERLESS);
-		usernameLabel = new Label();
-		login_logout_Button = new Button();
-		login_logout_Button.addClickListener(this);
-		login_logout_Button.setImmediate(true);
-		HorizontalLayout hl = new HorizontalLayout();
-		hl.setSpacing(true);
-		hl.addComponent(usernameLabel);
-		hl.addComponent(login_logout_Button);
-		this.setContent(hl);
-		setIds();
-		userStatusChanged();
+	private ClickListener login_logout_listener = new ClickListener() {
+		@Override
+		public void buttonClick(ClickEvent event) {
+			boolean authenticated = subjectProvider.get().isAuthenticated();
+			if (authenticated) {
+				subjectProvider.get().logout();
+				// the navigation is automaicly handled by the navigator
+				// responding to the logout event
+			} else {
+				navigator.navigateTo(StandardPageKey.Log_In);
+			}
 
-	}
+		}
+	};
 
-	private void setIds() {
+    @Inject
+	protected DefaultUserStatusPanel(V7Navigator navigator,
+			SubjectProvider subjectProvider, Translate translate,
+			SubjectIdentifier subjectIdentifier,
+			AuthenticationNotifier authenticationNotifier,
+			CurrentLocale currentLocale) {
+        super();
+        this.navigator = navigator;
+        this.subjectProvider = subjectProvider;
+        this.translate = translate;
+        this.subjectIdentifier = subjectIdentifier;
+        currentLocale.addListener(this);
+		authenticationNotifier.addListener(this);
+        setSizeFull();
+        addStyleName(ChameleonTheme.PANEL_BORDERLESS);
+        usernameLabel = new Label();
+        login_logout_Button = new Button();
+		login_logout_Button.addClickListener(login_logout_listener);
+        login_logout_Button.setImmediate(true);
+        HorizontalLayout hl = new HorizontalLayout();
+        hl.setSpacing(true);
+        hl.addComponent(usernameLabel);
+        hl.addComponent(login_logout_Button);
+        this.setContent(hl);
+        setIds();
+        userStatusChanged();
+
+    }
+
+    private void setIds() {
 		setId(ID.getId(this));
 		login_logout_Button.setId(ID.getId(this, login_logout_Button));
 		usernameLabel.setId(ID.getId(this, usernameLabel));
+    }
+
+    @Override
+	public void onSuccess(SuccesfulLoginEvent event) {
+		userStatusChanged();
 	}
 
 	@Override
-	public String getActionLabel() {
-		return login_logout_Button.getCaption();
+	public void onFailure(FailedLoginEvent event) {
+		userStatusChanged();
 	}
 
 	@Override
-	public String getUserId() {
-		return usernameLabel.getValue();
+	public void onLogout(LogoutEvent event) {
+		userStatusChanged();
 	}
-
-	public Button getLogin_logout_Button() {
-		return login_logout_Button;
-	}
-
-	@Override
-	public void buttonClick(ClickEvent event) {
-		boolean authenticated = subjectProvider.get().isAuthenticated();
-		if (authenticated) {
-			subjectProvider.get().logout();
-			navigator.navigateTo(StandardPageKey.Log_Out);
-			userStatus.statusChanged();
-		} else {
-			navigator.navigateTo(StandardPageKey.Log_In);
-		}
-
-	}
-
-	@Override
+	
 	public void userStatusChanged() {
 		log.debug("login status change, reset the user status panel");
 		build();
 
 	}
 
-	@Override
-	public void localeChanged(Locale locale) {
-		log.debug("locale change to {}", locale);
-		build();
-	}
+    public String getActionLabel() {
+        return login_logout_Button.getCaption();
+    }
+
+    @Override
+    public String getUserId() {
+        return usernameLabel.getValue();
+    }
+
+    public Button getLogin_logout_Button() {
+        return login_logout_Button;
+    }
+
+    @Override
+    public void localeChanged(Locale locale) {
+        log.debug("locale change to {}", locale);
+        build();
+    }
 
 	private void build() {
 		log.debug("building");

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.co.q3c.v7.base.guice.vsscope.VaadinSessionScoped;
 import uk.co.q3c.v7.base.navigate.URIFragmentHandler;
-import uk.co.q3c.v7.base.user.status.UserStatusListener;
 import uk.co.q3c.v7.i18n.CurrentLocale;
 import uk.co.q3c.v7.i18n.LocaleChangeListener;
 import uk.co.q3c.v7.i18n.Translate;

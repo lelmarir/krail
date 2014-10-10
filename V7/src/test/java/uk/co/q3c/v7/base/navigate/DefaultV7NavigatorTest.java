@@ -20,22 +20,26 @@ import com.mycila.testing.plugin.guice.ModuleProvider;
 import com.vaadin.server.Page;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+
 import fixture.ReferenceUserSitemap;
 import fixture.testviews2.TestLoginView;
 import fixture.testviews2.ViewA1;
 import fixture.testviews2.ViewB;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import uk.co.q3c.v7.base.guice.vsscope.VaadinSessionScopeModule;
 import uk.co.q3c.v7.base.navigate.sitemap.*;
 import uk.co.q3c.v7.base.shiro.PageAccessControl;
 import uk.co.q3c.v7.base.shiro.PageAccessController;
 import uk.co.q3c.v7.base.shiro.PagePermission;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
+import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.ui.ScopedUIProvider;
 import uk.co.q3c.v7.base.user.opt.DefaultUserOption;
@@ -96,6 +100,8 @@ public class DefaultV7NavigatorTest {
     private Provider<UserSitemap> userSitemapProvider;
     @Inject
     private DefaultViewFactory viewFactory;
+    @Inject
+	private AuthenticationNotifier authenticationNotifier;
 
     @Before
     public void setup() {
@@ -125,7 +131,7 @@ public class DefaultV7NavigatorTest {
 
     private DefaultV7Navigator createNavigator() {
         navigator = new DefaultV7Navigator(uriHandler, sitemapService, subjectProvider, pageAccessController,
-                uiProvider, viewFactory, builder);
+                uiProvider, viewFactory, builder, authenticationNotifier);
         navigator.init();
         return navigator;
     }
@@ -164,7 +170,6 @@ public class DefaultV7NavigatorTest {
         assertThat(navigator.getCurrentView()).isInstanceOf(TestLoginView.class);
         // // when
         when(subject.isAuthenticated()).thenReturn(true);
-        navigator.userStatusChanged();
         // // then
         assertThat(navigator.getCurrentView()).isInstanceOf(ViewA1.class);
     }
@@ -180,7 +185,6 @@ public class DefaultV7NavigatorTest {
         verify(scopedUI).changeView(any(V7View.class));
         // // when
         when(subject.isAuthenticated()).thenReturn(true);
-        navigator.userStatusChanged();
         // // then
         verify(scopedUI, times(2)).changeView(any(V7View.class));
         assertThat(navigator.getCurrentView()).isInstanceOf(userSitemap.privateHomeViewClass);

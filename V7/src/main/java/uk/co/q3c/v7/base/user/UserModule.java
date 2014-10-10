@@ -27,8 +27,6 @@ import uk.co.q3c.v7.base.user.opt.DefaultUserOption;
 import uk.co.q3c.v7.base.user.opt.DefaultUserOptionStore;
 import uk.co.q3c.v7.base.user.opt.UserOption;
 import uk.co.q3c.v7.base.user.opt.UserOptionStore;
-import uk.co.q3c.v7.base.user.status.DefaultUserStatus;
-import uk.co.q3c.v7.base.user.status.UserStatus;
 import uk.co.q3c.v7.i18n.I18NKey;
 import uk.co.q3c.v7.i18n.LabelKey;
 
@@ -50,7 +48,6 @@ public class UserModule extends AbstractModule {
 		bindErrorNotifications(errorNotificationBinder);
 		bindWarningNotifications(warningNotificationBinder);
 		bindInformationNotifications(informationNotificationBinder);
-		bindUserStatus();
 		bindUserOption();
 		bindUserOptionStore();
 	}
@@ -100,10 +97,6 @@ public class UserModule extends AbstractModule {
 	 */
 	protected void bindUserNotifier() {
 		bind(UserNotifier.class).to(DefaultUserNotifier.class);
-	}
-
-	protected void bindUserStatus() {
-		bind(UserStatus.class).to(DefaultUserStatus.class);
 	}
 
 	/**
