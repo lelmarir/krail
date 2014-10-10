@@ -55,7 +55,14 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 	protected BaseGuiceServletInjector() {
 		super();
 	}
-
+	
+	public Injector getInjector(boolean create) {
+		if (injector == null && create) {
+			createInjector();
+		}
+		return injector;
+	}
+	
 	/**
 	 * Module instances for the base should be added in {@link #getModules()}. Module instance for the app using V7
 	 * should be added to {@link AppModules#appModules()}
@@ -63,11 +70,8 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 	 * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
 	 */
 	@Override
-	public Injector getInjector() {
-		if (injector == null) {
-			createInjector();
-		}
-		return injector;
+	protected Injector getInjector() {
+		return getInjector(true);
 	}
 
 	protected void createInjector() {
@@ -201,7 +205,10 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
 		log.info("Stopping services");
 		try {
-			getInjector().getInstance(ServicesMonitor.class).stopAllServices();
+			Injector injector = getInjector(false);
+			if(injector != null) {
+				injector.getInstance(ServicesMonitor.class).stopAllServices();
+			}
 		} catch (Exception e) {
 			log.error("Exception while stopping services", e);
 		}
