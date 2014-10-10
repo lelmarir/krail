@@ -73,5 +73,9 @@ public abstract class ViewBase implements V7View {
         return getClass().getSimpleName();
     }
 
+    @Override
+    public void beforeBuild(V7ViewChangeEvent event) {
+    	;
+    }
 
 }
