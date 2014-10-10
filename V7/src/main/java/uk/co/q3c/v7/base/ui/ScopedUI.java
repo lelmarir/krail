@@ -73,6 +73,7 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 	private final I18NProcessor translator;
 	protected final CurrentLocale currentLocale;
 
+	//FIXME: too many parameters
 	protected ScopedUI(V7Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
 			Broadcaster broadcaster, PushMessageRouter pushMessageRouter, ApplicationTitle applicationTitle,
 			Translate translate, CurrentLocale currentLocale, I18NProcessor translator) {

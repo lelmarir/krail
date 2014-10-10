@@ -47,7 +47,8 @@ public class SubjectProvider implements Provider<Subject> {
 			VaadinSession session = sessionProvider.get();
 			subject = session.getAttribute(Subject.class);
 			if (subject == null) {
-				log.debug("VaadinSession is valid, but does not have a stored Subject, creating a new Subject");
+				//TODO: is it right to create a subject every time? why not store it into the session and return it?
+				log.debug("VaadinSession is valid, but does not have a stored Subject, creating a new Subject (will be stored in session only on succesful login)");
 				subject = new Subject.Builder().buildSubject();
 			}
 			return subject;

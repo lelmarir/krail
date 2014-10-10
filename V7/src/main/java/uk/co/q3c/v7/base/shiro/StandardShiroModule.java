@@ -100,6 +100,7 @@ public class StandardShiroModule extends ShiroModule {
 
 	protected void bindSubjectProvider() {
 		bind(Subject.class).toProvider(SubjectProvider.class);
+		expose(Subject.class);
 	}
 
 }
