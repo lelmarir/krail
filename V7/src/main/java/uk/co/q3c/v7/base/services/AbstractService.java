@@ -259,5 +259,17 @@ public abstract class AbstractService implements Service, ServiceStartListener, 
 	public void removeStartListener(ServiceStartListener listener) {
 		serviceStartListeners.remove(listener);
 	}
+	
+	@Override
+	public String getDescription() {
+		//TODO: read form annotation
+		return "";
+	}
+	
+	@Override
+	public String getName() {
+		// TODO: read from annotation
+		return this.getClass().getSimpleName();
+	}
 
 }
