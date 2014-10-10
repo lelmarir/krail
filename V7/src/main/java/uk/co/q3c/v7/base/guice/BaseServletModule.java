@@ -16,11 +16,12 @@ import com.google.inject.servlet.ServletModule;
 
 public class BaseServletModule extends ServletModule {
 
+	/**
+	 * <code>serve("/*").with(BaseServlet.class);</code>
+	 */
 	@Override
 	protected void configureServlets() {
-		serve("/*").with(BaseServlet.class);
-		// removed when switching to non-web setup to enable push support
-		// ShiroWebModule.bindGuiceFilter(binder());
-
+		serve("/*").with(BaseServlet.class);	
 	}
-}
+	
+	}
