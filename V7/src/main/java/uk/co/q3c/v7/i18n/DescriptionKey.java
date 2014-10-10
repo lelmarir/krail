@@ -32,7 +32,8 @@ public enum DescriptionKey implements I18NKey<Descriptions> {
 	Sitemap_Service,
 	Too_Many_Login_Attempts,
 	Unknown_Account,
-	You_have_not_logged_in,
+	You_have_not_logged_in, 
+	Generic_Authentication_Exception,
 
 	// Small_Font;
 	;

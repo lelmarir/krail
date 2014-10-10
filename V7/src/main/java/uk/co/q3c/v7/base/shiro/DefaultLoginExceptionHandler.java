@@ -12,6 +12,14 @@
  */
 package uk.co.q3c.v7.base.shiro;
 
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.ConcurrentAccessException;
+import org.apache.shiro.authc.DisabledAccountException;
+import org.apache.shiro.authc.ExcessiveAttemptsException;
+import org.apache.shiro.authc.ExpiredCredentialsException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LockedAccountException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 import uk.co.q3c.v7.base.view.LoginView;
@@ -26,38 +34,49 @@ public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 	}
 
 	@Override
-	public void unknownAccount(LoginView loginView, UsernamePasswordToken token) {
+	public void unknownAccount(LoginView loginView, UsernamePasswordToken token, UnknownAccountException uae) {
 		loginView.setStatusMessage(DescriptionKey.Unknown_Account);
 	}
 
 	@Override
-	public void incorrectCredentials(LoginView loginView, UsernamePasswordToken token) {
+	public void incorrectCredentials(LoginView loginView,
+			UsernamePasswordToken token, IncorrectCredentialsException ice) {
 		loginView.setStatusMessage(DescriptionKey.Invalid_Login);
 	}
 
 	@Override
-	public void expiredCredentials(LoginView loginView, UsernamePasswordToken token) {
+	public void expiredCredentials(LoginView loginView,
+			UsernamePasswordToken token, ExpiredCredentialsException ece) {
 		loginView.setStatusMessage(DescriptionKey.Account_Expired);
 	}
 
 	@Override
-	public void accountLocked(LoginView loginView, UsernamePasswordToken token) {
+	public void accountLocked(LoginView loginView, UsernamePasswordToken token,
+			LockedAccountException lae) {
 		loginView.setStatusMessage(DescriptionKey.Account_Locked);
 	}
 
 	@Override
-	public void excessiveAttempts(LoginView loginView, UsernamePasswordToken token) {
+	public void excessiveAttempts(LoginView loginView,
+			UsernamePasswordToken token, ExcessiveAttemptsException excess) {
 		loginView.setStatusMessage(DescriptionKey.Too_Many_Login_Attempts);
 	}
 
 	@Override
-	public void concurrentAccess(LoginView loginView, UsernamePasswordToken token) {
+	public void concurrentAccess(LoginView loginView,
+			UsernamePasswordToken token, ConcurrentAccessException cae) {
 		loginView.setStatusMessage(DescriptionKey.Account_Already_In_Use);
 	}
 
 	@Override
-	public void disabledAccount(LoginView loginView, UsernamePasswordToken token) {
+	public void disabledAccount(LoginView loginView, UsernamePasswordToken token, DisabledAccountException dae) {
 		loginView.setStatusMessage(DescriptionKey.Account_is_Disabled);
+	}
+
+	@Override
+	public void genericException(LoginView loginView,
+			UsernamePasswordToken token, AuthenticationException ae) {
+		loginView.setStatusMessage(DescriptionKey.Generic_Authentication_Exception);
 	}
 
 }

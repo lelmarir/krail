@@ -105,26 +105,27 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
 
     @Override
     public void buttonClick(ClickEvent event) {
-        UsernamePasswordToken token = new UsernamePasswordToken(usernameBox.getValue(), passwordBox.getValue());
+		UsernamePasswordToken token = new UsernamePasswordToken(
+				usernameBox.getValue(), passwordBox.getValue());
         try {
-            subjectProvider.get()
-                           .login(token);subjectProvider.get().logout();
+			subjectProvider.get().login(token);
+			subjectProvider.get().logout();
         } catch (UnknownAccountException uae) {
-            loginExceptionHandler.unknownAccount(this, token);
+			loginExceptionHandler.unknownAccount(this, token, uae);
         } catch (IncorrectCredentialsException ice) {
-            loginExceptionHandler.incorrectCredentials(this, token);
+			loginExceptionHandler.incorrectCredentials(this, token, ice);
         } catch (ExpiredCredentialsException ece) {
-            loginExceptionHandler.expiredCredentials(this, token);
+			loginExceptionHandler.expiredCredentials(this, token, ece);
         } catch (LockedAccountException lae) {
-            loginExceptionHandler.accountLocked(this, token);
+			loginExceptionHandler.accountLocked(this, token, lae);
         } catch (ExcessiveAttemptsException excess) {
-            loginExceptionHandler.excessiveAttempts(this, token);
+			loginExceptionHandler.excessiveAttempts(this, token, excess);
         } catch (DisabledAccountException dae) {
-            loginExceptionHandler.disabledAccount(this, token);
+			loginExceptionHandler.disabledAccount(this, token, dae);
         } catch (ConcurrentAccessException cae) {
-            loginExceptionHandler.concurrentAccess(this, token);
+			loginExceptionHandler.concurrentAccess(this, token, cae);
         } catch (AuthenticationException ae) {
-            loginExceptionHandler.disabledAccount(this, token);
+			loginExceptionHandler.genericException(this, token, ae);
         }
         // unexpected condition - error?
         // an exception would be raised if login failed
