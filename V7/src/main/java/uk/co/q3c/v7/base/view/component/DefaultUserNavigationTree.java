@@ -47,31 +47,31 @@ import com.vaadin.ui.Tree;
  *
  */
 public class DefaultUserNavigationTree extends Tree implements UserNavigationTree, V7ViewChangeListener,
-		UserSitemapChangeListener {
-	private static Logger log = LoggerFactory.getLogger(DefaultUserNavigationTree.class);
-	private final UserSitemap userSitemap;
-	private final V7Navigator navigator;
-	private final UserOption userOption;
+        UserSitemapChangeListener {
+    private static Logger log = LoggerFactory.getLogger(DefaultUserNavigationTree.class);
+    private final UserSitemap userSitemap;
+    private final V7Navigator navigator;
+    private final UserOption userOption;
 	private boolean suppressValueChangeEvents;
-	private final UserNavigationTreeBuilder builder;
-	private final UserSitemapSorters sorters;
-	private boolean rebuildRequired = true;
+    private final UserNavigationTreeBuilder builder;
+    private final UserSitemapSorters sorters;
+    private boolean rebuildRequired = true;
 
-	@Inject
-	protected DefaultUserNavigationTree(UserSitemap userSitemap, V7Navigator navigator, UserOption userOption,
-			UserNavigationTreeBuilder builder, UserSitemapSorters sorters) {
-		super();
-		this.userSitemap = userSitemap;
-		this.navigator = navigator;
-		this.userOption = userOption;
-		this.builder = builder;
-		this.sorters = sorters;
-		builder.setUserNavigationTree(this);
-		setImmediate(true);
-		setItemCaptionMode(ItemCaptionMode.EXPLICIT);
-		userSitemap.addListener(this);
-		addValueChangeListener(this);
-		navigator.addViewChangeListener(this);
+    @Inject
+    protected DefaultUserNavigationTree(UserSitemap userSitemap, V7Navigator navigator, UserOption userOption,
+                                        UserNavigationTreeBuilder builder, UserSitemapSorters sorters) {
+        super();
+        this.userSitemap = userSitemap;
+        this.navigator = navigator;
+        this.userOption = userOption;
+        this.builder = builder;
+        this.sorters = sorters;
+        builder.setUserNavigationTree(this);
+        setImmediate(true);
+        setItemCaptionMode(ItemCaptionMode.EXPLICIT);
+        userSitemap.addListener(this);
+        addValueChangeListener(this);
+        navigator.addViewChangeListener(this);
 		setId(ID.getId(this));
 		boolean ascending = userOption.getOptionAsBoolean(this.getClass().getSimpleName(),
 				UserOptionProperty.SORT_ASCENDING, true);
@@ -79,105 +79,105 @@ public class DefaultUserNavigationTree extends Tree implements UserNavigationTre
 		SortType sortType = (SortType) userOption.getOptionAsEnum(this.getClass().getSimpleName(),
 				UserOptionProperty.SORT_TYPE, SortType.ALPHA);
 
-		setSortAscending(ascending, false);
-		setSortType(sortType, false);
+        setSortAscending(ascending, false);
+        setSortType(sortType, false);
 
-	}
+    }
 
-	public UserNavigationTreeBuilder getBuilder() {
-		return builder;
-	}
+    public UserNavigationTreeBuilder getBuilder() {
+        return builder;
+    }
 
-	/**
-	 * Returns true if the {@code node} is a leaf as far as this {@link DefaultUserNavigationTree} is concerned. It may
-	 * be a leaf here, but not in the {@link #userSitemap}, depending on the setting of {@link #maxLevel}
-	 *
-	 * @param node
-	 * @return
-	 */
-	public boolean isLeaf(UserSitemapNode node) {
-		return !areChildrenAllowed(node);
-	}
+    /**
+     * Returns true if the {@code node} is a leaf as far as this {@link DefaultUserNavigationTree} is concerned. It may
+     * be a leaf here, but not in the {@link #userSitemap}, depending on the setting of {@link #maxLevel}
+     *
+     * @param node
+     * @return
+     */
+    public boolean isLeaf(UserSitemapNode node) {
+        return !areChildrenAllowed(node);
+    }
 
-	@Override
-	public int getMaxDepth() {
+    @Override
+    public int getMaxDepth() {
 		return userOption.getOptionAsInt(this.getClass().getSimpleName(), UserOptionProperty.MAX_DEPTH, 10);
-	}
+    }
 
-	/**
-	 * See {@link UserNavigationTree#setMaxDepth(int)}
-	 */
-	@Override
-	public void setMaxDepth(int maxDepth) {
-		setMaxDepth(maxDepth, true);
-	}
+    /**
+     * See {@link UserNavigationTree#setMaxDepth(int)}
+     */
+    @Override
+    public void setMaxDepth(int maxDepth) {
+        setMaxDepth(maxDepth, true);
+    }
 
-	/**
-	 * See {@link UserNavigationTree#setMaxDepth(int, boolean)}
-	 */
-	@Override
-	public void setMaxDepth(int maxDepth, boolean rebuild) {
-		if (maxDepth > 0) {
+    /**
+     * See {@link UserNavigationTree#setMaxDepth(int, boolean)}
+     */
+    @Override
+    public void setMaxDepth(int maxDepth, boolean rebuild) {
+        if (maxDepth > 0) {
 			userOption.setOption(this.getClass().getSimpleName(), UserOptionProperty.MAX_DEPTH, maxDepth);
-			build();
-		} else {
-			log.warn("Attempt to set max depth value to {}, but has been ignored.  It must be greater than 0. ");
-		}
-	}
+            build();
+        } else {
+            log.warn("Attempt to set max depth value to {}, but has been ignored.  It must be greater than 0. ");
+        }
+    }
 
-	@Override
-	public void valueChange(Property.ValueChangeEvent event) {
-		if (!suppressValueChangeEvents) {
-			if (getValue() != null) {
-				String url = userSitemap.uri((UserSitemapNode) getValue());
-				navigator.navigateTo(url);
-			}
-		}
-	}
+    @Override
+    public void valueChange(Property.ValueChangeEvent event) {
+        if (!suppressValueChangeEvents) {
+            if (getValue() != null) {
+                String url = userSitemap.uri((UserSitemapNode) getValue());
+                navigator.navigateTo(url);
+            }
+        }
+    }
 
-	/**
+    /**
 	 *
-	 * @see uk.co.q3c.v7.base.view.V7ViewChangeListener#beforeViewChange(uk.co.q3c.v7.base.view.V7ViewChangeEvent)
-	 */
-	@Override
-	public boolean beforeViewChange(V7ViewChangeEvent event) {
-		return true; // do nothing, and don't block
-	}
+     * @see uk.co.q3c.v7.base.view.V7ViewChangeListener#beforeViewChange(uk.co.q3c.v7.base.view.V7ViewChangeEvent)
+     */
+    @Override
+    public void beforeViewChange(V7ViewChangeEvent event) {
+        ; // do nothing, and don't block
+    }
 
-	/**
-	 * After a navigation change, select the appropriate node.
-	 *
-	 * @see uk.co.q3c.v7.base.view.V7ViewChangeListener#afterViewChange(uk.co.q3c.v7.base.view.V7ViewChangeEvent)
-	 */
-	@Override
-	public void afterViewChange(V7ViewChangeEvent event) {
-		UserSitemapNode selectedNode = navigator.getCurrentNode();
-		UserSitemapNode childNode = selectedNode;
+    /**
+     * After a navigation change, select the appropriate node.
+     *
+     * @see uk.co.q3c.v7.base.view.V7ViewChangeListener#afterViewChange(uk.co.q3c.v7.base.view.V7ViewChangeEvent)
+     */
+    @Override
+    public void afterViewChange(V7ViewChangeEvent event) {
+        UserSitemapNode selectedNode = navigator.getCurrentNode();
+        UserSitemapNode childNode = selectedNode;
 
-		UserSitemapNode parentNode = (UserSitemapNode) getParent(childNode);
+        UserSitemapNode parentNode = (UserSitemapNode) getParent(childNode);
 
-		while (parentNode != null) {
-			expandItem(parentNode);
-			parentNode = (UserSitemapNode) getParent(parentNode);
-		}
-		suppressValueChangeEvents = true;
-		log.debug("selecting node for uri '{}'", userSitemap.uri(selectedNode));
-		this.select(selectedNode);
-		suppressValueChangeEvents = false;
+        while (parentNode != null) {
+            expandItem(parentNode);
+            parentNode = (UserSitemapNode) getParent(parentNode);
+        }
+        suppressValueChangeEvents = true;
+        log.debug("selecting node for uri '{}'", userSitemap.uri(selectedNode));
+        this.select(selectedNode);
+        suppressValueChangeEvents = false;
 
-	}
+    }
 
-	@Override
-	public Tree getTree() {
-		return this;
-	}
+    @Override
+    public Tree getTree() {
+        return this;
+    }
 
 	@Override
 	public void clear() {
 		removeAllItems();
 	}
 
-	/**
+    /**
 	 * See {@link UserNavigationTree#build()}
 	 */
 	@Override
@@ -203,64 +203,64 @@ public class DefaultUserNavigationTree extends Tree implements UserNavigationTre
 
 	/**
 	 * Although only {@link UserSitemap} labels (and therefore captions) have changed, the tree may need to be re-sorted
-	 * to reflect the change in language, so it is easier just to rebuild the tree
-	 */
-	@Override
-	public void labelsChanged() {
-		rebuildRequired = true;
-		build();
-	}
+     * to reflect the change in language, so it is easier just to rebuild the tree
+     */
+    @Override
+    public void labelsChanged() {
+        rebuildRequired = true;
+        build();
+    }
 
-	/**
-	 * {@link UserSitemap} structure has changed, we need to rebuild
-	 */
-	@Override
-	public void structureChanged() {
-		rebuildRequired = true;
-		build();
-	}
+    /**
+     * {@link UserSitemap} structure has changed, we need to rebuild
+     */
+    @Override
+    public void structureChanged() {
+        rebuildRequired = true;
+        build();
+    }
 
-	@Override
-	public void setSortAscending(boolean ascending) {
-		setSortAscending(ascending, true);
-	}
+    @Override
+    public void setSortAscending(boolean ascending) {
+        setSortAscending(ascending, true);
+    }
 
-	@Override
-	public void setSortAscending(boolean ascending, boolean rebuild) {
-		sorters.setSortAscending(ascending);
+    @Override
+    public void setSortAscending(boolean ascending, boolean rebuild) {
+        sorters.setSortAscending(ascending);
 		userOption.setOption(this.getClass().getSimpleName(), UserOptionProperty.SORT_ASCENDING, ascending);
-		rebuildRequired = true;
-		if (rebuild) {
-			build();
-		}
-	}
+        rebuildRequired = true;
+        if (rebuild) {
+            build();
+        }
+    }
 
-	@Override
-	public void setSortType(SortType sortType) {
-		setSortType(sortType, true);
-	}
+    @Override
+    public void setSortType(SortType sortType) {
+        setSortType(sortType, true);
+    }
 
-	@Override
-	public void setSortType(SortType sortType, boolean rebuild) {
-		sorters.setSortType(sortType);
+    @Override
+    public void setSortType(SortType sortType, boolean rebuild) {
+        sorters.setSortType(sortType);
 		userOption.setOption(this.getClass().getSimpleName(), UserOptionProperty.SORT_TYPE, sortType);
-		rebuildRequired = true;
-		if (rebuild) {
-			build();
-		}
-	}
+        rebuildRequired = true;
+        if (rebuild) {
+            build();
+        }
+    }
 
-	@Override
-	public Comparator<UserSitemapNode> getSortComparator() {
-		return sorters.getSortComparator();
-	}
+    @Override
+    public Comparator<UserSitemapNode> getSortComparator() {
+        return sorters.getSortComparator();
+    }
 
-	public boolean isRebuildRequired() {
-		return rebuildRequired;
-	}
+    public boolean isRebuildRequired() {
+        return rebuildRequired;
+    }
 
-	public void setRebuildRequired(boolean rebuildRequired) {
-		this.rebuildRequired = rebuildRequired;
-	}
+    public void setRebuildRequired(boolean rebuildRequired) {
+        this.rebuildRequired = rebuildRequired;
+    }
 
 }

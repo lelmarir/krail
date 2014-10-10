@@ -16,7 +16,7 @@ public interface V7ViewChangeListener {
 	 * @return true if the view change should be allowed or this listener does not care about the view change, false to
 	 *         block the change
 	 */
-	public boolean beforeViewChange(V7ViewChangeEvent event);
+	public void beforeViewChange(V7ViewChangeEvent event);
 
 	/**
 	 * Invoked after the view is changed. If a <code>beforeViewChange</code> method blocked the view change, this method

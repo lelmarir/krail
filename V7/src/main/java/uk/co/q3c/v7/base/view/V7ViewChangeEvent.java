@@ -7,6 +7,7 @@ public class V7ViewChangeEvent {
 	private final V7Navigator navigator;
 	private final NavigationState oldNavigationState;
 	private final NavigationState newNavigationState;	
+	private boolean cancel = false;
 
 	public V7ViewChangeEvent(V7Navigator navigator, NavigationState oldNavigationState, NavigationState newNavigationState) {
 		super();
@@ -26,6 +27,13 @@ public class V7ViewChangeEvent {
 	public NavigationState getNewNavigationState() {
 		return newNavigationState;
 	}
+	
+	public boolean isCancelled(){
+		return cancel;
+	}
+	
+	public void cancel(){
+		this.cancel = true;
 	}
 
 }

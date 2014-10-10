@@ -285,7 +285,8 @@ public class DefaultV7Navigator implements V7Navigator {
      */
     protected boolean fireBeforeViewChange(V7ViewChangeEvent event) {
         for (V7ViewChangeListener l : viewChangeListeners) {
-            if (!l.beforeViewChange(event)) {
+            l.beforeViewChange(event);
+            if(event.isCancelled()){
                 return false;
             }
         }
