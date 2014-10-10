@@ -14,41 +14,17 @@
 package uk.co.q3c.v7.base.view;
 
 import com.google.inject.Inject;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.VerticalLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class VerticalViewBase extends ViewBase implements V7View {
-    private static Logger log = LoggerFactory.getLogger(VerticalViewBase.class);
-
-    private VerticalLayout layout;
-
+public abstract class VerticalViewBase extends ViewBase<VerticalLayout> {
     @Inject
     protected VerticalViewBase() {
         super();
     }
-
-    public VerticalLayout getLayout() {
-        return layout;
-    }
-
-    /**
-     * Override this method to build the layout and components for this View
-     *
-     * @param event
-     *
-     * @return
-     */
+    
     @Override
     public void buildView(V7ViewChangeEvent event) {
-        layout = new VerticalLayout();
-        setRootComponent(layout);
-    }
-
-    @Override
-    public Component getRootComponent() {
-        return layout;
+        setRootComponent(new VerticalLayout());
     }
 
 

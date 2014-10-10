@@ -40,7 +40,7 @@ public class DefaultLogoutView extends VerticalViewBase implements LogoutView {
         super.buildView(event);
         Panel p = new Panel("Logged out");
         p.setSizeFull();
-        getLayout().addComponent(p);
+        getRootComponent().addComponent(p);
     }
 
 

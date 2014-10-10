@@ -21,7 +21,7 @@ import uk.co.q3c.util.StackTraceUtil;
  * @author David Sowerby 4 Aug 2013
  */
 
-public class DefaultErrorView extends ViewBase implements ErrorView {
+public class DefaultErrorView extends ViewBase<TextArea> implements ErrorView {
 
     private Throwable error;
     private TextArea textArea;

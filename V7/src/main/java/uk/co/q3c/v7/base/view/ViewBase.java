@@ -14,17 +14,19 @@ package uk.co.q3c.v7.base.view;
 
 import com.google.inject.Inject;
 import com.vaadin.ui.Component;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.co.q3c.util.ID;
 
 /**
  * Provides default View behaviour suitable for most view implementations
  */
-public abstract class ViewBase implements V7View {
+public abstract class ViewBase<R extends Component> implements V7View {
 
     private static Logger log = LoggerFactory.getLogger(ViewBase.class);
-    private Component rootComponent;
+    private R rootComponent;
 
     @Inject
     protected ViewBase() {
@@ -55,7 +57,7 @@ public abstract class ViewBase implements V7View {
     }
 
     @Override
-    public Component getRootComponent() {
+    public R getRootComponent() {
         if (rootComponent == null) {
             throw new ViewBuildException("Root component cannot be null in " + getClass().getName() + ". Has your " +
                     "buildView() method called " +
@@ -64,7 +66,7 @@ public abstract class ViewBase implements V7View {
         return rootComponent;
     }
 
-    public void setRootComponent(Component rootComponent) {
+    public void setRootComponent(R rootComponent) {
         this.rootComponent = rootComponent;
     }
 
@@ -72,7 +74,7 @@ public abstract class ViewBase implements V7View {
     public String viewName() {
         return getClass().getSimpleName();
     }
-
+    
     @Override
     public void beforeBuild(V7ViewChangeEvent event) {
     	;

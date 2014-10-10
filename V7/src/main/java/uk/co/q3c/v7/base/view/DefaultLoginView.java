@@ -53,10 +53,10 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
 
     @Override
     public void buildView(V7ViewChangeEvent event) {
-        super.buildView(event);
-        getGridLayout().setColumns(3);
-        getGridLayout().setRows(3);
-        getGridLayout().setSizeFull();
+		super.buildView(event);
+		getRootComponent().setColumns(3);
+		getRootComponent().setRows(3);
+		getRootComponent().setSizeFull();
         Panel centrePanel = new Panel("Log in"); // TODO i18N
         centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
         centrePanel.setSizeUndefined();
@@ -84,12 +84,12 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
         vl.addComponent(submitButton);
         vl.addComponent(statusMsgLabel);
 
-        getGridLayout().addComponent(centrePanel, 1, 1);
-        getGridLayout().setColumnExpandRatio(0, 1);
-        getGridLayout().setColumnExpandRatio(2, 1);
+		getRootComponent().addComponent(centrePanel, 1, 1);
+		getRootComponent().setColumnExpandRatio(0, 1);
+		getRootComponent().setColumnExpandRatio(2, 1);
 
-        getGridLayout().setRowExpandRatio(0, 1);
-        getGridLayout().setRowExpandRatio(2, 1);
+		getRootComponent().setRowExpandRatio(0, 1);
+		getRootComponent().setRowExpandRatio(2, 1);
 
     }
 
