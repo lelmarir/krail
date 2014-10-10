@@ -60,8 +60,8 @@ public class DefaultAnnotationSitemapLoader extends SitemapLoaderBase implements
 
 			for (Entry<String, AnnotationSitemapEntry> entry : sources.entrySet()) {
 				String source = entry.getKey();
-				log.debug("scanning {} for View annotations", entry.getKey());
-				Reflections reflections = new Reflections(entry.getKey());
+				log.debug("scanning {} for View annotations", source);
+				Reflections reflections = new Reflections(source);
 
 				// find the View annotations
 				Set<Class<?>> typesWithView = reflections.getTypesAnnotatedWith(View.class);
