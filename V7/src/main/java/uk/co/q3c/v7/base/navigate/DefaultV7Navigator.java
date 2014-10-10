@@ -203,7 +203,7 @@ public class DefaultV7Navigator implements V7Navigator {
             previousNavigationState = currentNavigationState;
             currentNavigationState = navigationState;
 
-            V7ViewChangeEvent event = new V7ViewChangeEvent(navigationState);
+            V7ViewChangeEvent event = new V7ViewChangeEvent(this, previousPreviousNavigationState, currentNavigationState);
             // if change is blocked revert to previous state
             if (!fireBeforeViewChange(event)) {
                 currentNavigationState = previousNavigationState;
@@ -340,7 +340,7 @@ public class DefaultV7Navigator implements V7Navigator {
         log.debug("A {} Error has been thrown, reporting via the Error View", error.getClass()
                                                                                    .getName());
         NavigationState navigationState = uriHandler.navigationState("error");
-        V7ViewChangeEvent event = new V7ViewChangeEvent(navigationState);
+        V7ViewChangeEvent event = new V7ViewChangeEvent(this,currentNavigationState, navigationState);
         ErrorView view = viewFactory.get(ErrorView.class);
         view.setError(error);
         changeView(view, event);
