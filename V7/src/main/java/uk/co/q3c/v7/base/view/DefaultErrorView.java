@@ -23,37 +23,34 @@ import uk.co.q3c.util.StackTraceUtil;
 
 public class DefaultErrorView extends ViewBase<TextArea> implements ErrorView {
 
-    private Throwable error;
-    private TextArea textArea;
+	private Throwable error;
+	private TextArea textArea;
 
-    @Inject
-    protected DefaultErrorView() {
-        super();
-        
-        textArea = new TextArea();
-        textArea.setSizeFull();
-        textArea.setReadOnly(false);
-        if (error != null) {
-            String s = StackTraceUtil.getStackTrace(error);
-            textArea.setValue(s);
-        } else {
-            textArea.setValue("Error view has been called but no error has been set.  This should not happen");
-            textArea.setReadOnly(true);
-        }
-        setRootComponent(textArea);
-    }
+	@Inject
+	protected DefaultErrorView() {
+		super();
 
+		textArea = new TextArea();
+		textArea.setSizeFull();
+		textArea.setValue("Error view has been called but no error has been set.  This should not happen");
+		textArea.setReadOnly(true);
 
-    public TextArea getTextArea() {
-        return textArea;
-    }
+		setRootComponent(textArea);
+	}
 
-    public Throwable getError() {
-        return error;
-    }
+	public TextArea getTextArea() {
+		return textArea;
+	}
 
-    @Override
-    public void setError(Throwable error) {
-        this.error = error;
-    }
+	public Throwable getError() {
+		return error;
+	}
+
+	@Override
+	public void setError(Throwable error) {
+		this.error = error;
+		textArea.setReadOnly(false);
+		textArea.setValue(StackTraceUtil.getStackTrace(error));
+		textArea.setReadOnly(true);
+	}
 }
