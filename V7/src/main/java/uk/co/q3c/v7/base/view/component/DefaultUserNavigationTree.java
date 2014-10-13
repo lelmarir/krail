@@ -30,6 +30,7 @@ import uk.co.q3c.v7.base.navigate.sitemap.comparator.UserSitemapSorters;
 import uk.co.q3c.v7.base.user.opt.UserOption;
 import uk.co.q3c.v7.base.user.opt.UserOptionProperty;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
+import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 import uk.co.q3c.v7.base.view.V7ViewChangeListener;
 
 import com.google.inject.Inject;
@@ -134,15 +135,11 @@ public class DefaultUserNavigationTree extends Tree implements UserNavigationTre
             }
         }
     }
-
-    /**
-	 *
-     * @see uk.co.q3c.v7.base.view.V7ViewChangeListener#beforeViewChange(uk.co.q3c.v7.base.view.V7ViewChangeEvent)
-     */
+    
     @Override
-    public void beforeViewChange(V7ViewChangeEvent event) {
-        ; // do nothing, and don't block
-    }
+	public void beforeViewChange(CancellableV7ViewChangeEvent event) {
+		; //no-op
+	}
 
     /**
      * After a navigation change, select the appropriate node.

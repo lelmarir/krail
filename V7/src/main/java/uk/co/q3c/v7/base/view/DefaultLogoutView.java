@@ -20,28 +20,9 @@ public class DefaultLogoutView extends VerticalViewBase implements LogoutView {
     @Inject
     protected DefaultLogoutView() {
         super();
-    }
-
-    /**
-     * Called after the view itself has been constructed but before {@link #buildView()} is called.  Typically checks
-     * whether a valid URI parameters are being passed to the view, or uses the URI parameters to set up some
-     * configuration which affects the way the view is presented.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    @Override
-    public void beforeBuild(V7ViewChangeEvent event) {
-
-    }
-
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
-        super.buildView(event);
         Panel p = new Panel("Logged out");
         p.setSizeFull();
         getRootComponent().addComponent(p);
     }
-
 
 }

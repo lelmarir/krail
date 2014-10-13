@@ -25,11 +25,22 @@ public class DefaultErrorView extends ViewBase<TextArea> implements ErrorView {
 
     private Throwable error;
     private TextArea textArea;
-    private boolean viewBuilt = false;
 
     @Inject
     protected DefaultErrorView() {
         super();
+        
+        textArea = new TextArea();
+        textArea.setSizeFull();
+        textArea.setReadOnly(false);
+        if (error != null) {
+            String s = StackTraceUtil.getStackTrace(error);
+            textArea.setValue(s);
+        } else {
+            textArea.setValue("Error view has been called but no error has been set.  This should not happen");
+            textArea.setReadOnly(true);
+        }
+        setRootComponent(textArea);
     }
 
 
@@ -45,33 +56,4 @@ public class DefaultErrorView extends ViewBase<TextArea> implements ErrorView {
     public void setError(Throwable error) {
         this.error = error;
     }
-
-    /**
-     * Called after the view itself has been constructed but before {@link #buildView()} is called.  Typically checks
-     * whether a valid URI parameters are being passed to the view, or uses the URI parameters to set up some
-     * configuration which affects the way the view is presented.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    @Override
-    public void beforeBuild(V7ViewChangeEvent event) {
-
-    }
-
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
-        textArea = new TextArea();
-        textArea.setSizeFull();
-        textArea.setReadOnly(false);
-        if (error != null) {
-            String s = StackTraceUtil.getStackTrace(error);
-            textArea.setValue(s);
-        } else {
-            textArea.setValue("Error view has been called but no error has been set.  This should not happen");
-            textArea.setReadOnly(true);
-        }
-        setRootComponent(textArea);
-    }
-
 }

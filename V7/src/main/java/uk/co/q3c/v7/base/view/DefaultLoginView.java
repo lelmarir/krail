@@ -28,61 +28,60 @@ import uk.co.q3c.v7.base.shiro.LoginExceptionHandler;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
 import uk.co.q3c.v7.i18n.*;
 
-public class DefaultLoginView extends GridViewBase implements LoginView, ClickListener {
-    private final LoginExceptionHandler loginExceptionHandler;
-    private final Provider<Subject> subjectProvider;
-    private final Translate translate;
-    private Label demoInfoLabel;
-    private Label demoInfoLabel2;
-    @I18NValue(value = LabelKey.Authentication)
-    private Label label;
-    private PasswordField passwordBox;
-    private Label statusMsgLabel;
-    private Button submitButton;
-    @I18N(caption = LabelKey.User_Name, description = DescriptionKey.Enter_your_user_name)
-    private TextField usernameBox;
+public class DefaultLoginView extends GridViewBase implements LoginView,
+		ClickListener {
+	private final LoginExceptionHandler loginExceptionHandler;
+	private final Provider<Subject> subjectProvider;
+	private final Translate translate;
+	private Label demoInfoLabel;
+	private Label demoInfoLabel2;
+	@I18NValue(value = LabelKey.Authentication)
+	private Label label;
+	private PasswordField passwordBox;
+	private Label statusMsgLabel;
+	private Button submitButton;
+	@I18N(caption = LabelKey.User_Name, description = DescriptionKey.Enter_your_user_name)
+	private TextField usernameBox;
 
-    @Inject
-    protected DefaultLoginView(LoginExceptionHandler loginExceptionHandler, SubjectProvider subjectProvider,
-                               Translate translate) {
-        super();
-        this.loginExceptionHandler = loginExceptionHandler;
-        this.subjectProvider = subjectProvider;
-        this.translate = translate;
-    }
+	@Inject
+	protected DefaultLoginView(LoginExceptionHandler loginExceptionHandler,
+			SubjectProvider subjectProvider, Translate translate) {
+		super();
+		this.loginExceptionHandler = loginExceptionHandler;
+		this.subjectProvider = subjectProvider;
+		this.translate = translate;
 
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
-		super.buildView(event);
 		getRootComponent().setColumns(3);
 		getRootComponent().setRows(3);
 		getRootComponent().setSizeFull();
-        Panel centrePanel = new Panel("Log in"); // TODO i18N
-        centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
-        centrePanel.setSizeUndefined();
-        VerticalLayout vl = new VerticalLayout();
-        centrePanel.setContent(vl);
-        vl.setSpacing(true);
-        vl.setSizeUndefined();
-        label = new Label();
-        usernameBox = new TextField();
-        passwordBox = new PasswordField("password");
+		Panel centrePanel = new Panel("Log in"); // TODO i18N
+		centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
+		centrePanel.setSizeUndefined();
+		VerticalLayout vl = new VerticalLayout();
+		centrePanel.setContent(vl);
+		vl.setSpacing(true);
+		vl.setSizeUndefined();
+		label = new Label();
+		usernameBox = new TextField();
+		passwordBox = new PasswordField("password");
 
-        demoInfoLabel = new Label("for this demo, enter any user name, and a password of 'password'");
-        demoInfoLabel2 = new Label("In a real application your Shiro Realm implementation defines how to authenticate");
+		demoInfoLabel = new Label(
+				"for this demo, enter any user name, and a password of 'password'");
+		demoInfoLabel2 = new Label(
+				"In a real application your Shiro Realm implementation defines how to authenticate");
 
-        submitButton = new Button("submit");
-        submitButton.addClickListener(this);
+		submitButton = new Button("submit");
+		submitButton.addClickListener(this);
 
-        statusMsgLabel = new Label("Please enter your username and password");
+		statusMsgLabel = new Label("Please enter your username and password");
 
-        vl.addComponent(label);
-        vl.addComponent(demoInfoLabel);
-        vl.addComponent(demoInfoLabel2);
-        vl.addComponent(usernameBox);
-        vl.addComponent(passwordBox);
-        vl.addComponent(submitButton);
-        vl.addComponent(statusMsgLabel);
+		vl.addComponent(label);
+		vl.addComponent(demoInfoLabel);
+		vl.addComponent(demoInfoLabel2);
+		vl.addComponent(usernameBox);
+		vl.addComponent(passwordBox);
+		vl.addComponent(submitButton);
+		vl.addComponent(statusMsgLabel);
 
 		getRootComponent().addComponent(centrePanel, 1, 1);
 		getRootComponent().setColumnExpandRatio(0, 1);
@@ -90,103 +89,86 @@ public class DefaultLoginView extends GridViewBase implements LoginView, ClickLi
 
 		getRootComponent().setRowExpandRatio(0, 1);
 		getRootComponent().setRowExpandRatio(2, 1);
+	}
 
-    }
+	@Override
+	protected void setIds() {
+		super.setIds();
+		submitButton.setId(ID.getId(this, submitButton));
+		usernameBox.setId(ID.getId("username", this, usernameBox));
+		passwordBox.setId(ID.getId("password", this, passwordBox));
+		statusMsgLabel.setId(ID.getId("status", this, statusMsgLabel));
+	}
 
-    @Override
-    protected void setIds() {
-        super.setIds();
-        submitButton.setId(ID.getId(this, submitButton));
-        usernameBox.setId(ID.getId("username", this, usernameBox));
-        passwordBox.setId(ID.getId("password", this, passwordBox));
-        statusMsgLabel.setId(ID.getId("status", this, statusMsgLabel));
-    }
-
-
-    @Override
-    public void buttonClick(ClickEvent event) {
+	@Override
+	public void buttonClick(ClickEvent event) {
 		UsernamePasswordToken token = new UsernamePasswordToken(
 				usernameBox.getValue(), passwordBox.getValue());
-        try {
+		try {
 			subjectProvider.get().login(token);
-			subjectProvider.get().logout();
-        } catch (UnknownAccountException uae) {
+		} catch (UnknownAccountException uae) {
 			loginExceptionHandler.unknownAccount(this, token, uae);
-        } catch (IncorrectCredentialsException ice) {
+		} catch (IncorrectCredentialsException ice) {
 			loginExceptionHandler.incorrectCredentials(this, token, ice);
-        } catch (ExpiredCredentialsException ece) {
+		} catch (ExpiredCredentialsException ece) {
 			loginExceptionHandler.expiredCredentials(this, token, ece);
-        } catch (LockedAccountException lae) {
+		} catch (LockedAccountException lae) {
 			loginExceptionHandler.accountLocked(this, token, lae);
-        } catch (ExcessiveAttemptsException excess) {
+		} catch (ExcessiveAttemptsException excess) {
 			loginExceptionHandler.excessiveAttempts(this, token, excess);
-        } catch (DisabledAccountException dae) {
+		} catch (DisabledAccountException dae) {
 			loginExceptionHandler.disabledAccount(this, token, dae);
-        } catch (ConcurrentAccessException cae) {
+		} catch (ConcurrentAccessException cae) {
 			loginExceptionHandler.concurrentAccess(this, token, cae);
-        } catch (AuthenticationException ae) {
+		} catch (AuthenticationException ae) {
 			loginExceptionHandler.genericException(this, token, ae);
-        }
-        // unexpected condition - error?
-        // an exception would be raised if login failed
-    }
+		}
+		// unexpected condition - error?
+		// an exception would be raised if login failed
+	}
 
-    @Override
-    public void setUsername(String username) {
-        usernameBox.setValue(username);
-    }
+	@Override
+	public void setUsername(String username) {
+		usernameBox.setValue(username);
+	}
 
-    @Override
-    public void setPassword(String password) {
-        passwordBox.setValue(password);
-    }
+	@Override
+	public void setPassword(String password) {
+		passwordBox.setValue(password);
+	}
 
-    @Override
-    public Button getSubmitButton() {
-        return submitButton;
-    }
+	@Override
+	public Button getSubmitButton() {
+		return submitButton;
+	}
 
-    @Override
-    public String getStatusMessage() {
-        return statusMsgLabel.getValue();
-    }
+	@Override
+	public String getStatusMessage() {
+		return statusMsgLabel.getValue();
+	}
 
-    @Override
-    public void setStatusMessage(I18NKey<?> messageKey) {
-        setStatusMessage(translate.from(messageKey));
-    }
+	@Override
+	public void setStatusMessage(I18NKey<?> messageKey) {
+		setStatusMessage(translate.from(messageKey));
+	}
 
-    @Override
-    public void setStatusMessage(String msg) {
-        statusMsgLabel.setValue(msg);
-    }
+	@Override
+	public void setStatusMessage(String msg) {
+		statusMsgLabel.setValue(msg);
+	}
 
-    public TextField getUsernameBox() {
-        return usernameBox;
-    }
+	public TextField getUsernameBox() {
+		return usernameBox;
+	}
 
-    public PasswordField getPasswordBox() {
-        return passwordBox;
-    }
+	public PasswordField getPasswordBox() {
+		return passwordBox;
+	}
 
-    /**
-     * Called after the view itself has been constructed but before {@link #buildView()} is called.  Typically checks
-     * whether a valid URI parameters are being passed to the view, or uses the URI parameters to set up some
-     * configuration which affects the way the view is presented.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    @Override
-    public void beforeBuild(V7ViewChangeEvent event) {
+	@Override
+	public String viewName() {
 
-    }
-
-    @Override
-    public String viewName() {
-
-        return getClass().getSimpleName();
-    }
-
+		return getClass().getSimpleName();
+	}
 
 }

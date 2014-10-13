@@ -17,65 +17,43 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import uk.co.q3c.util.ID;
 
-public abstract class StandardPageViewBase extends ViewBase {
+public abstract class StandardPageViewBase extends ViewBase<GridLayout> {
 
-    protected GridLayout grid;
-    private Label label;
+	protected GridLayout grid;
+	private Label label;
 
-    @Inject
-    protected StandardPageViewBase() {
-        super();
-    }
+	@Inject
+	protected StandardPageViewBase() {
+		super();
 
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
+		label = new Label("This is the " + this.getClass().getSimpleName());
+		label.setHeight("100px");
+		grid = new GridLayout(3, 3);
 
-        label = new Label("This is the " + this.getClass()
-                                               .getSimpleName());
-        label.setHeight("100px");
-        grid = new GridLayout(3, 3);
+		grid.addComponent(label, 1, 1);
+		grid.setSizeFull();
+		grid.setColumnExpandRatio(0, 0.33f);
+		grid.setColumnExpandRatio(1, 0.33f);
+		grid.setColumnExpandRatio(2, 0.33f);
 
-        grid.addComponent(label, 1, 1);
-        grid.setSizeFull();
-        grid.setColumnExpandRatio(0, 0.33f);
-        grid.setColumnExpandRatio(1, 0.33f);
-        grid.setColumnExpandRatio(2, 0.33f);
+		grid.setRowExpandRatio(0, 0.4f);
+		grid.setRowExpandRatio(1, 0.2f);
+		grid.setRowExpandRatio(2, 0.4f);
 
-        grid.setRowExpandRatio(0, 0.4f);
-        grid.setRowExpandRatio(1, 0.2f);
-        grid.setRowExpandRatio(2, 0.4f);
+		label.setSizeFull();
 
-        label.setSizeFull();
+		setRootComponent(grid);
+	}
 
-        setRootComponent(grid);
-    }
+	@Override
+	public void setIds() {
+		super.setIds();
+		grid.setId(ID.getId(this.getClass().getSimpleName(), grid));
+		label.setId(ID.getId(this.getClass().getSimpleName(), label));
+	}
 
-    @Override
-    public void setIds() {
-        super.setIds();
-        grid.setId(ID.getId(this.getClass()
-                                .getSimpleName(), grid));
-        label.setId(ID.getId(this.getClass()
-                                 .getSimpleName(), label));
-    }
-
-
-    public Label getLabel() {
-        return label;
-    }
-
-    /**
-     * Called after the view itself has been constructed but before {@link #buildView()} is called.  Typically checks
-     * whether a valid URI parameters are being passed to the view, or uses the URI parameters to set up some
-     * configuration which affects the way the view is presented.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    @Override
-    public void beforeBuild(V7ViewChangeEvent event) {
-
-    }
-
+	public Label getLabel() {
+		return label;
+	}
 
 }

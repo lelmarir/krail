@@ -31,19 +31,6 @@ public abstract class ViewBase<R extends Component> implements V7View {
     @Inject
     protected ViewBase() {
         super();
-
-    }
-
-    public void init() {
-
-    }
-
-    /**
-     * Calls {@link #setIds() after the View has been constructed}
-     */
-    @Override
-    public void afterBuild(V7ViewChangeEvent event) {
-        setIds();
     }
 
     /**
@@ -73,11 +60,6 @@ public abstract class ViewBase<R extends Component> implements V7View {
     @Override
     public String viewName() {
         return getClass().getSimpleName();
-    }
-    
-    @Override
-    public void beforeBuild(V7ViewChangeEvent event) {
-    	;
     }
 
 }

@@ -27,6 +27,7 @@ import uk.co.q3c.v7.base.navigate.sitemap.UserSitemap;
 import uk.co.q3c.v7.base.navigate.sitemap.UserSitemapNode;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent;
 import uk.co.q3c.v7.base.view.V7ViewChangeListener;
+import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 import uk.co.q3c.v7.i18n.CurrentLocale;
 import uk.co.q3c.v7.i18n.LocaleChangeListener;
 
@@ -125,11 +126,10 @@ public abstract class NavigationButtonPanel extends HorizontalLayout implements 
     }
 
     @Override
-    public void beforeViewChange(V7ViewChangeEvent event) {
-        // do nothing
-        ;
+    public void beforeViewChange(CancellableV7ViewChangeEvent event) {
+    	;
     }
-
+    
     @Override
     public void afterViewChange(V7ViewChangeEvent event) {
         log.debug("Responding to view change");

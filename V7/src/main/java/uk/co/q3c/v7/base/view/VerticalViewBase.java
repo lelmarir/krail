@@ -20,12 +20,8 @@ public abstract class VerticalViewBase extends ViewBase<VerticalLayout> {
     @Inject
     protected VerticalViewBase() {
         super();
-    }
-    
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
+        
         setRootComponent(new VerticalLayout());
     }
-
 
 }

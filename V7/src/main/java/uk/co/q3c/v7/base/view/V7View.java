@@ -18,6 +18,7 @@ import uk.co.q3c.v7.base.navigate.NavigationState;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
 
 
+//TODO: rewrite javadoc
 /**
  * A view is constructed by the {@link ViewFactory} from a Provider defined in the sitemap building process.  When
  * the view is selected for use, calls are made against {@link V7ViewChangeListener}s added to {@link V7Navigator}, and
@@ -36,28 +37,6 @@ import uk.co.q3c.v7.base.navigate.V7Navigator;
  * information can be used to determine how the View is to be built or respond in some other way to URL parameters.
  */
 public interface V7View {
-
-    /**
-     * Called after the view itself has been constructed but before {@link #buildView()} is called.  Typically checks
-     * whether a valid URI parameters are being passed to the view, or uses the URI parameters to set up some
-     * configuration which affects the way the view is presented.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    public void beforeBuild(V7ViewChangeEvent event);
-
-    /**
-     * Builds the UI components of the view.  MUST set the root component of the View (returned by {@link
-     * #getRootComponent()}, which is used to insert into the {@link ScopedUI} view area. The view implementation may
-     * need to check whether components have already been constructed, as this method may be called when the View is
-     * selected again after initial construction.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    public void buildView(V7ViewChangeEvent event);
-
     /**
      * To enable implementations to implement this interface without descending from Component. If the implementation
      * does descend from Component, just return 'this'.  Throws a ViewBuildException if the root component has not been
@@ -73,18 +52,4 @@ public interface V7View {
      * @return
      */
     public String viewName();
-
-    /**
-     * Called by the {@link ViewFactory} after the construction of a view, and intended for initialisation which does
-     * not depend on navigation state.
-     */
-    public void init();
-
-    /**
-     * Called immediately after the construction of the Views components (see {@link buildView}) to enable setting up
-     * the view from URL parameters.  A typical use is to set ids for components if these are being used.
-     *
-     * @param navigationState
-     */
-    void afterBuild(V7ViewChangeEvent event);
 }

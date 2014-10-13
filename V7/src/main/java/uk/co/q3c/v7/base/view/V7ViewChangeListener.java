@@ -1,5 +1,7 @@
 package uk.co.q3c.v7.base.view;
 
+import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
+
 public interface V7ViewChangeListener {
 	/**
 	 * Invoked before the view is changed.
@@ -16,7 +18,7 @@ public interface V7ViewChangeListener {
 	 * @return true if the view change should be allowed or this listener does not care about the view change, false to
 	 *         block the change
 	 */
-	public void beforeViewChange(V7ViewChangeEvent event);
+	public void beforeViewChange(CancellableV7ViewChangeEvent event);
 
 	/**
 	 * Invoked after the view is changed. If a <code>beforeViewChange</code> method blocked the view change, this method

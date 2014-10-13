@@ -20,20 +20,6 @@ public abstract class GridViewBase extends ViewBase<GridLayout> {
     @Inject
     protected GridViewBase() {
         super();
-
-    }
-
-    /**
-     * Builds the UI components of the view.  MUST set the root component of the View (returned by {@link
-     * #getRootComponent()}, which is used to insert into the {@link ScopedUI} view area. The view implementation may
-     * need to check whether components have already been constructed, as this method may be called when the View is
-     * selected again after initial construction.
-     *
-     * @param event
-     *         contains information about the change to this View
-     */
-    @Override
-    public void buildView(V7ViewChangeEvent event) {
-		setRootComponent(new GridLayout());
+        setRootComponent(new GridLayout());
     }
 }

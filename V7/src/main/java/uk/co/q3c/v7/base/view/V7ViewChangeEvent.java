@@ -3,37 +3,17 @@ package uk.co.q3c.v7.base.view;
 import uk.co.q3c.v7.base.navigate.NavigationState;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
 
-public class V7ViewChangeEvent {
-	private final V7Navigator navigator;
-	private final NavigationState oldNavigationState;
-	private final NavigationState newNavigationState;	
-	private boolean cancel = false;
+public interface V7ViewChangeEvent {
 
-	public V7ViewChangeEvent(V7Navigator navigator, NavigationState oldNavigationState, NavigationState newNavigationState) {
-		super();
-		this.navigator = navigator;
-		this.oldNavigationState = oldNavigationState;
-		this.newNavigationState = newNavigationState;
-	}
+	public static interface CancellableV7ViewChangeEvent extends V7ViewChangeEvent {
 
-	public V7Navigator getNavigator() {
-		return navigator;
-	}
-
-	public NavigationState getOldNavigationState() {
-		return oldNavigationState;
-	}
-
-	public NavigationState getNewNavigationState() {
-		return newNavigationState;
+		boolean isCancelled();
+		void cancel();
+		
 	}
 	
-	public boolean isCancelled(){
-		return cancel;
-	}
+	V7Navigator getNavigator();
+	NavigationState getOldNavigationState();
+	NavigationState getNewNavigationState();
 	
-	public void cancel(){
-		this.cancel = true;
-	}
-
 }
