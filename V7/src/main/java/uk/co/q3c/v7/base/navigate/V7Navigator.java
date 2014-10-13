@@ -64,7 +64,7 @@ public interface V7Navigator extends UriFragmentChangedListener, AuthenticationL
 	 *
 	 * @param throwable
 	 */
-	void error(Throwable throwable);
+	void showError(Throwable throwable);
 
 	/**
 	 * Navigates to the location represented by {@code navigationState}, which may include parameters
