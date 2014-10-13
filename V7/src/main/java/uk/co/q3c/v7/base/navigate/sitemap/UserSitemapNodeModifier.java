@@ -82,7 +82,7 @@ public class UserSitemapNodeModifier implements NodeModifier<MasterSitemapNode, 
 			}
 		}
 		if (pageAccessController.isAuthorised(subjectProvider.get(), masterNode)) {
-			log.debug("User is authorised for page {}, creating a node for it");
+			log.debug("User is authorised for page {}, creating a node for it", masterNode.getUriSegment());
 			UserSitemapNode userNode = new UserSitemapNode(masterNode);
 			userNode.setLabel(translate.from(masterNode.getLabelKey()));
 			userNode.setCollationKey(collator.getCollationKey(userNode.getLabel()));

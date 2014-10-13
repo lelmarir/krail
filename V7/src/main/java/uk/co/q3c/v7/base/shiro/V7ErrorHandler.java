@@ -75,7 +75,7 @@ public class V7ErrorHandler extends DefaultErrorHandler {
 			return;
 		}
 
-		navigator.error(event.getThrowable());
+		navigator.showError(event.getThrowable());
 
 	}
 
