@@ -383,9 +383,9 @@ public class DefaultV7Navigator implements V7Navigator {
 	}
 
 	@Override
-	public void error(Throwable error) {
-		log.debug("A {} Error has been thrown, reporting via the Error View",
-				error.getClass().getName());
+	public void showError(Throwable error) {
+		log.debug("A {} Error has been thrown, reporting via the Error View:",
+				error.getClass().getName(), error);
 		ErrorView view = viewFactory.get(ErrorView.class);
 		view.setError(error);
 		changeView(view);
