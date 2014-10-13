@@ -12,6 +12,7 @@
  */
 package uk.co.q3c.v7.base.view;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
@@ -19,41 +20,41 @@ import uk.co.q3c.util.ID;
 
 public abstract class StandardPageViewBase extends ViewBase<GridLayout> {
 
-	protected GridLayout grid;
-	private Label label;
+    protected GridLayout grid;
+    private Label label;
 
-	@Inject
-	protected StandardPageViewBase() {
-		super();
+    @Inject
+    protected StandardPageViewBase() {
+        super();
 
 		label = new Label("This is the " + this.getClass().getSimpleName());
-		label.setHeight("100px");
-		grid = new GridLayout(3, 3);
+        label.setHeight("100px");
+        grid = new GridLayout(3, 3);
 
-		grid.addComponent(label, 1, 1);
-		grid.setSizeFull();
-		grid.setColumnExpandRatio(0, 0.33f);
-		grid.setColumnExpandRatio(1, 0.33f);
-		grid.setColumnExpandRatio(2, 0.33f);
+        grid.addComponent(label, 1, 1);
+        grid.setSizeFull();
+        grid.setColumnExpandRatio(0, 0.33f);
+        grid.setColumnExpandRatio(1, 0.33f);
+        grid.setColumnExpandRatio(2, 0.33f);
 
-		grid.setRowExpandRatio(0, 0.4f);
-		grid.setRowExpandRatio(1, 0.2f);
-		grid.setRowExpandRatio(2, 0.4f);
+        grid.setRowExpandRatio(0, 0.4f);
+        grid.setRowExpandRatio(1, 0.2f);
+        grid.setRowExpandRatio(2, 0.4f);
 
-		label.setSizeFull();
+        label.setSizeFull();
 
-		setRootComponent(grid);
-	}
+        setRootComponent(grid);
+    }
 
-	@Override
-	public void setIds() {
-		super.setIds();
-		grid.setId(ID.getId(this.getClass().getSimpleName(), grid));
-		label.setId(ID.getId(this.getClass().getSimpleName(), label));
-	}
+    @Override
+    public void setIds() {
+        super.setIds();
+        grid.setId(ID.getId(Optional.absent(), this, grid));
+        label.setId(ID.getId(Optional.absent(), this, label));
+    }
 
-	public Label getLabel() {
-		return label;
-	}
+    public Label getLabel() {
+        return label;
+    }
 
 }

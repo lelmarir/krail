@@ -56,16 +56,24 @@ task waitForTomcat(dependsOn: startTomcat) {
     }
 }
 
-task showResults() {
-    println 'results at  file:///home/david/git/v7/testApp/build/reports/tests/index.html'
+task showResults(type: Exec, dependsOn: test) {
+    commandLine '/home/david/testapp_results.sh'
 }
 
+task cleanTomcat(type: Delete, dependsOn: stopTomcat) {
+    delete '/home/david/tomcat7_8080/webapps/testapp.war', '/home/david/tomcat7_8080/webapps/testapp'
+}
+
+
 deployToTomcat.mustRunAfter(stopTomcat)
-deployToTomcat.mustRunAfter(clean)
+deployToTomcat.mustRunAfter(cleanTomcat)
 test.mustRunAfter(waitForTomcat)
 showResults.mustRunAfter(test)
 
-task cleantest(dependsOn: ['clean', 'stopTomcat', 'deployToTomcat', 'waitForTomcat', 'test', 'showResults']) {
+
+
+
+task cleantest(dependsOn: ['clean', 'cleanTomcat', 'deployToTomcat', 'waitForTomcat', 'test', 'showResults']) {
 
 }
 
@@ -75,29 +83,18 @@ task cleantest(dependsOn: ['clean', 'stopTomcat', 'deployToTomcat', 'waitForTomc
 dependencies {
 
     //vaadin push
-    compile 'com.vaadin:vaadin-push:' + vaadinVersion
+    providedCompile 'com.vaadin:vaadin-push:' + vaadinVersion
 
     //UI components
-    compile 'de.steinwedel.vaadin.addon:messagebox:2.0.6'
-    compile 'org.vaadin.addons:stepper:2.1.2'
+    providedCompile 'de.steinwedel.vaadin.addon:messagebox:2.0.6'
+    providedCompile 'org.vaadin.addons:stepper:2.1.2'
 
-    compile project(':V7')
+    providedCompile project(':V7')
 
 
     testCompile project(':testbench')
     testCompile project(':testUtil')
-    testCompile 'com.vaadin:vaadin-testbench:3.1.2'
 
-//    //tomcat testing
-//    classpath 'com.bmuschko:gradle-tomcat-plugin:2.0'
-//
-//
-//    def tomcatVersion = '7.0.11'
-//    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-//            "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
-//    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
-//        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-//    }
 
 }
 

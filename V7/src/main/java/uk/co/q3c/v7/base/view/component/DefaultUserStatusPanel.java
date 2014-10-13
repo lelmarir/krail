@@ -12,8 +12,7 @@
  */
 package uk.co.q3c.v7.base.view.component;
 
-import java.util.Locale;
-
+import com.google.common.base.Optional;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ChameleonTheme;
+import java.util.Locale;
 
 import uk.co.q3c.util.ID;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
@@ -51,12 +51,12 @@ import uk.co.q3c.v7.i18n.Translate;
 public class DefaultUserStatusPanel extends Panel implements UserStatusPanel {
 	private static Logger log = LoggerFactory
 			.getLogger(DefaultUserStatusPanel.class);
-    private final Label usernameLabel;
-    private final Button login_logout_Button;
-    private final V7Navigator navigator;
-    private final Provider<Subject> subjectProvider;
-    private final Translate translate;
-    private final SubjectIdentifier subjectIdentifier;
+	private final Label usernameLabel;
+	private final Button login_logout_Button;
+	private final V7Navigator navigator;
+	private final Provider<Subject> subjectProvider;
+	private final Translate translate;
+	private final SubjectIdentifier subjectIdentifier;
 
 	private ClickListener login_logout_listener = new ClickListener() {
 		@Override
@@ -73,42 +73,58 @@ public class DefaultUserStatusPanel extends Panel implements UserStatusPanel {
 		}
 	};
 
-    @Inject
+	@Inject
 	protected DefaultUserStatusPanel(V7Navigator navigator,
 			SubjectProvider subjectProvider, Translate translate,
 			SubjectIdentifier subjectIdentifier,
 			AuthenticationNotifier authenticationNotifier,
 			CurrentLocale currentLocale) {
-        super();
-        this.navigator = navigator;
-        this.subjectProvider = subjectProvider;
-        this.translate = translate;
-        this.subjectIdentifier = subjectIdentifier;
-        currentLocale.addListener(this);
+		super();
+		this.navigator = navigator;
+		this.subjectProvider = subjectProvider;
+		this.translate = translate;
+		this.subjectIdentifier = subjectIdentifier;
+		currentLocale.addListener(this);
 		authenticationNotifier.addListener(this);
-        setSizeFull();
-        addStyleName(ChameleonTheme.PANEL_BORDERLESS);
-        usernameLabel = new Label();
-        login_logout_Button = new Button();
+		setSizeFull();
+		addStyleName(ChameleonTheme.PANEL_BORDERLESS);
+		usernameLabel = new Label();
+		login_logout_Button = new Button();
 		login_logout_Button.addClickListener(login_logout_listener);
-        login_logout_Button.setImmediate(true);
-        HorizontalLayout hl = new HorizontalLayout();
-        hl.setSpacing(true);
-        hl.addComponent(usernameLabel);
-        hl.addComponent(login_logout_Button);
-        this.setContent(hl);
-        setIds();
-        userStatusChanged();
+		login_logout_Button.setImmediate(true);
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		hl.addComponent(usernameLabel);
+		hl.addComponent(login_logout_Button);
+		this.setContent(hl);
+		setIds();
+		userStatusChanged();
+
+	}
+
+	private void setIds() {
+        setId(ID.getId(Optional.absent(), this));
+        login_logout_Button.setId(ID.getId(Optional.absent(), this, login_logout_Button));
+        usernameLabel.setId(ID.getId(Optional.absent(), this, usernameLabel));
+    }
+
+    public void userStatusChanged() {
+        log.debug("login status change, reset the user status panel");
+        build();
 
     }
 
-    private void setIds() {
-		setId(ID.getId(this));
-		login_logout_Button.setId(ID.getId(this, login_logout_Button));
-		usernameLabel.setId(ID.getId(this, usernameLabel));
-    }
+    private void build() {
+        log.debug("building");
+        boolean authenticated = subjectProvider.get()
+                                               .isAuthenticated();
+        String caption = (authenticated) ? translate.from(LabelKey.Log_Out) : translate.from(LabelKey.Log_In);
+        log.debug("Caption is '{}'", caption);
+        login_logout_Button.setCaption(caption.toLowerCase());
+        usernameLabel.setValue(subjectIdentifier.subjectName());
+	}
 
-    @Override
+	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
 		userStatusChanged();
 	}
@@ -122,18 +138,12 @@ public class DefaultUserStatusPanel extends Panel implements UserStatusPanel {
 	public void onLogout(LogoutEvent event) {
 		userStatusChanged();
 	}
-	
-	public void userStatusChanged() {
-		log.debug("login status change, reset the user status panel");
-		build();
-
-	}
 
     public String getActionLabel() {
         return login_logout_Button.getCaption();
-    }
+	}
 
-    @Override
+	@Override
     public String getUserId() {
         return usernameLabel.getValue();
     }
@@ -143,18 +153,9 @@ public class DefaultUserStatusPanel extends Panel implements UserStatusPanel {
     }
 
     @Override
-    public void localeChanged(Locale locale) {
-        log.debug("locale change to {}", locale);
-        build();
-    }
-
-	private void build() {
-		log.debug("building");
-		boolean authenticated = subjectProvider.get().isAuthenticated();
-		String caption = (authenticated) ? translate.from(LabelKey.Log_Out) : translate.from(LabelKey.Log_In);
-		log.debug("Caption is '{}'", caption);
-		login_logout_Button.setCaption(caption.toLowerCase());
-		usernameLabel.setValue(subjectIdentifier.subjectName());
+	public void localeChanged(Locale locale) {
+		log.debug("locale change to {}", locale);
+		build();
 	}
 
 }
