@@ -36,6 +36,7 @@ import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEven
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.ui.ScopedUIProvider;
 import uk.co.q3c.v7.base.view.*;
+import uk.co.q3c.v7.base.view.V7View.NavigationAwareView;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 import uk.co.q3c.v7.base.view.V7ViewChangeEventImpl.CancellableWrapper;
 
@@ -200,8 +201,7 @@ public class DefaultV7Navigator implements V7Navigator {
 		
 		navigationState = redirect(navigationState);
 
-		log.debug("obtaining view for '{}'", navigationState.getVirtualPage());
-
+		log.debug("obtaining node for '{}'", navigationState.getVirtualPage());
 		UserSitemapNode node = userSitemap.nodeFor(navigationState);
 		if (node == null) {
 			throw new InvalidURIException("URI not found: "
@@ -215,6 +215,7 @@ public class DefaultV7Navigator implements V7Navigator {
 		V7ViewChangeEvent event = new V7ViewChangeEventImpl(this,
 				currentNavigationState, navigationState);
 
+		//notify V7ViewChangeListener
 		{
 			CancellableWrapper cancellable = new CancellableWrapper(event);
 			// if change is blocked revert to previous state
@@ -224,66 +225,45 @@ public class DefaultV7Navigator implements V7Navigator {
 				return;
 			}
 		}
-
-		V7View view = viewFactory.get(node.getViewClass());
-
-		// before view change
+		
+		//notify Outbound navigation to current view
 		{
 			CancellableWrapper cancellable = new CancellableWrapper(event);
-			fireBeforeViewChange(view, cancellable);
+			fireViewOutboundNavigationEvent(getCurrentView(), cancellable);
 			if (cancellable.isCancelled()) {
-				log.debug("navigation canceled by the view in V7ViewChangeListener#beforeViewChange()");
+				log.debug("navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation", getCurrentView().getClass().getSimpleName());
+				return;
+			}
+		}
+		
+		
+		log.debug("obtaining view instance for '{}'", navigationState.getVirtualPage());
+		V7View view = viewFactory.get(node.getViewClass());
+
+		//notify before Inbound navigation to target view
+		{
+			CancellableWrapper cancellable = new CancellableWrapper(event);
+			fireViewBeforeInboundNavigationEvent(view, cancellable);
+			if (cancellable.isCancelled()) {
+				log.debug("navigation canceled by the view {} in NavigationAwareView#onInboundNavigation", view.getClass().getSimpleName());
 				return;
 			}
 		}
 
-		// now change the view
+		
 		setCurrentNavigationState(navigationState);
+		
 		// make sure the page uri is updated if necessary, but do not fire any
 		// change events as we have already responded to the change
 		updateUriFragment(navigationState, false);
+		// now change the view
 		changeView(view);
 
-		fireAfterViewChange(view, event);
+		fireViewAfterInboundNavigationEvent(view, event);
 
 		// and tell listeners its changed
 		fireAfterViewChange(event);
 
-	}
-
-	private void setCurrentNavigationState(NavigationState navigationState) {
-		previousNavigationState = currentNavigationState;
-		currentNavigationState = navigationState;
-	}
-
-	private void updateUriFragment(NavigationState navigationState,
-			boolean fireEvents) {
-		ScopedUI ui = uiProvider.get();
-		Page page = ui.getPage();
-		if (!navigationState.getFragment().equals(page.getUriFragment())) {
-			page.setUriFragment(navigationState.getFragment(), fireEvents);
-		}
-	}
-
-	private void fireBeforeViewChange(V7View view,
-			CancellableV7ViewChangeEvent cancellable) {
-		if (view instanceof V7ViewChangeListener) {
-			log.debug(
-					"view implements V7ViewChangeListener: calling V7ViewChangeListener#beforeViewChange(event) for {}",
-					view.getClass().getName());
-
-			((V7ViewChangeListener) view).beforeViewChange(cancellable);
-		}
-	}
-
-	private void fireAfterViewChange(V7View view, V7ViewChangeEvent event) {
-		if (view instanceof V7ViewChangeListener) {
-			log.debug(
-					"view implements V7ViewChangeListener: calling V7ViewChangeListener#afterViewChange(event) for {}",
-					view.getClass().getName());
-
-			((V7ViewChangeListener) view).afterViewChange(event);
-		}
 	}
 
 	/**
@@ -297,7 +277,7 @@ public class DefaultV7Navigator implements V7Navigator {
 	 * @return
 	 */
 	private NavigationState redirect(NavigationState navigationState) {
-
+	
 		String page = navigationState.getVirtualPage();
 		String redirection = userSitemap.getRedirectPageFor(page);
 		// if no redirect found, page is returned
@@ -308,11 +288,6 @@ public class DefaultV7Navigator implements V7Navigator {
 			navigationState.setFragment(uriHandler.fragment(navigationState));
 			return navigationState;
 		}
-	}
-
-	protected void changeView(V7View view) {
-		ScopedUI ui = uiProvider.get();
-		ui.changeView(view);
 	}
 
 	/**
@@ -338,6 +313,55 @@ public class DefaultV7Navigator implements V7Navigator {
 		}
 	}
 
+	private void fireViewOutboundNavigationEvent(V7View view,
+			CancellableWrapper cancellable) {
+		if (view instanceof NavigationAwareView) {
+			log.debug(
+					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
+					view.getClass().getName());
+			((NavigationAwareView) view).onOutboundNavigation(cancellable);
+		}
+	}
+
+	private void fireViewBeforeInboundNavigationEvent(V7View view,
+			CancellableV7ViewChangeEvent cancellable) {
+		if (view instanceof NavigationAwareView) {
+			log.debug(
+					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
+					view.getClass().getName());
+			((NavigationAwareView) view).beforeInboundNavigation(cancellable);
+		}
+	}
+
+	private void setCurrentNavigationState(NavigationState navigationState) {
+		previousNavigationState = currentNavigationState;
+		currentNavigationState = navigationState;
+	}
+
+	private void updateUriFragment(NavigationState navigationState,
+			boolean fireEvents) {
+		ScopedUI ui = uiProvider.get();
+		Page page = ui.getPage();
+		if (!navigationState.getFragment().equals(page.getUriFragment())) {
+			page.setUriFragment(navigationState.getFragment(), fireEvents);
+		}
+	}
+
+	protected void changeView(V7View view) {
+		ScopedUI ui = uiProvider.get();
+		ui.changeView(view);
+	}
+
+	private void fireViewAfterInboundNavigationEvent(V7View view,
+			V7ViewChangeEvent event) {
+		if (view instanceof NavigationAwareView) {
+			log.debug(
+					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
+					view.getClass().getName());
+			((NavigationAwareView) view).afterInboundNavigation(event);
+		}
+	}
+	
 	/**
 	 * Fires an event after the current view has changed.
 	 * <p/>

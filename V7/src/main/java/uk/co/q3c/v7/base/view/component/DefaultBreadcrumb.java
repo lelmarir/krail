@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 import com.vaadin.ui.Button;
 
 @UIScoped
-public class DefaultBreadcrumb extends NavigationButtonPanel implements V7ViewChangeListener, Button.ClickListener,
+public class DefaultBreadcrumb extends NavigationButtonPanel implements Button.ClickListener,
 		Breadcrumb {
 	private static Logger log = LoggerFactory.getLogger(DefaultBreadcrumb.class);
 
