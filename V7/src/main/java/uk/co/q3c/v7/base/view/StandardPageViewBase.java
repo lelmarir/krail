@@ -18,7 +18,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import uk.co.q3c.util.ID;
 
-public abstract class StandardPageViewBase extends ViewBase<GridLayout> {
+public abstract class StandardPageViewBase extends GridViewBase {
 
     protected GridLayout grid;
     private Label label;

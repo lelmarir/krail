@@ -16,7 +16,7 @@ package uk.co.q3c.v7.base.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.GridLayout;
 
-public abstract class GridViewBase extends ViewBase<GridLayout> {
+public abstract class GridViewBase extends LayoutViewBase<GridLayout> {
     @Inject
     protected GridViewBase() {
         super();

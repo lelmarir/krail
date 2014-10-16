@@ -14,14 +14,18 @@
 package uk.co.q3c.v7.base.view;
 
 import com.google.inject.Inject;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 
-public abstract class VerticalViewBase extends ViewBase<VerticalLayout> {
+public abstract class VerticalViewBase extends LayoutViewBase<VerticalLayout> {
     @Inject
     protected VerticalViewBase() {
-        super();
-        
-        setRootComponent(new VerticalLayout());
+        super(new VerticalLayout());
+    }
+    
+    @Override
+    public VerticalLayout getLayout() {
+    	return (VerticalLayout) super.getLayout();
     }
 
 }
