@@ -11,16 +11,18 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package uk.co.q3c.v7.testbench;
+package uk.co.q3c.v7.testbench.page.object;
 
 import com.google.common.base.Optional;
-import com.vaadin.testbench.elements.TreeElement;
-import uk.co.q3c.v7.base.view.component.DefaultUserNavigationTree;
+import com.vaadin.testbench.elements.LabelElement;
+import com.vaadin.ui.Label;
+import uk.co.q3c.v7.base.view.component.DefaultMessageBar;
+import uk.co.q3c.v7.testbench.V7TestBenchTestCase;
 
 /**
- * Created by david on 04/10/14.
+ * Created by david on 03/10/14.
  */
-public class NavTreePageObject extends PageObject {
+public class MessageBarPageObject extends PageObject {
     /**
      * Initialises the PageObject with a reference to the parent test case, so that the PageObject can access a number
      * of variables from the parent, for example: drivers, baseUrl,
@@ -32,38 +34,15 @@ public class NavTreePageObject extends PageObject {
      *
      * @param parentCase
      */
-    public NavTreePageObject(V7TestBenchTestCase parentCase) {
+    public MessageBarPageObject(V7TestBenchTestCase parentCase) {
         super(parentCase);
     }
 
-    public String itemCaption(int index) {
-        return navTree().index(index)
-                        .get()
-                        .getText();
+    public String message() {
+        return label().getText();
     }
 
-    protected UITree navTree() {
-        return treeLocator().id("DefaultUserNavigationTree");
-    }
-
-    protected UITree treeLocator() {
-        return new UITree(parentCase.getDriver(), parentCase.getAppContext());
-    }
-
-    public void expand(int index) {
-        navTree().expand(index);
-    }
-
-
-    public void select(int... index) {
-        navTree().select(index);
-    }
-
-    public String currentSelection() {
-        return navTree2().getValue();
-    }
-
-    private TreeElement navTree2() {
-        return parentCase.tree(Optional.absent(), DefaultUserNavigationTree.class);
+    public LabelElement label() {
+        return element(LabelElement.class, Optional.absent(), DefaultMessageBar.class, Label.class);
     }
 }

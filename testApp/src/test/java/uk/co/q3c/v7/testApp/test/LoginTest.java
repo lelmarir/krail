@@ -13,17 +13,13 @@
 
 package uk.co.q3c.v7.testApp.test;
 
-import com.google.common.base.Optional;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
-import com.vaadin.ui.Label;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import uk.co.q3c.v7.base.view.DefaultLoginView;
-import uk.co.q3c.v7.testbench.NavTreePageObject;
 import uk.co.q3c.v7.testbench.V7TestBenchTestCase;
+import uk.co.q3c.v7.testbench.page.object.NavTreePageObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,10 +49,11 @@ public class LoginTest extends V7TestBenchTestCase {
         // then initial state
         assertThat(loginStatus.loginButton()
                               .getText()).isEqualTo("log in");
-        assertThat(loginStatusLabelText()).isEqualTo("Guest");
+        assertThat(loginStatus.username()).isEqualTo("Guest");
 
         // when LoginStatusPanel button clicked
-        loginStatus.clickButton();
+        loginStatus.loginButton()
+                   .click();
         // then
         verifyUrl("login");
 
@@ -66,7 +63,7 @@ public class LoginTest extends V7TestBenchTestCase {
         verifyUrl(startFragment);
         assertThat(loginStatus.loginButton()
                               .getText()).isEqualTo("log out");
-        assertThat(loginStatusLabelText()).isEqualTo("ds");
+        assertThat(loginStatus.username()).isEqualTo("ds");
     }
 
     @Test
@@ -75,7 +72,8 @@ public class LoginTest extends V7TestBenchTestCase {
         // given
         login();
         pause(500);
-        loginStatus.clickButton();
+        loginStatus.loginButton()
+                   .click();
         pause(500);
         verifyUrl("logout");
         // when
@@ -96,21 +94,23 @@ public class LoginTest extends V7TestBenchTestCase {
         // given
         login();
         //logout
-        loginStatus.clickButton();
+        loginStatus.loginButton()
+                   .click();
         // when
-        loginStatus.clickButton();
+        loginStatus.loginButton()
+                   .click();
         loginForm.login("ds", "rubbish");
 
         // // then
         verifyUrl("login"); // has not moved
         assertThat(navTree.currentSelection()).isEqualTo("Log In");
-        pause(1000);
-        WebElement label = element(Optional.of("status"), DefaultLoginView.class, Label.class);
-        pause(1000);
-        assertThat(label).isNotNull();
-        String s = label.getText();
+        //        pause(1000);
+        //        WebElement label = label(Optional.of("status"), DefaultLoginView.class, Label.class);
+        //        pause(1000);
+        //        assertThat(label).isNotNull();
+        //        String s = label.getText();
 
-        assertThat(s).isEqualTo("That username or password was not recognised");
+        assertThat(loginForm.message()).isEqualTo("That username or password was not recognised");
     }
 
     //	@After

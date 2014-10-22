@@ -13,28 +13,24 @@
 package uk.co.q3c.v7.testbench;
 
 import com.google.common.base.Optional;
-import com.vaadin.testbench.By;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.testbench.elements.*;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
+import com.vaadin.testbench.elements.NotificationElement;
+import com.vaadin.testbench.elementsbase.AbstractElement;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.q3c.util.ID;
-import uk.co.q3c.v7.base.view.component.DefaultLocaleSelector;
-import uk.co.q3c.v7.base.view.component.DefaultUserStatusPanel;
+import uk.co.q3c.v7.testbench.page.object.LoginFormPageObject;
+import uk.co.q3c.v7.testbench.page.object.LoginStatusPageObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,6 +43,7 @@ public class V7TestBenchTestCase extends TestBenchTestCase {
     protected String appContext = "testapp";
     private int currentDriverIndex = 1;
     private List<WebDriver> drivers = new ArrayList<>();
+
 
     @Before
     public void baseSetup() {
@@ -129,7 +126,7 @@ public class V7TestBenchTestCase extends TestBenchTestCase {
         return rootUrl() + "/#" + fragment;
     }
 
-    protected void pause(int milliseconds) {
+    public void pause(int milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (Exception e) {
@@ -172,205 +169,23 @@ public class V7TestBenchTestCase extends TestBenchTestCase {
      * shorthand method to click the login button, and fill in the login form using credentials in {@link #loginForm}
      */
     protected void login() {
-        loginStatus.clickButton();
+        loginStatus.loginButton()
+                   .click();
         loginForm.login();
     }
 
-    protected WebElement loginLabel() {
-        return element(DefaultUserStatusPanel.class, Label.class);
+
+    protected <E extends AbstractElement> E element(Class<E> elementClass, Optional<?> qualifier,
+                                                    Class<?>... componentClasses) {
+
+        return element(elementClass, ID.getIdc(qualifier, componentClasses));
     }
 
-    protected WebElement element(Class<?>... classes) {
-        return element(driver, classes);
+    public <E extends AbstractElement> E element(Class<E> elementClass, String id) {
+
+        return $(elementClass).id(id);
     }
 
-    protected WebElement element(WebDriver driver, Class<?>... classes) {
-        return element(driver, Optional.absent(), classes);
-    }
-
-    //    protected WebElement element(WebDriver driver, String qualifier, Class<?>... classes) {
-    //        if (classes == null || classes.length == 0) {
-    //            throw new RuntimeException("Id will fail with only a qualifier supplied.  Always use classes to
-    // define Id");
-    //        }
-    //        String s = id(qualifier, classes);
-    //        WebElement findElement = driver.findElement(By.vaadin(s));
-    //        return findElement;
-    //    }
-    //
-    //    protected String id(String qualifier, Class<?>... components) {
-    //        ElementPath elementPath = new ElementPath(appContext);
-    //        ElementPath id = elementPath.id(ID.getIdc(Optional.of(qualifier), components));
-    //        return id.get();
-    //    }
-    //
-    //    protected WebElement usernameBox() {
-    //        return element("username", DefaultLoginView.class, TextField.class);
-    //    }
-    //
-    //    protected WebElement passwordBox() {
-    //        return element("password", DefaultLoginView.class, PasswordField.class);
-    //    }
-    //
-    //    protected WebElement submitButton() {
-    //        return element(DefaultLoginView.class, Button.class);
-    //    }
-
-    protected WebElement element(WebDriver driver, Optional<?> qualifier, Class<?>... classes) {
-        if (classes == null || classes.length == 0) {
-            throw new RuntimeException("Id will fail with only a qualifier supplied.  Always use classes to define Id");
-        }
-        String s = id(qualifier, classes);
-        WebElement findElement = driver.findElement(By.vaadin(s));
-        return findElement;
-    }
-
-    protected String id(Optional<?> qualifier, Class<?>... components) {
-        ElementPath elementPath = new ElementPath(appContext);
-        ElementPath id = elementPath.id(ID.getIdc(qualifier, components));
-        return id.get();
-    }
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    protected UITree navTree() {
-        return treeLocator().id("DefaultUserNavigationTree");
-    }
-
-    protected UITree treeLocator() {
-        return new UITree(driver, appContext);
-    }
-
-    protected String textFieldValue(Optional<?> qualifier, Class<?>... componentClasses) {
-        TextFieldElement element = textField(qualifier, componentClasses);
-        return element.getText();
-    }
-
-    protected TextFieldElement textField(Optional<?> qualifier, Class<?>... componentClasses) {
-        TextFieldElement element = $(TextFieldElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    protected void setTextFieldValue(String text, Optional<?> qualifier, Class<?>... componentClasses) {
-        TextFieldElement element = textField(qualifier, componentClasses);
-        element.sendKeys(text);
-    }
-
-    protected void clickButton(Optional<?> qualifier, Class<?>... classes) {
-        button(qualifier, classes).click();
-    }
-
-    protected ButtonElement button(Optional<?> qualifier, Class<?>... componentClasses) {
-        String id = ID.getIdc(qualifier, componentClasses);
-        return $(ButtonElement.class).id(id);
-    }
-
-    protected WebElement element(Optional<?> qualifier, Class<?>... classes) {
-        return element(driver, qualifier, classes);
-    }
-
-    protected String loginStatusLabelText() {
-        return labelText(Optional.absent(), DefaultUserStatusPanel.class, Label.class);
-    }
-
-    protected String labelText(Optional<?> qualifier, Class<?>... componentClasses) {
-        return label(qualifier, componentClasses).getText();
-    }
-
-    protected LabelElement label(Optional<?> qualifier, Class<?>... componentClasses) {
-        String id = ID.getIdc(qualifier, componentClasses);
-        return label(id);
-    }
-
-    protected LabelElement label(String id) {
-        LabelElement label = $(LabelElement.class).id(id);
-        return label;
-    }
-
-    public PanelElement panel(Optional<?> qualifier, Class<?>... componentClasses) {
-        PanelElement element = $(PanelElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    public HorizontalLayoutElement horizontalLayout(Optional<?> qualifier, Class<?>... componentClasses) {
-        HorizontalLayoutElement element = $(HorizontalLayoutElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    public VerticalLayoutElement verticalLayout(Optional<?> qualifier, Class<?>... componentClasses) {
-        VerticalLayoutElement element = $(VerticalLayoutElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-
-    protected String comboValue(Optional<?> qualifier, Class<?>... componentClasses) {
-        ComboBoxElement element = combo(qualifier, componentClasses);
-        return element.getValue();
-    }
-
-    protected ComboBoxElement combo(Optional<?> qualifier, Class<?>... componentClasses) {
-        ComboBoxElement element = $(ComboBoxElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    protected void selectComboValue(String valueToSelect, Optional<?> qualifier, Class<?>... componentClasses) {
-        ComboBoxElement element = combo(qualifier, componentClasses);
-        element.selectByText(valueToSelect);
-    }
-
-    protected void clickMenuItem(String[] path, Optional<?> qualifier, Class<?>... componentClasses) {
-        menu(qualifier, componentClasses).clickItem(path);
-    }
-
-    protected MenuBarElement menu(Optional<?> qualifier, Class<?>... componentClasses) {
-        MenuBarElement element = $(MenuBarElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    protected boolean checkboxValue(Optional<?> qualifier, Class<?>... componentClasses) {
-        return checkbox(qualifier, componentClasses).getValue()
-                                                    .equals("checked");
-    }
-
-    protected CheckBoxElement checkbox(Optional<?> qualifier, Class<?>... componentClasses) {
-        String id = ID.getIdc(qualifier, componentClasses);
-        return $(CheckBoxElement.class).id(id);
-    }
-
-    protected void clickCheckBox(Optional<?> qualifier, Class<?>... componentClasses) {
-        checkbox(qualifier, componentClasses).click();
-    }
-
-    protected String textAreaValue(Optional<?> qualifier, Class<?>... componentClasses) {
-        return textArea(qualifier, componentClasses).getValue();
-    }
-
-    protected TextAreaElement textArea(Optional<?> qualifier, Class<?>... componentClasses) {
-        TextAreaElement element = $(TextAreaElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
-
-    protected void setTextAreaValue(String text, Optional<?> qualifier, Class<?>... componentClasses) {
-        textArea(qualifier, componentClasses).sendKeys(text);
-    }
-
-    protected String localeSelectorValue() {
-        return localeSelector().getValue();
-    }
-
-    protected ComboBoxElement localeSelector() {
-        return combo(Optional.absent(), DefaultLocaleSelector.class, ComboBox.class);
-    }
-
-    protected void selectLocale(Locale locale) {
-        localeSelector().selectByText(locale.getDisplayName());
-    }
-
-    protected TreeElement tree(Optional<?> qualifier, Class<?>... componentClasses) {
-        TreeElement element = $(TreeElement.class).id(ID.getIdc(qualifier, componentClasses));
-        return element;
-    }
 
     /**
      * Indexed from 1 (that is, the default driver is at index 1)
