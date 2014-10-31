@@ -13,6 +13,7 @@
 package uk.co.q3c.v7.base.shiro;
 
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.ConcurrentAccessException;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
@@ -20,63 +21,85 @@ import org.apache.shiro.authc.ExpiredCredentialsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
 
-import uk.co.q3c.v7.base.view.LoginView;
 import uk.co.q3c.v7.i18n.DescriptionKey;
+import uk.co.q3c.v7.i18n.Translate;
 
 import com.google.inject.Inject;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
 public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 
+	private final Translate translate;
+
 	@Inject
-	protected DefaultLoginExceptionHandler() {
+	protected DefaultLoginExceptionHandler(Translate translate) {
+		this.translate = translate;
 	}
 
 	@Override
-	public void unknownAccount(LoginView loginView, UsernamePasswordToken token, UnknownAccountException uae) {
-		loginView.setStatusMessage(DescriptionKey.Unknown_Account);
+	public void unknownAccount(AuthenticationToken token,
+			UnknownAccountException uae) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Unknown_Account, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void incorrectCredentials(LoginView loginView,
-			UsernamePasswordToken token, IncorrectCredentialsException ice) {
-		loginView.setStatusMessage(DescriptionKey.Invalid_Login);
+	public void incorrectCredentials(AuthenticationToken token,
+			IncorrectCredentialsException ice) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Invalid_Login, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void expiredCredentials(LoginView loginView,
-			UsernamePasswordToken token, ExpiredCredentialsException ece) {
-		loginView.setStatusMessage(DescriptionKey.Account_Expired);
+	public void expiredCredentials(AuthenticationToken token,
+			ExpiredCredentialsException ece) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Account_Expired, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void accountLocked(LoginView loginView, UsernamePasswordToken token,
+	public void accountLocked(AuthenticationToken token,
 			LockedAccountException lae) {
-		loginView.setStatusMessage(DescriptionKey.Account_Locked);
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Account_Locked, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void excessiveAttempts(LoginView loginView,
-			UsernamePasswordToken token, ExcessiveAttemptsException excess) {
-		loginView.setStatusMessage(DescriptionKey.Too_Many_Login_Attempts);
+	public void excessiveAttempts(AuthenticationToken token,
+			ExcessiveAttemptsException excess) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Too_Many_Login_Attempts, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void concurrentAccess(LoginView loginView,
-			UsernamePasswordToken token, ConcurrentAccessException cae) {
-		loginView.setStatusMessage(DescriptionKey.Account_Already_In_Use);
+	public void concurrentAccess(AuthenticationToken token,
+			ConcurrentAccessException cae) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Account_Already_In_Use, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void disabledAccount(LoginView loginView, UsernamePasswordToken token, DisabledAccountException dae) {
-		loginView.setStatusMessage(DescriptionKey.Account_is_Disabled);
+	public void disabledAccount(AuthenticationToken token,
+			DisabledAccountException dae) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Account_is_Disabled, Type.WARNING_MESSAGE);
 	}
 
 	@Override
-	public void genericException(LoginView loginView,
-			UsernamePasswordToken token, AuthenticationException ae) {
-		loginView.setStatusMessage(DescriptionKey.Generic_Authentication_Exception);
+	public void genericException(AuthenticationToken token,
+			AuthenticationException ae) {
+		showNotification(DescriptionKey.Login_Error_Caption,
+				DescriptionKey.Generic_Authentication_Exception, Type.WARNING_MESSAGE);
+	}
+
+	private void showNotification(DescriptionKey caption,
+			DescriptionKey description, Type type) {
+		Notification n = new Notification(translate.from(caption),
+				translate.from(description), type);
+		n.show(UI.getCurrent().getPage());
 	}
 
 }

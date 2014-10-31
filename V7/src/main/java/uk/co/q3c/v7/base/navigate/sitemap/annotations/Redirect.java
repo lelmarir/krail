@@ -10,23 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.co.q3c.v7.base.user.notify;
+package uk.co.q3c.v7.base.navigate.sitemap.annotations;
 
-import com.vaadin.ui.Notification;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Implementations of this provide a means of notifying a user with a message, and are used in conjunction with
- * {@link UserNotifier}. There are a set of sub-interfaces to identify the message as either an Error, Warning or
- * Information message
- * <p>
- * The intended use of this, and its sub-interfaces, is via the {@link UserNotifier}, which enables I18N support and
- * provides a configurable way of selecting notification methods.
+ * Used with a {@link View} annotation, to indicate that the annotated V7View (and therefore virtual page) is the
+ * redirection target from other (source) pages. This annotation is meaningful only when used with a View annotation,
+ * and is otherwise ignored
  * 
  * @author David Sowerby
  * 
  */
-public interface UserNotification {
 
-	public void message(String message);
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Redirect {
 
+	public String uri();
 }

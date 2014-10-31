@@ -14,21 +14,21 @@ package uk.co.q3c.v7.base.navigate;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.UriFragmentChangedEvent;
+import com.vaadin.shared.Position;
+import com.vaadin.ui.UI;
 
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.co.q3c.v7.base.navigate.sitemap.*;
-import uk.co.q3c.v7.base.shiro.PageAccessController;
+import uk.co.q3c.v7.base.navigate.sitemap.NavigationState.Parameters;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
-import uk.co.q3c.v7.base.shiro.UnauthorizedExceptionHandler;
 import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.LogoutEvent;
@@ -36,258 +36,315 @@ import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEven
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.ui.ScopedUIProvider;
 import uk.co.q3c.v7.base.view.*;
-import uk.co.q3c.v7.base.view.V7View.NavigationAwareView;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 import uk.co.q3c.v7.base.view.V7ViewChangeEventImpl.CancellableWrapper;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The navigator is at the heart of navigation process, and provides navigation form a number of data types (for
- * example, String, {@link NavigationState} and {@link UserSitemapNode}. Because the USerSitemap only holds pages
- * authorised for the current Subject, there is not need to check for authorisation before navigating (there is still
- * some old code in here which does, but that will be removed)
+ * The navigator is at the heart of navigation process, and provides navigation
+ * form a number of data types (for example, String, {@link NavigationState} and
+ * {@link UserSitemapNode}. Because the USerSitemap only holds pages authorised
+ * for the current Subject, there is not need to check for authorisation before
+ * navigating (there is still some old code in here which does, but that will be
+ * removed)
  * <p/>
- * There is no need to register as a listener with {@link UserStatus}, the navigator is always called after all other
- * listeners - this is so that navigation components are set up before the navigator moves to a page (which might not
- * be
- * displayed in a navigation component if it is not up to date)
+ * There is no need to register as a listener with {@link UserStatus}, the
+ * navigator is always called after all other listeners - this is so that
+ * navigation components are set up before the navigator moves to a page (which
+ * might not be displayed in a navigation component if it is not up to date)
  * 
  * @author David Sowerby
  * @date 18 Apr 2014
  */
 public class DefaultV7Navigator implements V7Navigator {
 
+	public class DefaultNavigationCallbackHandler<T extends V7View> implements
+			NavigationCallbackHandler<T> {
+
+		@Override
+		public void beforeOutboundNavigationEvent(T view,
+				CancellableWrapper cancellable) {
+			try {
+				fireNavigationCallback(view, cancellable,
+						BeforeOutboundNavigation.class);
+			} catch (IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public void beforeInboundNavigationEvent(T view,
+				CancellableV7ViewChangeEvent cancellable) {
+			try {
+				fireNavigationCallback(view, cancellable,
+						BeforeInboundNavigation.class);
+			} catch (IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public void afterInbounNavigationEvent(T view, V7ViewChangeEvent event) {
+			try {
+				fireNavigationCallback(view, event,
+						AfterInboundNavigation.class);
+			} catch (IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+	}
+
 	private static final long serialVersionUID = -1199874611306964538L;
 
-	private static Logger log = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultV7Navigator.class);
 
+	private final NavigationCallbackHandler DEFAULT_NAVIGATION_CALLBACK_HANDLER = new DefaultNavigationCallbackHandler();
+
+	private static List<Method> getAnnotatedMethods(
+			Class<? extends V7View> clazz,
+			Class<? extends Annotation> annotation) {
+		LinkedList<Method> list = new LinkedList<>();
+		for (Method m : clazz.getMethods()) {
+			if (m.isAnnotationPresent(annotation)) {
+				list.add(m);
+			}
+		}
+		return list;
+	}
+
+	private static void fireNavigationCallback(V7View view,
+			V7ViewChangeEvent event, Class<? extends Annotation> annotation)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		List<Method> methods = getAnnotatedMethods(view.getClass(), annotation);
+		if (methods.size() > 1) {
+			throw new IllegalStateException(
+					"Only one method can be annotated with "
+							+ annotation.getClass() + ":" + methods);
+		}
+
+		if (!methods.isEmpty()) {
+			Method method = methods.get(0);
+			LOGGER.debug("found method annotated with " + annotation.getClass()
+					+ ": ", method);
+
+			if (!method.getReturnType().equals(Void.TYPE)) {
+				throw new IllegalStateException("The method annotated with "
+						+ annotation.getClass() + " should return void: "
+						+ method);
+			}
+
+			Class<?>[] parametersTypes = method.getParameterTypes();
+			Object[] args = new Object[parametersTypes.length];
+			for (int i = 0; i < parametersTypes.length; i++) {
+				if (parametersTypes[i].isAssignableFrom(event.getClass())) {
+					args[i] = event;
+					LOGGER.trace(
+							"parameter {} of type {} -> CancellableV7ViewChangeEvent",
+							i, parametersTypes[i]);
+				} else {
+					throw new IllegalStateException("Unable to bind parameter "
+							+ i + " (of type " + parametersTypes[i]
+							+ ") of the callback method " + method);
+				}
+			}
+
+			method.invoke(view, args);
+		}
+	}
+
 	private final List<V7ViewChangeListener> viewChangeListeners = new LinkedList<V7ViewChangeListener>();
-	private final URIFragmentHandler uriHandler;
 	private final Provider<Subject> subjectProvider;
-	private final PageAccessController pageAccessController;
+	private final Sitemap sitemap;
 	private final ScopedUIProvider uiProvider;
 	private final DefaultViewFactory viewFactory;
-	private final SitemapService sitemapService;
-	private final UserSitemapBuilder userSitemapBuilder;
 	private NavigationState currentNavigationState;
 	private NavigationState previousNavigationState;
-	private UserSitemap userSitemap;
 
 	@Inject
-	public DefaultV7Navigator(URIFragmentHandler uriHandler,
-			SitemapService sitemapService, SubjectProvider subjectProvider,
-			PageAccessController pageAccessController,
+	public DefaultV7Navigator(SubjectProvider subjectProvider, Sitemap sitemap,
 			ScopedUIProvider uiProvider, DefaultViewFactory viewFactory,
-			UserSitemapBuilder userSitemapBuilder,
 			AuthenticationNotifier authenticationNotifier) {
 		super();
-		this.uriHandler = uriHandler;
 		this.uiProvider = uiProvider;
-		this.sitemapService = sitemapService;
 		this.subjectProvider = subjectProvider;
-		this.pageAccessController = pageAccessController;
+		this.sitemap = sitemap;
 		this.viewFactory = viewFactory;
-		this.userSitemapBuilder = userSitemapBuilder;
 		authenticationNotifier.addListener(this);
 	}
 
 	@Override
-	public void init() {
-		try {
-			sitemapService.start();
-			userSitemapBuilder.build();
-			userSitemap = userSitemapBuilder.getUserSitemap();
-
-		} catch (Exception e) {
-			String msg = "Sitemap service failed to start, application will have no pages";
-			log.error(msg);
-			throw new IllegalStateException(msg, e);
-		}
-	}
-
-	/**
-	 * Listen to changes of the active view.
-	 * <p/>
-	 * Registered listeners are invoked in registration order before (
-	 * {@link ViewChangeListener#beforeViewChange(ViewChangeEvent)
-	 * beforeViewChange()}) and after (
-	 * {@link ViewChangeListener#afterViewChange(ViewChangeEvent)
-	 * afterViewChange()}) a view change occurs.
-	 * 
-	 * @param listener
-	 *            Listener to invoke during a view change.
-	 */
-	@Override
-	public void addViewChangeListener(V7ViewChangeListener listener) {
+	public void addListener(V7ViewChangeListener listener) {
 		viewChangeListeners.add(listener);
 	}
 
-	/**
-	 * Removes a view change listener.
-	 * 
-	 * @param listener
-	 *            Listener to remove.
-	 */
 	@Override
-	public void removeViewChangeListener(V7ViewChangeListener listener) {
+	public void removeListener(V7ViewChangeListener listener) {
 		viewChangeListeners.remove(listener);
 	}
 
 	@Override
 	public void uriFragmentChanged(UriFragmentChangedEvent event) {
-		navigateTo(event.getUriFragment());
+		String fragment = event.getUriFragment();
+		navigateTo(fragment != null ? fragment : "");
 	}
 
 	/**
-	 * Takes a URI fragment, checks for any redirects defined by the
-	 * {@link Sitemap}, then calls {@link #navigateTo(V7View, String, String)}
-	 * to change the view
-	 * 
-	 * @see uk.co.q3c.v7.base.navigate.V7Navigator#navigateTo(java.lang.String)
+	 * When a user has successfully logged in, they are routed back to the page
+	 * they were on before going to the login page. If they have gone straight
+	 * to the login page (maybe they bookmarked it), or they were on the logout
+	 * page, they will be routed to the 'private home page' (the StandardPage
+	 * for {@link StandardViewKey#PrivateHome})
 	 */
 	@Override
-	public void navigateTo(String fragment) {
-		log.debug("Navigating to fragment: {}", fragment);
+	public void onSuccess(SuccesfulLoginEvent event) {
+		assert event.getSubject().isAuthenticated();
+
+		LOGGER.info("user logged in successfully, navigating to appropriate view");
+		// they have logged in
+		NavigationState previousNavigationState = getPreviousNavigationState();
+		if (previousNavigationState != null
+				&& !isLogOutPage(previousNavigationState)) {
+			navigateTo(previousNavigationState);
+		} else {
+			navigateTo(StandardViewKey.PrivateHome);
+		}
+	}
+
+	private boolean isLogOutPage(NavigationState navigationState) {
+		return navigationState.getSitemapNode().equals(
+				sitemap.getStandardView(StandardViewKey.Log_Out));
+	}
+
+	@Override
+	public void onFailure(FailedLoginEvent event) {
+		;
+	}
+
+	@Override
+	public void onLogout(LogoutEvent event) {
+		LOGGER.info("logging out");
+		subjectProvider.get().logout();
+		navigateTo(StandardViewKey.Log_Out);
+	}
+
+	@Override
+	public void navigateTo(String fragment) throws InvalidURIException {
+		LOGGER.debug("Navigating to fragment: {}", fragment);
 
 		// set up the navigation state
-		NavigationState navigationState = uriHandler.navigationState(fragment);
+		NavigationState navigationState = sitemap
+				.buildNavigationStateFor(fragment);
 		navigateTo(navigationState);
 	}
 
-	/**
-	 * Navigates to a the location represented by {@code navigationState}. If
-	 * the {@link Sitemap} holds a redirect for the URI represented by
-	 * {@code navigationState}, navigation will be directed to the redirect
-	 * target. An unrecognised URI will throw a {@link SitemapException}. If the
-	 * view for the URI is found, the user's authorisation is checked. If the
-	 * user is not authorised, a {@link AuthorizationException} is thrown. This
-	 * would be caught by the the implementation bound to
-	 * {@link UnauthorizedExceptionHandler}. If the user is authorised, the View
-	 * is instantiated, and made the current view in the UI via
-	 * {@link ScopedUI#changeView(V7View)}.<br>
-	 * <br>
-	 * Events are fired before and after the view change, to the
-	 * {@link #viewChangeListeners}. Listeners have the option to block the view
-	 * change by calling event.cancel() (see {@link V7ViewChangeEvent#cancel()}
-	 * <p/>
-	 * 
-	 * @param navigationState
-	 *            The navigationState to navigate to. May not be null.
-	 */
+	@Override
+	public void navigateTo(StandardViewKey pageKey) {
+		navigateTo(sitemap.buildNavigationStateFor(pageKey));
+	}
+
+	public <T extends V7View> void navigateTo(Class<T> viewClass,
+			NavigationCallbackHandler<T> callbackHandler) {
+		NavigationState ns = sitemap.buildNavigationState(viewClass);
+		navigateTo(ns, callbackHandler);
+	}
+
 	@Override
 	public void navigateTo(NavigationState navigationState) {
+		navigateTo(navigationState, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
+	}
+
+	public void navigateTo(NavigationState navigationState,
+			NavigationCallbackHandler callbackHandler) {
 		checkNotNull(navigationState);
+		checkNotNull(callbackHandler);
 
 		// stop unnecessary changes, but also to prevent navigation aware
 		// components from causing a loop by responding to a change of URI (they
-		// should suppress events when they do,
-		// but may not)
+		// should suppress events when they do, but may not)
 		if (navigationState.equals(currentNavigationState)) {
-			log.debug("fragment unchanged, no navigation required");
+			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
 
-		// https://sites.google.com/site/q3cjava/sitemap#emptyURI
-		if (navigationState.getVirtualPage().isEmpty()) {
-			navigationState.setVirtualPage(userSitemap
-					.standardPageURI(StandardPageKey.Public_Home));
-			uriHandler.updateFragment(navigationState);
-		}
-		
-		navigationState = redirect(navigationState);
+		SitemapNode node = navigationState.getSitemapNode();
+		assert node != null;
 
-		log.debug("obtaining node for '{}'", navigationState.getVirtualPage());
-		UserSitemapNode node = userSitemap.nodeFor(navigationState);
-		if (node == null) {
-			throw new InvalidURIException("URI not found: "
-					+ navigationState.getVirtualPage());
-		}
-
-		if (!pageAccessController.isAuthorised(subjectProvider.get(), node)) {
-			throw new UnauthorizedException(navigationState.getVirtualPage());
-		}
+		Subject subject = subjectProvider.get();
+		// throw an exception if not authorized
+		assert node.getAccesControlRule() != null : node;
+		node.getAccesControlRule().checkAuthorization(subject);
 
 		V7ViewChangeEvent event = new V7ViewChangeEventImpl(this,
 				currentNavigationState, navigationState);
 
-		//notify V7ViewChangeListener
+		// notify V7ViewChangeListener
 		{
 			CancellableWrapper cancellable = new CancellableWrapper(event);
 			// if change is blocked revert to previous state
 			fireBeforeViewChange(cancellable);
 			if (cancellable.isCancelled()) {
-				log.debug("navigation canceled by a V7ViewChangeListener");
+				LOGGER.debug("navigation canceled by a V7ViewChangeListener");
 				return;
 			}
 		}
-		
-		//notify Outbound navigation to current view
+
+		// notify Outbound navigation to current view
 		{
-			CancellableWrapper cancellable = new CancellableWrapper(event);
-			fireViewOutboundNavigationEvent(getCurrentView(), cancellable);
-			if (cancellable.isCancelled()) {
-				log.debug("navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation", getCurrentView().getClass().getSimpleName());
-				return;
+			if (getCurrentView() != null) {
+				CancellableWrapper cancellable = new CancellableWrapper(event);
+				fireViewBeforeOutboundNavigationEvent(getCurrentView(),
+						cancellable, callbackHandler);
+				if (cancellable.isCancelled()) {
+					LOGGER.debug(
+							"navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation",
+							getCurrentView().getClass().getSimpleName());
+					return;
+				}
 			}
 		}
-		
-		
-		log.debug("obtaining view instance for '{}'", navigationState.getVirtualPage());
+
+		LOGGER.debug("obtaining view instance for '{}'", node);
 		V7View view = viewFactory.get(node.getViewClass());
 
-		//notify before Inbound navigation to target view
+		// notify before Inbound navigation to target view
 		{
 			CancellableWrapper cancellable = new CancellableWrapper(event);
-			fireViewBeforeInboundNavigationEvent(view, cancellable);
+			fireViewBeforeInboundNavigationEvent(view, cancellable,
+					callbackHandler);
 			if (cancellable.isCancelled()) {
-				log.debug("navigation canceled by the view {} in NavigationAwareView#onInboundNavigation", view.getClass().getSimpleName());
+				LOGGER.debug(
+						"navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
+						view.getClass().getSimpleName());
 				return;
 			}
 		}
 
-		
 		setCurrentNavigationState(navigationState);
-		
+
 		// make sure the page uri is updated if necessary, but do not fire any
 		// change events as we have already responded to the change
 		updateUriFragment(navigationState, false);
 		// now change the view
 		changeView(view);
 
-		fireViewAfterInboundNavigationEvent(view, event);
+		fireViewAfterInboundNavigationEvent(view, event, callbackHandler);
 
 		// and tell listeners its changed
 		fireAfterViewChange(event);
 
-	}
-
-	/**
-	 * Checks {@code fragment} to see whether the {@link Sitemap} defines this
-	 * as a page which should be redirected. If it is, the full fragment is
-	 * returned, but modified for the redirected page. If not, the
-	 * {@code fragment} is returned unchanged.
-	 * 
-	 * @param fragment
-	 * 
-	 * @return
-	 */
-	private NavigationState redirect(NavigationState navigationState) {
-	
-		String page = navigationState.getVirtualPage();
-		String redirection = userSitemap.getRedirectPageFor(page);
-		// if no redirect found, page is returned
-		if (redirection == page) {
-			return navigationState;
-		} else {
-			navigationState.setVirtualPage(redirection);
-			navigationState.setFragment(uriHandler.fragment(navigationState));
-			return navigationState;
-		}
 	}
 
 	/**
@@ -313,24 +370,16 @@ public class DefaultV7Navigator implements V7Navigator {
 		}
 	}
 
-	private void fireViewOutboundNavigationEvent(V7View view,
-			CancellableWrapper cancellable) {
-		if (view instanceof NavigationAwareView) {
-			log.debug(
-					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
-					view.getClass().getName());
-			((NavigationAwareView) view).onOutboundNavigation(cancellable);
-		}
+	private void fireViewBeforeOutboundNavigationEvent(V7View view,
+			CancellableWrapper cancellable,
+			NavigationCallbackHandler callbackHandler) {
+		callbackHandler.beforeOutboundNavigationEvent(view, cancellable);
 	}
 
 	private void fireViewBeforeInboundNavigationEvent(V7View view,
-			CancellableV7ViewChangeEvent cancellable) {
-		if (view instanceof NavigationAwareView) {
-			log.debug(
-					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
-					view.getClass().getName());
-			((NavigationAwareView) view).beforeInboundNavigation(cancellable);
-		}
+			CancellableV7ViewChangeEvent cancellable,
+			NavigationCallbackHandler callbackHandler) {
+		callbackHandler.beforeInboundNavigationEvent(view, cancellable);
 	}
 
 	private void setCurrentNavigationState(NavigationState navigationState) {
@@ -353,15 +402,10 @@ public class DefaultV7Navigator implements V7Navigator {
 	}
 
 	private void fireViewAfterInboundNavigationEvent(V7View view,
-			V7ViewChangeEvent event) {
-		if (view instanceof NavigationAwareView) {
-			log.debug(
-					"view implements NavigationAwareView: calling NavigationAwareView#beforeInboundNavigation(event) for {}",
-					view.getClass().getName());
-			((NavigationAwareView) view).afterInboundNavigation(event);
-		}
+			V7ViewChangeEvent event, NavigationCallbackHandler callbackHandler) {
+		callbackHandler.afterInbounNavigationEvent(view, event);
 	}
-	
+
 	/**
 	 * Fires an event after the current view has changed.
 	 * <p/>
@@ -381,91 +425,29 @@ public class DefaultV7Navigator implements V7Navigator {
 		return currentNavigationState;
 	}
 
-	@Override
-	public List<String> getNavigationParams() {
-		return currentNavigationState.getParameterList();
-	}
-
-	@Override
-	public V7View getCurrentView() {
+	private V7View getCurrentView() {
 		return uiProvider.get().getView();
 	}
 
-	/**
-	 * Returns the NavigationState representing the previous position of the
-	 * navigator
-	 * 
-	 * @return
-	 */
+	@Override
 	public NavigationState getPreviousNavigationState() {
 		return previousNavigationState;
 	}
 
 	@Override
-	public void clearHistory() {
-		previousNavigationState = null;
-	}
-
-	@Override
-	public void showError(Throwable error) {
-		log.debug("A {} Error has been thrown, reporting via the Error View:",
+	public void navigateToErrorView(final Throwable error) {
+		LOGGER.debug(
+				"A {} Error has been thrown, reporting via the Error View",
 				error.getClass().getName(), error);
-		ErrorView view = viewFactory.get(ErrorView.class);
-		view.setError(error);
-		changeView(view);
-	}
 
-	/**
-	 * Navigates to a the location represented by {@code node}
-	 */
-	@Override
-	public void navigateTo(UserSitemapNode node) {
-		navigateTo(userSitemap.uri(node));
-	}
-
-	@Override
-	public UserSitemapNode getCurrentNode() {
-		return userSitemap.nodeFor(currentNavigationState);
-	}
-
-	/**
-	 * When a user has successfully logged in, they are routed back to the page
-	 * they were on before going to the login page. If they have gone straight
-	 * to the login page (maybe they bookmarked it), or they were on the logout
-	 * page, they will be routed to the 'private home page' (the StandardPage
-	 * for {@link StandardPageKey#Private_Home})
-	 */
-	@Override
-	public void onSuccess(SuccesfulLoginEvent event) {
-		assert event.getSubject().isAuthenticated();
-
-		log.info("user logged in successfully, navigating to appropriate view");
-		// they have logged in
-		SitemapNode previousNode = userSitemap.nodeFor(previousNavigationState);
-		if (previousNode != null
-				&& previousNode != userSitemap
-						.standardPageNode(StandardPageKey.Log_Out)) {
-			navigateTo(previousNavigationState);
-		} else {
-			navigateTo(StandardPageKey.Private_Home);
-		}
-	}
-
-	@Override
-	public void onFailure(FailedLoginEvent event) {
-		;
-	}
-
-	@Override
-	public void onLogout(LogoutEvent event) {
-		log.info("logging out");
-		subjectProvider.get().logout();
-		navigateTo(StandardPageKey.Log_Out);
-	}
-
-	@Override
-	public void navigateTo(StandardPageKey pageKey) {
-		navigateTo(userSitemap.standardPageURI(pageKey));
+		navigateTo(ErrorView.class,
+				new DefaultNavigationCallbackHandler<ErrorView>() {
+					@Override
+					public void beforeInboundNavigationEvent(ErrorView view,
+							CancellableV7ViewChangeEvent cancellable) {
+						view.beforeInboundNavigation(error);
+					}
+				});
 	}
 
 }

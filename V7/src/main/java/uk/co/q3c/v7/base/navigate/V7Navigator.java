@@ -1,21 +1,20 @@
 package uk.co.q3c.v7.base.navigate;
 
-import java.util.List;
-
-import uk.co.q3c.v7.base.navigate.sitemap.MasterSitemapNode;
-import uk.co.q3c.v7.base.navigate.sitemap.StandardPageKey;
-import uk.co.q3c.v7.base.navigate.sitemap.UserSitemap;
-import uk.co.q3c.v7.base.navigate.sitemap.UserSitemapNode;
+import uk.co.q3c.v7.base.navigate.sitemap.NavigationState;
+import uk.co.q3c.v7.base.navigate.sitemap.NavigationState.Parameters;
+import uk.co.q3c.v7.base.navigate.sitemap.Sitemap;
+import uk.co.q3c.v7.base.navigate.sitemap.SitemapNode;
+import uk.co.q3c.v7.base.navigate.sitemap.StandardViewKey;
 import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
 import uk.co.q3c.v7.base.ui.ScopedUI;
 import uk.co.q3c.v7.base.view.V7View;
-import uk.co.q3c.v7.base.view.V7ViewChangeListener;
+import uk.co.q3c.v7.base.view.V7ViewChangeNotifier;
 
 import com.vaadin.server.Page.UriFragmentChangedListener;
 
 /**
  * Uses the {@link UserSitemap} to control navigation from one 'page' to another, using a uri String, or a
- * {@link StandardPageKey} or a {@link UserSitemapNode} to identify a page.<br>
+ * {@link StandardViewKey} or a {@link UserSitemapNode} to identify a page.<br>
  * <br>
  * Even though {@link UserSitemapNode} should have already been verified for authorisation, all page navigation is
  * checked for authorisation. <br>
@@ -32,39 +31,16 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
  * @author David Sowerby 20 Jan 2013
  *
  */
-public interface V7Navigator extends UriFragmentChangedListener, AuthenticationListener {
+public interface V7Navigator extends UriFragmentChangedListener, AuthenticationListener, V7ViewChangeNotifier {
 
-	void navigateTo(String navigationState);
+	void navigateTo(String fragment) throws InvalidURIException;
 
 	/**
-	 * A convenience method to look up the URI fragment for the {@link StandardPageKey} and navigate to it
+	 * A convenience method to look up the URI fragment for the {@link StandardViewKey} and navigate to it
 	 *
 	 * @param pageKey
 	 */
-	void navigateTo(StandardPageKey pageKey);
-
-	NavigationState getCurrentNavigationState();
-
-	List<String> getNavigationParams();
-
-	void addViewChangeListener(V7ViewChangeListener listener);
-
-	void removeViewChangeListener(V7ViewChangeListener listener);
-
-	/**
-	 * Removes any historical navigation state
-	 */
-	void clearHistory();
-
-	V7View getCurrentView();
-
-	/**
-	 * Navigate to the error view. It is assumed that the view has already been set up with error information, usually
-	 * via the V7ErrorHandler
-	 *
-	 * @param throwable
-	 */
-	void showError(Throwable throwable);
+	void navigateTo(StandardViewKey pageKey);
 
 	/**
 	 * Navigates to the location represented by {@code navigationState}, which may include parameters
@@ -73,19 +49,22 @@ public interface V7Navigator extends UriFragmentChangedListener, AuthenticationL
 	 */
 	void navigateTo(NavigationState navigationState);
 
-	UserSitemapNode getCurrentNode();
+	/**
+	 * Returns the NavigationState representing the current position of the
+	 * navigator
+	 * 
+	 * @return
+	 */
+	NavigationState getCurrentNavigationState();
 
 	/**
-	 * Navigates to the location represented by {@code node}. Because this is based on a {@link MasterSitemapNode}, no
-	 * parameters are associated with this, and only navigates to the page associated with the node
-	 *
-	 * @param node
+	 * Returns the NavigationState representing the previous position of the
+	 * navigator
+	 * 
+	 * @return
 	 */
-	void navigateTo(UserSitemapNode node);
+	NavigationState getPreviousNavigationState();
 
-	/**
-	 * Initialises the navigator by preparing the {@link UserSitemap}
-	 */
-	void init();
+	void navigateToErrorView(Throwable throwable);
 
 }

@@ -1,7 +1,7 @@
 package uk.co.q3c.v7.base.view;
 
-import uk.co.q3c.v7.base.navigate.NavigationState;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
+import uk.co.q3c.v7.base.navigate.sitemap.NavigationState;
 
 public class V7ViewChangeEventImpl implements V7ViewChangeEvent {
 	

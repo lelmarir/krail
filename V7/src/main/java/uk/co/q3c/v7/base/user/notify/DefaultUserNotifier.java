@@ -13,55 +13,51 @@
 package uk.co.q3c.v7.base.user.notify;
 
 import java.io.Serializable;
-import java.util.Map;
-
-import uk.co.q3c.v7.i18n.I18NKey;
+import uk.co.q3c.v7.i18n.DescriptionKey;
+import uk.co.q3c.v7.i18n.MessageKey;
 import uk.co.q3c.v7.i18n.Translate;
 
 import com.google.inject.Inject;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.UI;
 
-@SuppressWarnings("rawtypes")
 public class DefaultUserNotifier implements UserNotifier, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private final Map<I18NKey, ErrorNotification> errorNotifications;
-	private final Map<I18NKey, WarningNotification> warningNotifications;
-	private final Map<I18NKey, InformationNotification> informationNotifications;
 	private final Translate translate;
 
 	@Inject
-	protected DefaultUserNotifier(Map<I18NKey, ErrorNotification> errorNotifications,
-			Map<I18NKey, WarningNotification> warningNotifications,
-			Map<I18NKey, InformationNotification> informationNotifications, Translate translate) {
-		this.errorNotifications = errorNotifications;
-		this.warningNotifications = warningNotifications;
-		this.informationNotifications = informationNotifications;
+	protected DefaultUserNotifier(Translate translate) {
 		this.translate = translate;
 
 	}
 
 	@Override
-	public void notifyError(I18NKey<?> msg, Object... params) {
-		String translatedMessage = translate.from(msg, params);
-		for (ErrorNotification notification : errorNotifications.values()) {
-			notification.message(translatedMessage);
-		}
+	public void show(NotificationType type, MessageKey description,
+			Object... arguments) {
+		Notification n = new Notification(translate.from(
+				description, arguments), convertType(type));
+		n.show(UI.getCurrent().getPage());
 	}
 
 	@Override
-	public void notifyWarning(I18NKey<?> msg, Object... params) {
-		String translatedMessage = translate.from(msg, params);
-		for (WarningNotification notification : warningNotifications.values()) {
-			notification.message(translatedMessage);
-		}
+	public void show(NotificationType type, DescriptionKey description) {
+		Notification n = new Notification(translate.from(
+				description), convertType(type));
+		n.show(UI.getCurrent().getPage());
 	}
 
-	@Override
-	public void notifyInformation(I18NKey<?> msg, Object... params) {
-		String translatedMessage = translate.from(msg, params);
-		for (InformationNotification notification : informationNotifications.values()) {
-			notification.message(translatedMessage);
+	private Type convertType(NotificationType type) {
+		switch (type) {
+		case ERROR:
+			return Type.ERROR_MESSAGE;
+		case WARNING:
+			return Type.WARNING_MESSAGE;
+		case INFO:
+			return Type.HUMANIZED_MESSAGE;
+		default:
+			return Type.ERROR_MESSAGE;
 		}
 	}
-
 }

@@ -12,6 +12,9 @@
  */
 package uk.co.q3c.v7.base.shiro;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -25,8 +28,9 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
 
 /**
- * Extends the {@link DefaultErrorHandler} to intercept known V& exceptions, including Shiro related exceptions -
- * {@link UnauthorizedException} and {@link UnauthenticatedException}. Uses pluggable handlers for all caught
+ * Extends the {@link DefaultErrorHandler} to intercept known V& exceptions,
+ * including Shiro related exceptions - {@link UnauthorizedException} and
+ * {@link UnauthenticatedException}. Uses pluggable handlers for all caught
  * exceptions.
  * 
  * @author David Sowerby 4 Jan 2013
@@ -34,15 +38,18 @@ import com.vaadin.server.ErrorEvent;
  */
 public class V7ErrorHandler extends DefaultErrorHandler {
 
+	private static final long serialVersionUID = -8722893607740326862L;
+
 	private final UnauthenticatedExceptionHandler authenticationHandler;
 	private final UnauthorizedExceptionHandler authorisationHandler;
 	private final InvalidURIExceptionHandler invalidUriHandler;
 	private final V7Navigator navigator;
 
 	@Inject
-	protected V7ErrorHandler(UnauthenticatedExceptionHandler authenticationHandler,
-			UnauthorizedExceptionHandler authorisationHandler, InvalidURIExceptionHandler invalidUriHandler,
-			V7Navigator navigator) {
+	protected V7ErrorHandler(
+			UnauthenticatedExceptionHandler authenticationHandler,
+			UnauthorizedExceptionHandler authorisationHandler,
+			InvalidURIExceptionHandler invalidUriHandler, V7Navigator navigator) {
 		super();
 		this.authenticationHandler = authenticationHandler;
 		this.authorisationHandler = authorisationHandler;
@@ -52,31 +59,45 @@ public class V7ErrorHandler extends DefaultErrorHandler {
 
 	@Override
 	public void error(ErrorEvent event) {
-		Throwable originalError = event.getThrowable();
+		Throwable throwable = event.getThrowable();
 
+		List<Throwable> list = new ArrayList<Throwable>();
+		while (throwable != null && list.contains(throwable) == false) {
+			list.add(throwable);
+
+			boolean handled = handle(throwable);
+			if (handled == true) {
+				break;
+			}
+
+			throwable = ExceptionUtils.getCause(throwable);
+		}
+
+		//default
+		navigator.navigateToErrorView(event.getThrowable());
+
+	}
+
+	private boolean handle(Throwable throwable) {
 		// handle an attempt to navigate to an invalid page
-		int invalidURI = ExceptionUtils.indexOfThrowable(originalError, InvalidURIException.class);
-		if (invalidURI >= 0) {
-			invalidUriHandler.invoke();
-			return;
+		if (throwable instanceof InvalidURIException) {
+			invalidUriHandler.onInvalidUri((InvalidURIException) throwable);
+			return true;
 		}
 
 		// handle an unauthenticated access attempt
-		int unauthenticated = ExceptionUtils.indexOfThrowable(originalError, UnauthenticatedException.class);
-		if (unauthenticated >= 0) {
-			authenticationHandler.invoke();
-			return;
+		if (throwable instanceof UnauthenticatedException) {
+			authenticationHandler.onUnauthenticatedException((UnauthenticatedException)throwable);
+			return true;
 		}
 
 		// handle an unauthorised access attempt
-		int unauthorised = ExceptionUtils.indexOfThrowable(originalError, UnauthorizedException.class);
-		if (unauthorised >= 0) {
-			authorisationHandler.invoke();
-			return;
+		if (throwable instanceof UnauthorizedException) {
+			authorisationHandler.onUnauthorizedException((UnauthorizedException)throwable);
+			return true;
 		}
 
-		navigator.showError(event.getThrowable());
-
+		return false;
 	}
 
 }

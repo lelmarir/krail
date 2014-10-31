@@ -2,11 +2,13 @@ package uk.co.q3c.v7.base.shiro;
 
 import java.io.Serializable;
 
+import org.apache.shiro.authz.UnauthenticatedException;
+
 import uk.co.q3c.v7.base.user.notify.UserNotifier;
+import uk.co.q3c.v7.base.user.notify.UserNotifier.NotificationType;
 import uk.co.q3c.v7.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
-import com.vaadin.ui.Notification;
 
 public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedExceptionHandler, Serializable {
 
@@ -19,8 +21,8 @@ public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedEx
 	}
 
 	@Override
-	public void invoke() {
-		notifier.notifyError(DescriptionKey.You_have_not_logged_in, Notification.Type.ERROR_MESSAGE);
+	public void onUnauthenticatedException(UnauthenticatedException throwable) {
+		notifier.show(NotificationType.WARNING, DescriptionKey.You_have_not_logged_in);
 	}
 
 }

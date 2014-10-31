@@ -8,16 +8,21 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package uk.co.q3c.v7.base.view;
+package uk.co.q3c.v7.base.navigate.sitemap;
 
-import com.google.inject.Inject;
+import java.io.Serializable;
 
-public class DefaultPrivateHomeView extends StandardPageViewBase {
+public interface NavigationState extends Serializable {
+	
+	public static interface Parameters {
 
-    @Inject
-    protected DefaultPrivateHomeView() {
-        super();
-    }
+		Object setParameter(String id, Object value);
 
-
+		String getAsAtring(String group);
+		
+	}
+	
+    String getFragment();
+    Parameters getParameters();
+	SitemapNode getSitemapNode();
 }

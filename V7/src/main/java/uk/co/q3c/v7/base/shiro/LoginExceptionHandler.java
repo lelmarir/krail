@@ -15,6 +15,7 @@ package uk.co.q3c.v7.base.shiro;
 import javax.security.auth.login.AccountLockedException;
 
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.ConcurrentAccessException;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
@@ -23,8 +24,6 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-
-import uk.co.q3c.v7.base.view.LoginView;
 
 /**
  * Implementations should handle all Shiro exceptions captured during the login process.
@@ -40,7 +39,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void unknownAccount(LoginView loginView, UsernamePasswordToken token,
+	void unknownAccount(AuthenticationToken token,
 			UnknownAccountException uae);
 
 	/**
@@ -49,7 +48,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void incorrectCredentials(LoginView loginView, UsernamePasswordToken token,
+	void incorrectCredentials(AuthenticationToken token,
 			IncorrectCredentialsException ice);
 
 	/**
@@ -59,7 +58,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void expiredCredentials(LoginView loginView, UsernamePasswordToken token,
+	void expiredCredentials(AuthenticationToken token,
 			ExpiredCredentialsException ece);
 
 	/**
@@ -70,7 +69,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void accountLocked(LoginView loginView, UsernamePasswordToken token,
+	void accountLocked(AuthenticationToken token,
 			LockedAccountException lae);
 
 	/**
@@ -83,7 +82,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void excessiveAttempts(LoginView loginView, UsernamePasswordToken token,
+	void excessiveAttempts(AuthenticationToken token,
 			ExcessiveAttemptsException excess);
 
 	/**
@@ -92,7 +91,7 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void concurrentAccess(LoginView loginView, UsernamePasswordToken token,
+	void concurrentAccess(AuthenticationToken token,
 			ConcurrentAccessException cae);
 
 	/**
@@ -103,10 +102,9 @@ public interface LoginExceptionHandler {
 	 * @param loginView
 	 * @param token
 	 */
-	void disabledAccount(LoginView loginView, UsernamePasswordToken token,
+	void disabledAccount(AuthenticationToken token,
 			DisabledAccountException dae);
 
-	public void genericException(LoginView loginView,
-			UsernamePasswordToken token, AuthenticationException ae);
+	public void genericException(AuthenticationToken token, AuthenticationException ae);
 
 }

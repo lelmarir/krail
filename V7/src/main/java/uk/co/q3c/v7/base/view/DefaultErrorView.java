@@ -15,6 +15,7 @@ package uk.co.q3c.v7.base.view;
 
 import com.google.inject.Inject;
 import com.vaadin.ui.TextArea;
+
 import uk.co.q3c.util.StackTraceUtil;
 
 /**
@@ -47,7 +48,7 @@ public class DefaultErrorView extends ViewBase<TextArea> implements ErrorView {
 	}
 
 	@Override
-	public void setError(Throwable error) {
+	public void beforeInboundNavigation(Throwable error) {
 		this.error = error;
 		textArea.setReadOnly(false);
 		textArea.setValue(StackTraceUtil.getStackTrace(error));

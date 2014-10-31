@@ -2,11 +2,13 @@ package uk.co.q3c.v7.base.shiro;
 
 import java.io.Serializable;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import uk.co.q3c.v7.base.user.notify.UserNotifier;
+import uk.co.q3c.v7.base.user.notify.UserNotifier.NotificationType;
 import uk.co.q3c.v7.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
-import com.vaadin.ui.Notification;
 
 public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptionHandler, Serializable {
 
@@ -19,7 +21,7 @@ public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptio
 	}
 
 	@Override
-	public void invoke() {
-		notifier.notifyError(DescriptionKey.No_Permission, Notification.Type.ERROR_MESSAGE);
+	public void onUnauthorizedException(UnauthorizedException throwable) {
+		notifier.show(NotificationType.ERROR, DescriptionKey.No_Permission);
 	}
 }

@@ -29,16 +29,13 @@ import uk.co.q3c.v7.base.config.ApplicationConfigurationModule;
 import uk.co.q3c.v7.base.guice.threadscope.ThreadScopeModule;
 import uk.co.q3c.v7.base.guice.uiscope.UIScopeModule;
 import uk.co.q3c.v7.base.guice.vsscope.VaadinSessionScopeModule;
-import uk.co.q3c.v7.base.navigate.sitemap.MasterSitemap;
 import uk.co.q3c.v7.base.navigate.sitemap.SitemapModule;
-import uk.co.q3c.v7.base.navigate.sitemap.StandardPagesModule;
 import uk.co.q3c.v7.base.services.ServicesMonitor;
 import uk.co.q3c.v7.base.services.ServicesMonitorModule;
 import uk.co.q3c.v7.base.shiro.ShiroVaadinModule;
 import uk.co.q3c.v7.base.shiro.StandardShiroModule;
 import uk.co.q3c.v7.base.user.UserModule;
 import uk.co.q3c.v7.base.view.ViewModule;
-import uk.co.q3c.v7.base.view.component.StandardComponentModule;
 import uk.co.q3c.v7.i18n.I18NModule;
 
 import com.google.inject.Guice;
@@ -91,7 +88,7 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 
 		baseModules.add(i18NModule());
 		baseModules.add(applicationConfigurationModule());
-		baseModules.add(new SitemapModule());
+		baseModules.add(sitemapModule());
 
 		baseModules.add(new ThreadScopeModule());
 		baseModules.add(new UIScopeModule());
@@ -105,11 +102,7 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 
 		baseModules.add(servletModule());
 
-		baseModules.add(standardPagesModule());
-
 		baseModules.add(viewModule());
-
-		baseModules.add(componentModule());
 
 		baseModules.add(userModule());
 
@@ -135,10 +128,6 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 	protected void addSitemapModules(List<Module> baseModules) {
 	}
 
-	protected Module componentModule() {
-		return new StandardComponentModule();
-	}
-
 	/**
 	 * Override this if you have provided your own {@link ServletModule}
 	 *
@@ -158,12 +147,8 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 		return new ShiroVaadinModule();
 	}
 
-	/**
-	 * Override this if you have sub-classed {@link StandardPagesModule} to provide bindings to your own standard page
-	 * views
-	 */
-	protected Module standardPagesModule() {
-		return new StandardPagesModule();
+	private Module sitemapModule() {
+		return new SitemapModule();
 	}
 
 	/**

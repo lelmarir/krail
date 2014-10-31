@@ -3,11 +3,7 @@ package uk.co.q3c.v7.base.ui;
 import uk.co.q3c.v7.base.data.V7DefaultConverterFactory;
 import uk.co.q3c.v7.base.guice.uiscope.UIScoped;
 import uk.co.q3c.v7.base.navigate.DefaultV7Navigator;
-import uk.co.q3c.v7.base.navigate.StrictURIFragmentHandler;
-import uk.co.q3c.v7.base.navigate.URIFragmentHandler;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
-import uk.co.q3c.v7.base.view.component.DefaultUserStatusPanel;
-import uk.co.q3c.v7.base.view.component.UserStatusPanel;
 import uk.co.q3c.v7.i18n.I18NKey;
 import uk.co.q3c.v7.i18n.LabelKey;
 
@@ -29,9 +25,7 @@ public abstract class V7UIModule extends AbstractModule {
 		bindUIProvider();
 		addUIBindings(mapbinder);
 		bindNavigator();
-		bindURIHandler();
 		bindConverterFactory();
-		bindLoginStatusMonitor();
 
 	}
 
@@ -53,23 +47,9 @@ public abstract class V7UIModule extends AbstractModule {
 	}
 
 	/**
-	 * Override to bind your choice of LoginStatusMonitor
-	 */
-	protected void bindLoginStatusMonitor() {
-		bind(UserStatusPanel.class).to(DefaultUserStatusPanel.class);
-	}
-
-	/**
 	 * Override to bind your ScopedUIProvider implementation
 	 */
 	protected abstract void bindUIProvider();
-
-	/**
-	 * Override to bind your choice of URI handler
-	 */
-	protected void bindURIHandler() {
-		bind(URIFragmentHandler.class).to(StrictURIFragmentHandler.class);
-	}
 
 	protected void bindNavigator() {
 		bind(V7Navigator.class).to(DefaultV7Navigator.class).in(UIScoped.class);

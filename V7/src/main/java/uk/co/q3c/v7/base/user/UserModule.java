@@ -13,83 +13,20 @@
 package uk.co.q3c.v7.base.user;
 
 import uk.co.q3c.v7.base.user.notify.DefaultUserNotifier;
-import uk.co.q3c.v7.base.user.notify.ErrorNotification;
-import uk.co.q3c.v7.base.user.notify.InformationNotification;
-import uk.co.q3c.v7.base.user.notify.MessageBarErrorNotification;
-import uk.co.q3c.v7.base.user.notify.MessageBarInformationNotification;
-import uk.co.q3c.v7.base.user.notify.MessageBarWarningNotification;
 import uk.co.q3c.v7.base.user.notify.UserNotifier;
-import uk.co.q3c.v7.base.user.notify.VaadinErrorNotification;
-import uk.co.q3c.v7.base.user.notify.VaadinInformationNotification;
-import uk.co.q3c.v7.base.user.notify.VaadinWarningNotification;
-import uk.co.q3c.v7.base.user.notify.WarningNotification;
 import uk.co.q3c.v7.base.user.opt.DefaultUserOption;
 import uk.co.q3c.v7.base.user.opt.DefaultUserOptionStore;
 import uk.co.q3c.v7.base.user.opt.UserOption;
 import uk.co.q3c.v7.base.user.opt.UserOptionStore;
-import uk.co.q3c.v7.i18n.I18NKey;
-import uk.co.q3c.v7.i18n.LabelKey;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.MapBinder;
 
 public class UserModule extends AbstractModule {
-	@SuppressWarnings("rawtypes")
 	@Override
 	protected void configure() {
-
-		MapBinder<I18NKey, ErrorNotification> errorNotificationBinder = MapBinder.newMapBinder(binder(), I18NKey.class,
-				ErrorNotification.class);
-		MapBinder<I18NKey, WarningNotification> warningNotificationBinder = MapBinder.newMapBinder(binder(),
-				I18NKey.class, WarningNotification.class);
-		MapBinder<I18NKey, InformationNotification> informationNotificationBinder = MapBinder.newMapBinder(binder(),
-				I18NKey.class, InformationNotification.class);
+		
 		bindUserNotifier();
-		bindErrorNotifications(errorNotificationBinder);
-		bindWarningNotifications(warningNotificationBinder);
-		bindInformationNotifications(informationNotificationBinder);
 		bindUserOption();
 		bindUserOptionStore();
-	}
-
-	/**
-	 * Override this method if you want to remove any of the notification implementations. If you want to add
-	 * notifications, create your own module with a MapBinder instance of the same type signature, and Guice will
-	 * combine the mapbinders
-	 * 
-	 * @param informationNotificationBinder
-	 */
-	@SuppressWarnings("rawtypes")
-	protected void bindErrorNotifications(MapBinder<I18NKey, ErrorNotification> errorNotificationBinder) {
-		errorNotificationBinder.addBinding(LabelKey.Splash).to(VaadinErrorNotification.class);
-		errorNotificationBinder.addBinding(LabelKey.Message_Bar).to(MessageBarErrorNotification.class);
-	}
-
-	/**
-	 * Override this method if you want to remove any of the notification implementations. If you want to add
-	 * notifications, create your own module with a MapBinder instance of the same type signature, and Guice will
-	 * combine the mapbinders
-	 * 
-	 * @param informationNotificationBinder
-	 */
-	@SuppressWarnings("rawtypes")
-	protected void bindWarningNotifications(MapBinder<I18NKey, WarningNotification> warningNotificationBinder) {
-		warningNotificationBinder.addBinding(LabelKey.Splash).to(VaadinWarningNotification.class);
-		warningNotificationBinder.addBinding(LabelKey.Message_Bar).to(MessageBarWarningNotification.class);
-	}
-
-	/**
-	 * Override this method if you want to remove any of the notification implementations. If you want to add
-	 * notifications, create your own module with a MapBinder instance of the same type signature, and Guice will
-	 * combine the mapbinders
-	 * 
-	 * @param informationNotificationBinder
-	 */
-	@SuppressWarnings("rawtypes")
-	protected void bindInformationNotifications(
-			MapBinder<I18NKey, InformationNotification> informationNotificationBinder) {
-		informationNotificationBinder.addBinding(LabelKey.Splash).to(VaadinInformationNotification.class);
-		informationNotificationBinder.addBinding(LabelKey.Message_Bar).to(MessageBarInformationNotification.class);
 	}
 
 	/**

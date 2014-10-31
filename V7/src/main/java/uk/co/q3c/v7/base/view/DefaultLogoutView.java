@@ -15,7 +15,7 @@ package uk.co.q3c.v7.base.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.Panel;
 
-public class DefaultLogoutView extends VerticalViewBase implements LogoutView {
+public class DefaultLogoutView extends VerticalViewBase {
 
     @Inject
     protected DefaultLogoutView() {

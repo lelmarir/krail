@@ -41,23 +41,14 @@ public class V7SecurityManager extends DefaultSecurityManager implements Authent
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(V7SecurityManager.class);
-
+	
 	@Inject
 	private VaadinSessionProvider sessionProvider;
 	private List<AuthenticationListener> loginEventListeners;
-
-	public V7SecurityManager() {
-		super();
-		init();
-	}
-
+	
 	public V7SecurityManager(Collection<Realm> realms) {
 		super(realms);
-		init();
-	}
-
-	private void init() {
-		loginEventListeners = new LinkedList<>();
+		this.loginEventListeners = new LinkedList<>();
 	}
 
 	@Override

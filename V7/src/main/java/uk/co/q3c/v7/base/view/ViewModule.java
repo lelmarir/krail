@@ -12,8 +12,6 @@
  */
 package uk.co.q3c.v7.base.view;
 
-import uk.co.q3c.v7.base.guice.uiscope.UIScoped;
-
 import com.google.inject.AbstractModule;
 
 /**
@@ -33,10 +31,6 @@ public class ViewModule extends AbstractModule {
 		// the fallback in case a View is not defined
 		bind(V7View.class).to(ErrorView.class);
 		bindErrorView();
-		bindLoginView();
-		bindLogoutView();
-		bindPrivateHomeView();
-		bindPublicHomeView();
 		bindRequestSystemAccountView();
 		bindRequestSystemAccountResetView();
 		bindRequestSystemAccountEnableView();
@@ -92,36 +86,6 @@ public class ViewModule extends AbstractModule {
 	 */
 	private void bindRequestSystemAccountView() {
 		bind(RequestSystemAccountCreateView.class).to(DefaultRequestSystemAccountCreateView.class);
-	}
-
-	/**
-	 * Override this to provide your own private home {@link V7View}
-	 */
-	protected void bindPrivateHomeView() {
-		bind(PrivateHomeView.class).to(DefaultPrivateHomeView.class);
-
-	}
-
-	/**
-	 * Override this to provide your own public home {@link V7View}
-	 */
-	protected void bindPublicHomeView() {
-		bind(PublicHomeView.class).to(DefaultPublicHomeView.class).in(UIScoped.class);
-
-	}
-
-	/**
-	 * Override this to provide your own login {@link V7View}
-	 */
-	protected void bindLoginView() {
-		bind(LoginView.class).to(DefaultLoginView.class);
-	}
-
-	/**
-	 * Override this to provide your own logout {@link V7View}
-	 */
-	protected void bindLogoutView() {
-		bind(LogoutView.class).to(DefaultLogoutView.class);
 	}
 
 	/**

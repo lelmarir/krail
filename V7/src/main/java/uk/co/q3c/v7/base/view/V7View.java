@@ -15,8 +15,8 @@ package uk.co.q3c.v7.base.view;
 
 import com.vaadin.ui.Component;
 
-import uk.co.q3c.v7.base.navigate.NavigationState;
 import uk.co.q3c.v7.base.navigate.V7Navigator;
+import uk.co.q3c.v7.base.navigate.sitemap.NavigationState;
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 
 //TODO: rewrite javadoc
@@ -43,34 +43,6 @@ import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
  * navigation using {@link CancellableV7ViewChangeEvent#cancel()}
  */
 public interface V7View {
-
-	/**
-	 * Implementing this class the view will be notified of inbound and outbound
-	 * navigations
-	 */
-	public static interface NavigationAwareView extends V7View {
-
-		/**
-		 * Will be notified before navigating into this view and can cancel the
-		 * naavigation using event.cancel()
-		 * 
-		 * <b>The view is not yet attached to the UI</b>
-		 */
-		void beforeInboundNavigation(CancellableV7ViewChangeEvent event);
-
-		/**
-		 * Will ne notified after the viev has navigated to and attached to the
-		 * UI
-		 */
-		void afterInboundNavigation(V7ViewChangeEvent event);
-
-		/**
-		 * Will be notified before navigating away from this view and can cancel
-		 * the naavigation using event.cancel()
-		 */
-		void onOutboundNavigation(CancellableV7ViewChangeEvent event);
-
-	}
 
 	/**
 	 * To enable implementations to implement this interface without descending

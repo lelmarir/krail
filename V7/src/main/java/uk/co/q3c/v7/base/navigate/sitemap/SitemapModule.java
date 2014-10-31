@@ -12,44 +12,101 @@
  */
 package uk.co.q3c.v7.base.navigate.sitemap;
 
-import uk.co.q3c.v7.base.navigate.sitemap.comparator.DefaultUserSitemapSorters;
-import uk.co.q3c.v7.base.navigate.sitemap.comparator.UserSitemapSorters;
+import java.util.Set;
+
+import uk.co.q3c.v7.base.navigate.sitemap.DefaultSitemap.ViewNode;
+import uk.co.q3c.v7.base.navigate.sitemap.annotations.AnnotationSitemapLoader;
+import uk.co.q3c.v7.base.view.DefaultErrorView;
+import uk.co.q3c.v7.base.view.DefaultLoginView;
+import uk.co.q3c.v7.base.view.DefaultLogoutView;
+import uk.co.q3c.v7.base.view.DefaultPrivateHomeView;
+import uk.co.q3c.v7.base.view.DefaultPublicHomeView;
+import uk.co.q3c.v7.base.view.ErrorView;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.multibindings.Multibinder;
 
 public class SitemapModule extends AbstractModule {
 
+	private static class SitemapProvider implements Provider<Sitemap> {
+
+		private final Sitemap sitemap;
+
+		@Inject
+		public SitemapProvider(Set<SitemapLoader> loaders) {
+			this.sitemap = new DefaultSitemap();
+
+			for (SitemapLoader loader : loaders) {
+				loader.configure(sitemap);
+			}
+			
+			sitemap.addView("error", ErrorView.class).setAccesControlRule(AccesControl.PUBLIC);
+			
+			setMissingStandardViews(sitemap);
+		}
+
+		@Override
+		public Sitemap get() {
+			return sitemap;
+		}
+
+		private void setMissingStandardViews(Sitemap sitemap) {
+			if (sitemap.getStandardView(StandardViewKey.Public_Home) == null) {
+				ViewNode node = sitemap.addView("", DefaultPublicHomeView.class);
+				node.setAccesControlRule(AccesControl.PUBLIC);
+				sitemap.setStandardView(StandardViewKey.Public_Home, node);
+			}
+			if (sitemap.getStandardView(StandardViewKey.PrivateHome) == null) {
+				ViewNode node = sitemap.addView("private", DefaultPrivateHomeView.class);
+				node.setAccesControlRule(AccesControl.AUTHENTICATED);
+				sitemap.setStandardView(StandardViewKey.PrivateHome, node);
+			}
+			if (sitemap.getStandardView(StandardViewKey.Log_In) == null) {
+				ViewNode node = sitemap.addView("login", DefaultLoginView.class);
+				node.setAccesControlRule(AccesControl.PUBLIC);
+				sitemap.setStandardView(StandardViewKey.Log_In, node);
+			}
+			if (sitemap.getStandardView(StandardViewKey.Log_Out) == null) {
+				ViewNode node = sitemap.addView("logout", DefaultLogoutView.class);
+				node.setAccesControlRule(AccesControl.PUBLIC);
+				sitemap.setStandardView(StandardViewKey.Log_Out, node);
+			}
+		}
+	}
+
 	@Override
 	protected void configure() {
-		bindMasterSitemap();
-		bindUserSitemap();
-		bindService();
-		bindLoaders();
-		bindChecker();
+		Multibinder<SitemapLoader> sitemapLoadersBinder = Multibinder
+				.newSetBinder(binder(), SitemapLoader.class);
+
+		bindLoaders(sitemapLoadersBinder);
+
+		bind(Sitemap.class).toProvider(SitemapProvider.class)
+				.asEagerSingleton();
+		
+		bindErrorView();
 	}
 
-	private void bindMasterSitemap() {
-		bind(MasterSitemap.class).to(DefaultMasterSitemap.class);
+	/**
+	 * Override to provide a custom implementation of the ErrorView
+	 */
+	protected void bindErrorView() {
+		bind(ErrorView.class).to(DefaultErrorView.class);
 	}
 
-	private void bindUserSitemap() {
-		bind(UserSitemap.class).to(DefaultUserSitemap.class);
-		bind(UserSitemapSorters.class).to(DefaultUserSitemapSorters.class);
-	}
-
-	protected void bindService() {
-		bind(SitemapService.class).to(DefaultSitemapService.class);
-	}
-
-	protected void bindLoaders() {
-		bind(FileSitemapLoader.class).to(DefaultFileSitemapLoader.class);
-		bind(AnnotationSitemapLoader.class).to(DefaultAnnotationSitemapLoader.class);
-		bind(DirectSitemapLoader.class).to(DefaultDirectSitemapLoader.class);
-	}
-
-	protected void bindChecker() {
-		bind(SitemapChecker.class).to(DefaultSitemapChecker.class);
-
+	/**
+	 * Overide this to chaange the default used SitemapLoader
+	 * (AnnotationSitemapLoader that will scann all the classpath) or add others: <br>
+	 * <br>
+	 * <code>
+	 * 	super.bindLoaders(sitemapLoadersBinder); //to keep the Default Loader
+	 * 	sitemapLoadersBinder.addBinding().to(MyLoader.class);
+	 * </code>
+	 */
+	protected void bindLoaders(Multibinder<SitemapLoader> sitemapLoadersBinder) {
+		sitemapLoadersBinder.addBinding().toInstance(new AnnotationSitemapLoader(""));
 	}
 
 }

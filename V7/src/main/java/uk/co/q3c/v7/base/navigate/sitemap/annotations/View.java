@@ -10,9 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.co.q3c.v7.base.navigate;
+package uk.co.q3c.v7.base.navigate.sitemap.annotations;
 
-public interface InvalidURIExceptionHandler {
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 
-	public void onInvalidUri(InvalidURIException throwable);
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import uk.co.q3c.v7.base.shiro.PageAccessControlType;
+import uk.co.q3c.v7.base.view.V7View;
+
+
+@Target({ TYPE })
+@Retention(RUNTIME)
+@Inherited
+public @interface View {
+
+	String uri();
+
+	String labelKeyName();
 }
