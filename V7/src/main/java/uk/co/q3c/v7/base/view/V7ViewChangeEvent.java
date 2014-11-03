@@ -9,11 +9,11 @@ public interface V7ViewChangeEvent {
 
 		boolean isCancelled();
 		void cancel();
-		
+
 	}
-	
+
 	V7Navigator getNavigator();
 	NavigationState getOldNavigationState();
 	NavigationState getNewNavigationState();
-	
+
 }

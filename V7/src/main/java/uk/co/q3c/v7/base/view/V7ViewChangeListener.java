@@ -1,22 +1,25 @@
+/*
+ * Copyright (c) 2014 David Sowerby
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package uk.co.q3c.v7.base.view;
 
 import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
 
 public interface V7ViewChangeListener {
 	/**
-	 * Invoked before the view is changed.
-	 * <p>
-	 * This method may e.g. open a "save" dialog or question about the change, which may re-initiate the navigation
-	 * operation after user action.
-	 * <p>
-	 * If this listener does not want to block the view change (e.g. does not know the view in question), it should
-	 * return true. If any listener returns false, the view change is not allowed and <code>afterViewChange()</code>
-	 * methods are not called.
-	 * 
-	 * @param event
-	 *            view change event
-	 * @return true if the view change should be allowed or this listener does not care about the view change, false to
-	 *         block the change
+     * Receives an event fired before an imminent view change.  At this point the event:<ol> <
+     * <li><{@code fromState} represents the current navigation state/li>
+     * li>{@code toState} represents the navigation state which will be moved to if the change is successful.</li></ol>
+     * <p/>
+     * Listeners are called in registration order. If any listener cancels the event, {@link
+     * V7ViewChangeEvent#cancel()}, the rest of the listeners are not called and the view change is blocked.
 	 */
 	public void beforeViewChange(CancellableV7ViewChangeEvent event);
 

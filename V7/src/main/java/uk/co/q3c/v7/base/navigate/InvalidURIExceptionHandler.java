@@ -14,5 +14,5 @@ package uk.co.q3c.v7.base.navigate;
 
 public interface InvalidURIExceptionHandler {
 
-	public void onInvalidUri(InvalidURIException throwable);
+	public void onInvalidUri(InvalidURIException exception);
 }

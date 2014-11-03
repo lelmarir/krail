@@ -10,10 +10,6 @@
 
 package uk.co.q3c.v7.testutil;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 /**
  * A couple of helper methods to ensure that the correct directory is looked up for file related test operations. This
  * is useful mainly because of the difference between IDEA and Eclipse in their treatment of 'master' and 'sub'

@@ -12,11 +12,19 @@
  */
 package uk.co.q3c.v7.base.ui;
 
-import java.util.Locale;
-
+import com.vaadin.annotations.Push;
+import com.vaadin.data.util.converter.ConverterFactory;
+import com.vaadin.navigator.Navigator;
+import com.vaadin.server.ErrorHandler;
+import com.vaadin.server.Page;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.AbstractOrderedLayout;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.co.q3c.v7.base.config.V7ConfigurationException;
 import uk.co.q3c.v7.base.guice.uiscope.UIKey;
 import uk.co.q3c.v7.base.guice.uiscope.UIScope;
@@ -32,22 +40,13 @@ import uk.co.q3c.v7.i18n.I18NProcessor;
 import uk.co.q3c.v7.i18n.LocaleChangeListener;
 import uk.co.q3c.v7.i18n.Translate;
 
-import com.vaadin.annotations.Push;
-import com.vaadin.data.util.converter.ConverterFactory;
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.ErrorHandler;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
+import java.util.Locale;
 
 /**
  * The base class for all V7 UIs, it provides an essential part of the {@link UIScoped} mechanism. It also provides
  * support for Vaadin Server Push (but only if you annotate your sub-class with {@link Push}), by capturing broadcast
- * messages in {@link #processBroadcastMessage(String, String)} and passing them to the {@link PushMessageRouter}. For a
+ * messages in {@link #processBroadcastMessage(String, String)} and passing them to the {@link PushMessageRouter}. For
+ * a
  * full description of the V7 server push implementation see: https://sites.google.com/site/q3cjava/server-push
  *
  * @author David Sowerby
@@ -56,27 +55,25 @@ import com.vaadin.ui.UI;
 
 public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastListener, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
-	private UIKey instanceKey;
-	private UIScope uiScope;
+    protected final CurrentLocale currentLocale;
 	private final Panel viewDisplayPanel;
-	private AbstractOrderedLayout screenLayout;
-
 	private final ErrorHandler errorHandler;
-
 	private final ConverterFactory converterFactory;
-	private V7View view;
 	private final PushMessageRouter pushMessageRouter;
-
 	private final V7Navigator navigator;
 	private final ApplicationTitle applicationTitle;
 	private final Translate translate;
 	private final I18NProcessor translator;
-	protected final CurrentLocale currentLocale;
+    private UIKey instanceKey;
+    private AbstractOrderedLayout screenLayout;
+    private UIScope uiScope;
+    private V7View view;
 
 	//FIXME: too many parameters
 	protected ScopedUI(V7Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
-			Broadcaster broadcaster, PushMessageRouter pushMessageRouter, ApplicationTitle applicationTitle,
-			Translate translate, CurrentLocale currentLocale, I18NProcessor translator) {
+                       Broadcaster broadcaster, PushMessageRouter pushMessageRouter,
+                       ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
+                       I18NProcessor translator) {
 		super();
 		this.errorHandler = errorHandler;
 		this.navigator = navigator;
@@ -96,12 +93,12 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		broadcaster.register(Broadcaster.ALL_MESSAGES, this);
 	}
 
+    public UIKey getInstanceKey() {
+        return instanceKey;
+    }
+
 	protected void setInstanceKey(UIKey instanceKey) {
 		this.instanceKey = instanceKey;
-	}
-
-	public UIKey getInstanceKey() {
-		return instanceKey;
 	}
 
 	protected void setScope(UIScope uiScope) {
@@ -116,11 +113,6 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		super.detach();
 	}
 
-	@Override
-	public void setNavigator(Navigator navigator) {
-		throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
-	}
-
 	/**
 	 * The Vaadin navigator has been replaced by the V7Navigator, use {@link #getV7Navigator()} instead.
 	 *
@@ -132,19 +124,21 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		return null;
 	}
 
-	public V7Navigator getV7Navigator() {
-		return navigator;
+    @Override
+    public void setNavigator(Navigator navigator) {
+        throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
 	}
 
 	@Override
 	public void changeView(V7View toView) {
 		if (log.isDebugEnabled()) {
-			String to = (toView == null) ? "null" : toView.getClass().getSimpleName();
+            String to = (toView == null) ? "null" : toView.getClass()
+                                                          .getSimpleName();
 			log.debug("changing view to {}", to);
 		}
 
 		Component content = toView.getRootComponent();
-		translator.translate(content);
+        translator.translate(toView);
 		content.setSizeFull();
 		viewDisplayPanel.setContent(content);
 		this.view = toView;
@@ -181,6 +175,10 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		getV7Navigator().navigateTo(fragment!=null?fragment:"");
 	}
 
+    public V7Navigator getV7Navigator() {
+        return navigator;
+    }
+
 	/**
 	 * Provides a locale sensitive title for your application (which appears in the browser tab). The title is defined
 	 * by the {@link #applicationTitle}, which should be specified in your sub-class of {@link V7UIModule}
@@ -201,7 +199,8 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		}
 		screenLayout.setSizeFull();
 		if (viewDisplayPanel.getParent() == null) {
-			String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
+            String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a " +
+                    "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
 			log.error(msg);
 			throw new V7ConfigurationException(msg);
 		}
@@ -219,10 +218,6 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 	 */
 	protected abstract AbstractOrderedLayout screenLayout();
 
-	public V7View getView() {
-		return view;
-	}
-
 	public Panel getViewDisplayPanel() {
 		return viewDisplayPanel;
 	}
@@ -239,7 +234,9 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		});
 	}
 
-	/** Distribute the message to listeners within this UIScope */
+    /**
+     * Distribute the message to listeners within this UIScope
+     */
 	protected void processBroadcastMessage(String group, String message) {
 		pushMessageRouter.messageIn(group, message);
 	}
@@ -251,7 +248,11 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 	@Override
 	public void localeChanged(Locale toLocale) {
 		translator.translate(this);
-		translator.translate(viewDisplayPanel.getContent());
+        translator.translate(getView());
+    }
+
+    public V7View getView() {
+        return view;
 	}
 
 }

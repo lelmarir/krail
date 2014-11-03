@@ -14,14 +14,21 @@ package uk.co.q3c.v7.base.navigate;
 
 
 public class InvalidURIException extends PageNotFoundException {
-	
+
 	private static final long serialVersionUID = -2965666735662621325L;
 
+	private final String uri;
+	
 	public InvalidURIException(String uri) {
 		this(uri, null);
 	}
 
-	public InvalidURIException(String uri, PageNotFoundException cause) {
+	public InvalidURIException(String uri, PageNotFoundException cause) {		
 		super("Unable to find the uri '"+uri+"'", cause);
+		this.uri = uri;
+	}
+	
+	public String getTargetURI() {
+		return uri;
 	}
 }

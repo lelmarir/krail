@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.co.q3c.v7.testbench.V7TestBenchTestCase;
 import uk.co.q3c.v7.testbench.page.object.LocaleSelectorPageObject;
+import uk.co.q3c.v7.testbench.page.object.LoginFormPageObject;
 import uk.co.q3c.v7.testbench.page.object.NavMenuPageObject;
 import uk.co.q3c.v7.testbench.page.object.NavTreePageObject;
 
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LocaleTest extends V7TestBenchTestCase {
 
     private LocaleSelectorPageObject localeSelector = new LocaleSelectorPageObject(this);
+    private LoginFormPageObject loginForm = new LoginFormPageObject(this);
     private NavMenuPageObject navMenu = new NavMenuPageObject(this);
     private NavTreePageObject navTree = new NavTreePageObject(this);
 
@@ -55,7 +57,7 @@ public class LocaleTest extends V7TestBenchTestCase {
     }
 
     @Test
-    public void switchToGerman() {
+    public void switchToGerman_UIComponents() {
 
         // given
 
@@ -69,7 +71,7 @@ public class LocaleTest extends V7TestBenchTestCase {
         for (int i = 0; i < 5; i++) {
             items.add(navTree.itemCaption(i));
         }
-        assertThat(items).containsExactly("Benachrichtigungen", "Einloggen", "Nachricht Feld",
+        assertThat(items).containsExactly("Benachrichtigungen", "Einloggen", "Nachrichtenfeld",
                 "Öffentliche Startseite", "Systemkonto");
 
         items.clear();
@@ -79,12 +81,41 @@ public class LocaleTest extends V7TestBenchTestCase {
         }
 
         //this is in a different order to navtree. See https://github.com/davidsowerby/v7/issues/257
-        assertThat(items).containsExactly("Benachrichtigungen", "Einloggen", "Nachricht Feld", "Systemkonto",
+        assertThat(items).containsExactly("Benachrichtigungen", "Einloggen", "Nachrichtenfeld", "Systemkonto",
                 "Öffentliche Startseite");
 
         assertThat(loginStatus.loginButton()
                               .getText()).isEqualTo("einloggen");
         assertThat(loginStatus.username()).isEqualTo("Gast");
+    }
+
+    @Test
+    public void switchLanguages_View() {
+        //given
+        localeSelector.selectLocale(Locale.UK);
+        navigateTo("login");
+        //when
+
+        //then
+        assertThat(loginForm.submitButton()
+                            .getCaption()).isEqualTo("Submit");
+        assertThat(loginForm.passwordBox()
+                            .getCaption()).isEqualTo("Password");
+        assertThat(loginForm.usernameBox()
+                            .getCaption()).isEqualTo("User Name");
+
+        //when
+        localeSelector.selectLocale(Locale.GERMANY);
+        pause(500);
+
+        //then
+        assertThat(loginForm.submitButton()
+                            .getCaption()).isEqualTo("Absenden");
+        assertThat(loginForm.passwordBox()
+                            .getCaption()).isEqualTo("Passwort");
+        assertThat(loginForm.usernameBox()
+                            .getCaption()).isEqualTo("Benutzername");
+
     }
 
     /**
@@ -97,8 +128,7 @@ public class LocaleTest extends V7TestBenchTestCase {
         //when
 
         //then
-        assertThat(localeSelector.getPopupSuggestions()).containsOnly(Locale.UK.getDisplayName(),
-                Locale.GERMANY.getDisplayName(), Locale.ITALY.getDisplayName());
+        assertThat(localeSelector.getPopupSuggestions()).containsOnly(Locale.UK.getDisplayName(), Locale.GERMANY.getDisplayName(), Locale.ITALY.getDisplayName());
     }
 
 

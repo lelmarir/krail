@@ -18,7 +18,6 @@ import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-
 import uk.co.q3c.v7.base.navigate.InvalidURIException;
 import uk.co.q3c.v7.base.navigate.InvalidURIExceptionHandler;
 import uk.co.q3c.v7.base.navigate.V7Navigator;

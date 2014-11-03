@@ -25,60 +25,64 @@ import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
 
 import uk.co.q3c.util.ID;
-import uk.co.q3c.v7.base.shiro.LoginExceptionHandler;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
 import uk.co.q3c.v7.i18n.*;
 
 public class DefaultLoginView extends GridViewBase implements ClickListener {
-	private final Provider<Subject> subjectProvider;
-	private final Translate translate;
-	private Label demoInfoLabel;
-	private Label demoInfoLabel2;
-	@I18NValue(value = LabelKey.Authentication)
-	private Label label;
-	private PasswordField passwordBox;
-	private Label statusMsgLabel;
-	private Button submitButton;
-	@I18N(caption = LabelKey.User_Name, description = DescriptionKey.Enter_your_user_name)
-	private TextField usernameBox;
+    private final Provider<Subject> subjectProvider;
+    private final Translate translate;
+    @I18N(caption = LabelKey.Log_In)
+    private Panel centrePanel;
+    private Label demoInfoLabel;
+    private Label demoInfoLabel2;
+    @I18NValue(value = LabelKey.Authentication)
+    private Label label;
+    @I18N(caption = LabelKey.Password)
+    private PasswordField passwordBox;
+    private Label statusMsgLabel;
+    @I18N(caption = LabelKey.Submit)
+    private Button submitButton;
+    @I18N(caption = LabelKey.User_Name, description = DescriptionKey.Enter_your_user_name)
+    private TextField usernameBox;
 
-	@Inject
+    @Inject
 	protected DefaultLoginView(SubjectProvider subjectProvider, Translate translate) {
-		super();
-		this.subjectProvider = subjectProvider;
-		this.translate = translate;
+        super();
+        this.subjectProvider = subjectProvider;
+        this.translate = translate;
 
 		getRootComponent().setColumns(3);
 		getRootComponent().setRows(3);
 		getRootComponent().setSizeFull();
-		Panel centrePanel = new Panel("Log in"); // TODO i18N
-		centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
-		centrePanel.setSizeUndefined();
-		VerticalLayout vl = new VerticalLayout();
-		centrePanel.setContent(vl);
-		vl.setSpacing(true);
-		vl.setSizeUndefined();
-		label = new Label();
-		usernameBox = new TextField();
-		passwordBox = new PasswordField("password");
+        centrePanel = new Panel();
+        centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
+        centrePanel.setSizeUndefined();
+        VerticalLayout vl = new VerticalLayout();
+        centrePanel.setContent(vl);
+        vl.setSpacing(true);
+        vl.setSizeUndefined();
+        label = new Label();
+        usernameBox = new TextField();
+        passwordBox = new PasswordField();
 
 		demoInfoLabel = new Label(
 				"for this demo, enter any user name, and a password of 'password'");
 		demoInfoLabel2 = new Label(
 				"In a real application your Shiro Realm implementation defines how to authenticate");
 
-		submitButton = new Button("submit");
-		submitButton.addClickListener(this);
+        submitButton = new Button();
+        submitButton.setDisableOnClick(true);
+        submitButton.addClickListener(this);
 
-		statusMsgLabel = new Label("Please enter your username and password");
+        statusMsgLabel = new Label("Please enter your username and password");
 
-		vl.addComponent(label);
-		vl.addComponent(demoInfoLabel);
-		vl.addComponent(demoInfoLabel2);
-		vl.addComponent(usernameBox);
-		vl.addComponent(passwordBox);
-		vl.addComponent(submitButton);
-		vl.addComponent(statusMsgLabel);
+        vl.addComponent(label);
+        vl.addComponent(demoInfoLabel);
+        vl.addComponent(demoInfoLabel2);
+        vl.addComponent(usernameBox);
+        vl.addComponent(passwordBox);
+        vl.addComponent(submitButton);
+        vl.addComponent(statusMsgLabel);
 
 		getRootComponent().addComponent(centrePanel, 1, 1);
 		getRootComponent().setColumnExpandRatio(0, 1);
@@ -86,57 +90,57 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 		getRootComponent().setRowExpandRatio(0, 1);
 		getRootComponent().setRowExpandRatio(2, 1);
-	}
+    }
 
-	@Override
-	protected void setIds() {
-		super.setIds();
-		submitButton.setId(ID.getId(Optional.absent(), this, submitButton));
-		usernameBox.setId(ID.getId(Optional.of("username"), this, usernameBox));
-		passwordBox.setId(ID.getId(Optional.of("password"), this, passwordBox));
+    @Override
+    protected void setIds() {
+        super.setIds();
+        submitButton.setId(ID.getId(Optional.absent(), this, submitButton));
+        usernameBox.setId(ID.getId(Optional.of("username"), this, usernameBox));
+        passwordBox.setId(ID.getId(Optional.of("password"), this, passwordBox));
 		statusMsgLabel.setId(ID.getId(Optional.of("status"), this,
 				statusMsgLabel));
-	}
+    }
 
-	@Override
-	public void buttonClick(ClickEvent event) {
+    @Override
+    public void buttonClick(ClickEvent event) {
 		submitButton.setEnabled(false);
 
 		UsernamePasswordToken token = new UsernamePasswordToken(
 				usernameBox.getValue(), passwordBox.getValue());
 
-		try {
+        try {
 			Subject subject = subjectProvider.get();
 			subject.login(token);
-		} catch (UnknownAccountException uae) {
+        } catch (UnknownAccountException uae) {
 			setStatusMessage(DescriptionKey.Unknown_Account);
-		} catch (IncorrectCredentialsException ice) {
+        } catch (IncorrectCredentialsException ice) {
 			setStatusMessage(DescriptionKey.Invalid_Login);
-		} catch (ExpiredCredentialsException ece) {
+        } catch (ExpiredCredentialsException ece) {
 			setStatusMessage(DescriptionKey.Account_Expired);
-		} catch (LockedAccountException lae) {
+        } catch (LockedAccountException lae) {
 			setStatusMessage(DescriptionKey.Account_Locked);
-		} catch (ExcessiveAttemptsException excess) {
+        } catch (ExcessiveAttemptsException excess) {
 			setStatusMessage(DescriptionKey.Too_Many_Login_Attempts);
-		} catch (DisabledAccountException dae) {
+        } catch (DisabledAccountException dae) {
 			setStatusMessage(DescriptionKey.Account_is_Disabled);
-		} catch (ConcurrentAccessException cae) {
+        } catch (ConcurrentAccessException cae) {
 			setStatusMessage(DescriptionKey.Account_Already_In_Use);
-		} catch (AuthenticationException ae) {
+        } catch (AuthenticationException ae) {
 			setStatusMessage(DescriptionKey.Generic_Authentication_Exception);
 		} finally {
 			submitButton.setEnabled(true);
-		}
-		// unexpected condition - error?
-		// an exception would be raised if login failed
-	}
+        }
+        // unexpected condition - error?
+        // an exception would be raised if login failed
+    }
 
 	private void setStatusMessage(DescriptionKey messageKey) {
 		setStatusMessage(translate.from(messageKey));
-	}
+    }
 
 	private void setStatusMessage(String msg) {
 		statusMsgLabel.setValue(msg);
-	}
+    }
 
 }
