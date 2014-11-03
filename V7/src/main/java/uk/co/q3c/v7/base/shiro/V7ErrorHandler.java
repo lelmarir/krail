@@ -60,11 +60,13 @@ public class V7ErrorHandler extends DefaultErrorHandler {
 	public void error(ErrorEvent event) {
 		Throwable throwable = event.getThrowable();
 
+		boolean handled = false;
+
 		List<Throwable> list = new ArrayList<Throwable>();
 		while (throwable != null && list.contains(throwable) == false) {
 			list.add(throwable);
 
-			boolean handled = handle(throwable);
+			handled = handle(throwable);
 			if (handled == true) {
 				break;
 			}
@@ -72,8 +74,9 @@ public class V7ErrorHandler extends DefaultErrorHandler {
 			throwable = ExceptionUtils.getCause(throwable);
 		}
 
-		//default
-		navigator.navigateToErrorView(event.getThrowable());
+		if (handled == false) {
+			navigator.navigateToErrorView(event.getThrowable());
+		}
 
 	}
 
@@ -86,13 +89,15 @@ public class V7ErrorHandler extends DefaultErrorHandler {
 
 		// handle an unauthenticated access attempt
 		if (throwable instanceof UnauthenticatedException) {
-			authenticationHandler.onUnauthenticatedException((UnauthenticatedException)throwable);
+			authenticationHandler
+					.onUnauthenticatedException((UnauthenticatedException) throwable);
 			return true;
 		}
 
 		// handle an unauthorised access attempt
 		if (throwable instanceof UnauthorizedException) {
-			authorisationHandler.onUnauthorizedException((UnauthorizedException)throwable);
+			authorisationHandler
+					.onUnauthorizedException((UnauthorizedException) throwable);
 			return true;
 		}
 

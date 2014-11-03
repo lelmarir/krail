@@ -171,8 +171,12 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
 		doLayout();
 		translator.translate(this);
 		// Navigate to the correct start point
-		String fragment = getPage().getUriFragment();
-		getV7Navigator().navigateTo(fragment!=null?fragment:"");
+		try {
+			String fragment = getPage().getUriFragment();
+			getV7Navigator().navigateTo(fragment!=null?fragment:"");
+		} catch (Exception e) {
+			errorHandler.error(new com.vaadin.server.ErrorEvent(e));
+		}		
 	}
 
     public V7Navigator getV7Navigator() {
