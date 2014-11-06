@@ -19,7 +19,7 @@ import com.vaadin.server.WebBrowser;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import uk.co.q3c.util.MessageFormat;
 import uk.co.q3c.v7.base.guice.vsscope.VaadinSessionScoped;
 import uk.co.q3c.v7.base.shiro.SubjectProvider;
 import uk.co.q3c.v7.base.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
@@ -40,14 +40,20 @@ import java.util.Set;
  * <li>If a user is authenticated, the UserOption for preferred locale is used, if valid</li>
  * <li>If a user is not logged in, or the user option was invalid, the browser locale is used</li>
  * <li>If the browser locale not accessible, or is not a supported locale (as defined in {@link I18NModule} or its
- * sub-class), the first supported locale is used.</li>
+ * sub-class), the {@link #defaultLocale} is used.</li>
  * </ol>
- * When a user logs in after initialisation, the UserOption value for preferred locale is used.
- * When a user logs out, no change is made, as the user may still have public pages they can view.
+ * When a user logs in after initialisation, the UserOption value for preferred locale is used, and the locale changed
+ * if required.
+ * When a user logs out, no change to locale is made, as the user may still have public pages they can view.
  * <p/>
- * Scope for this class must be set in {@link I18NModule} or its sub-class - this enables the developer to choose
+ * Scope for this class is set in {@link I18NModule} or its sub-class - this enables the developer to choose
  * between {@link UIScoped} or {@link VaadinSessionScoped}, depending on whether they want their users to set the
- * language for each browser tab or each browser instance, respectively
+ * language for each browser tab or each browser instance, respectively.  By default it is set to {@link
+ * VaadinSessionScoped}
+ * <p/>
+ * {@link #defaultLocale} and {@link #supportedLocales} are set in {@link I18NModule} or its sub-class.  An {@link
+ * UnsupportedLocaleException} will be thrown if an attempt is made to set a locale which is not in {@link
+ * #supportedLocales}, or if {@link #defaultLocale} the is not in {@link #supportedLocales}.
  *
  * @author David Sowerby
  * @date 5 May 2014
@@ -77,9 +83,14 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
     }
 
     /**
-     * Sets up the locale, see the Javadoc for the class
+     * Sets up the locale, see the Javadoc for this class
      */
     private void initialise() {
+        if (!supportedLocales.contains(defaultLocale)) {
+            String msg = MessageFormat.format("The default locale ({0}) you have specified must also be defined as a " +
+                    "" + "supported locale in your Guice I18N module", defaultLocale);
+            throw new UnsupportedLocaleException(msg);
+        }
         if (setLocaleFromUserOption(false)) {
             return;
         }
@@ -94,8 +105,9 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
      * active ( this usually only happens in testing or background tasks)
      *
      * @param fireListeners
+     *         if true, fires change listeners if a change is made
      *
-     * @return true if the browser was accessible and its locale is supported
+     * @return true if the browser was accessible and its locale is supported, false if no suitable locale has been set
      */
     private boolean setLocaleFromBrowser(boolean fireListeners) {
         WebBrowser webBrowser = browserProvider.get();
@@ -104,8 +116,6 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
             if (supportedLocales.contains(browserLocale)) {
                 setLocale(browserLocale, fireListeners);
                 return true;
-            } else {
-                locale = defaultLocale;
             }
         }
         return false;
@@ -121,6 +131,17 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
         setLocale(locale, true);
     }
 
+    /**
+     * Sets the locale and optionally fires listeners.  Typically, a call to this method is from a component which only
+     * allows the selection of a supported locale.  However, if an attempt is made to set a locale which is not defined
+     * in
+     * {@link #supportedLocales}, an UnsupportedLocaleException is thrown
+     *
+     * @param locale
+     *         the locale to set
+     * @param fireListeners
+     *         if true, fire registered listeners
+     */
     @Override
     public void setLocale(Locale locale, boolean fireListeners) {
         if (supportedLocales.contains(locale)) {
@@ -134,7 +155,8 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
                 }
             }
         } else {
-            throw new UnsupportedLocaleException("Locale is not supported: " + locale);
+            String msg = MessageFormat.format("{0} locale is not supported.", locale);
+            throw new UnsupportedLocaleException(msg);
         }
 
     }
@@ -160,13 +182,18 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
         listeners.clear();
 
     }
-    
+
+    /**
+     * A locale change is made only if the user is now authenticated (which means they ave just logged in).  If they
+     * have just logged out, they may still, no change is made, because they have public pages to view, and they would
+     * probably want to view those in the same language as they had selected while logged in
+     */
     public void userStatusChanged() {
         if (subjectProvider.get().isAuthenticated()) {
             setLocaleFromUserOption(true);
         }
     }
-    
+
     @Override
 	public void onSuccess(SuccesfulLoginEvent event) {
     	userStatusChanged();

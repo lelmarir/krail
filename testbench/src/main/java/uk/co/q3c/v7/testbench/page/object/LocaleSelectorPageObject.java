@@ -17,6 +17,7 @@ import com.google.common.base.Optional;
 import com.vaadin.testbench.elements.ComboBoxElement;
 import com.vaadin.ui.ComboBox;
 import uk.co.q3c.v7.base.view.component.DefaultLocaleSelector;
+import uk.co.q3c.v7.base.view.component.LocaleContainer;
 import uk.co.q3c.v7.testbench.V7TestBenchTestCase;
 
 import java.util.List;
@@ -32,8 +33,14 @@ public class LocaleSelectorPageObject extends PageObject {
         super(parentCase);
     }
 
+    /**
+     * Selects the locale using the same method as {@link LocaleContainer} (that is, translating the displayed string
+     * into the language of the target selection (for example Locale.GERMANY is always "German (Germany)"
+     *
+     * @param locale
+     */
     public void selectLocale(Locale locale) {
-        combo().selectByText(locale.getDisplayName());
+        combo().selectByText(locale.getDisplayName(locale));
     }
 
     public ComboBoxElement combo() {

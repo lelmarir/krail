@@ -54,209 +54,211 @@ import java.util.Locale;
  */
 
 public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastListener, LocaleChangeListener {
-	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
+    private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
     protected final CurrentLocale currentLocale;
-	private final Panel viewDisplayPanel;
-	private final ErrorHandler errorHandler;
-	private final ConverterFactory converterFactory;
-	private final PushMessageRouter pushMessageRouter;
-	private final V7Navigator navigator;
-	private final ApplicationTitle applicationTitle;
-	private final Translate translate;
-	private final I18NProcessor translator;
+    private final Panel viewDisplayPanel;
+    private final ErrorHandler errorHandler;
+    private final ConverterFactory converterFactory;
+    private final PushMessageRouter pushMessageRouter;
+    private final V7Navigator navigator;
+    private final ApplicationTitle applicationTitle;
+    private final Translate translate;
+    private final I18NProcessor translator;
     private UIKey instanceKey;
     private AbstractOrderedLayout screenLayout;
     private UIScope uiScope;
     private V7View view;
 
 	//FIXME: too many parameters
-	protected ScopedUI(V7Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
+    protected ScopedUI(V7Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
                        Broadcaster broadcaster, PushMessageRouter pushMessageRouter,
                        ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
                        I18NProcessor translator) {
-		super();
-		this.errorHandler = errorHandler;
-		this.navigator = navigator;
-		this.converterFactory = converterFactory;
-		this.pushMessageRouter = pushMessageRouter;
-		this.applicationTitle = applicationTitle;
-		this.translate = translate;
-		this.translator = translator;
-		this.currentLocale = currentLocale;
+        super();
+        this.errorHandler = errorHandler;
+        this.navigator = navigator;
+        this.converterFactory = converterFactory;
+        this.pushMessageRouter = pushMessageRouter;
+        this.applicationTitle = applicationTitle;
+        this.translate = translate;
+        this.translator = translator;
+        this.currentLocale = currentLocale;
 
-		viewDisplayPanel = new Panel();
-		registerWithBroadcaster(broadcaster);
-		currentLocale.addListener(this);
-	}
+        viewDisplayPanel = new Panel();
+        registerWithBroadcaster(broadcaster);
+        currentLocale.addListener(this);
+    }
 
-	protected void registerWithBroadcaster(Broadcaster broadcaster) {
-		broadcaster.register(Broadcaster.ALL_MESSAGES, this);
-	}
+    protected void registerWithBroadcaster(Broadcaster broadcaster) {
+        broadcaster.register(Broadcaster.ALL_MESSAGES, this);
+    }
 
     public UIKey getInstanceKey() {
         return instanceKey;
     }
 
-	protected void setInstanceKey(UIKey instanceKey) {
-		this.instanceKey = instanceKey;
-	}
+    protected void setInstanceKey(UIKey instanceKey) {
+        this.instanceKey = instanceKey;
+    }
 
-	protected void setScope(UIScope uiScope) {
-		this.uiScope = uiScope;
-	}
+    protected void setScope(UIScope uiScope) {
+        this.uiScope = uiScope;
+    }
 
-	@Override
-	public void detach() {
-		if (uiScope != null) {
-			uiScope.releaseScope(instanceKey);
-		}
-		super.detach();
-	}
+    @Override
+    public void detach() {
+        if (uiScope != null) {
+            uiScope.releaseScope(instanceKey);
+        }
+        super.detach();
+    }
 
-	/**
-	 * The Vaadin navigator has been replaced by the V7Navigator, use {@link #getV7Navigator()} instead.
-	 *
-	 * @see com.vaadin.ui.UI#getNavigator()
-	 */
-	@Override
-	@Deprecated
-	public Navigator getNavigator() {
-		return null;
-	}
+    /**
+     * The Vaadin navigator has been replaced by the V7Navigator, use {@link #getV7Navigator()} instead.
+     *
+     * @see com.vaadin.ui.UI#getNavigator()
+     */
+    @Override
+    @Deprecated
+    public Navigator getNavigator() {
+        return null;
+    }
 
     @Override
     public void setNavigator(Navigator navigator) {
         throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
-	}
+    }
 
-	@Override
-	public void changeView(V7View toView) {
-		if (log.isDebugEnabled()) {
+    @Override
+    public void changeView(V7View toView) {
+        if (log.isDebugEnabled()) {
             String to = (toView == null) ? "null" : toView.getClass()
                                                           .getSimpleName();
-			log.debug("changing view to {}", to);
-		}
+            log.debug("changing view to {}", to);
+        }
 
-		Component content = toView.getRootComponent();
+        Component content = toView.getRootComponent();
         translator.translate(toView);
-		content.setSizeFull();
-		viewDisplayPanel.setContent(content);
-		this.view = toView;
-	}
+        content.setSizeFull();
+        viewDisplayPanel.setContent(content);
+        this.view = toView;
+    }
 
-	/**
-	 * Make sure you call this from sub-class overrides. The Vaadin Page is not available during the construction of
-	 * this class, but is available when this method is invoked. As a result, this method sets the navigator a listener
-	 * for URI changes and obtains the browser locale setting for initialising {@link CurrentLocale}. Both of these are
-	 * provided by the Vaadin Page.
-	 *
-	 * @see com.vaadin.ui.UI#init(com.vaadin.server.VaadinRequest)
-	 */
-	@Override
-	protected void init(VaadinRequest request) {
+    /**
+     * Make sure you call this from sub-class overrides. The Vaadin Page is not available during the construction of
+     * this class, but is available when this method is invoked. As a result, this method sets the navigator a listener
+     * for URI changes and obtains the browser locale setting for initialising {@link CurrentLocale}. Both of these are
+     * provided by the Vaadin Page.
+     *
+     * @see com.vaadin.ui.UI#init(com.vaadin.server.VaadinRequest)
+     */
+    @Override
+    protected void init(VaadinRequest request) {
 
-		VaadinSession session = getSession();
-		session.setConverterFactory(converterFactory);
+        VaadinSession session = getSession();
+        session.setConverterFactory(converterFactory);
 
-		// page isn't available during injected construction, so we have to do this here
-		Page page = getPage();
-		page.addUriFragmentChangedListener(navigator);
+        // page isn't available during injected construction, so we have to do this here
+        Page page = getPage();
+        page.addUriFragmentChangedListener(navigator);
 
-		setErrorHandler(errorHandler);
-		page.setTitle(pageTitle());
+        setErrorHandler(errorHandler);
+        page.setTitle(pageTitle());
 
-		// We want to use the same default locale as Vaadin (held by the session and usually the browser locale)
-		currentLocale.setLocale(session.getLocale(), false);
+        //remove this because it results in a confusing model for setting locale.  DefaultCurrentLocale already has a
+        // logic for setting locale from user options and the browser
+        // We want to use the same default locale as Vaadin (held by the session and usually the browser locale)
+        //        currentLocale.setLocale(session.getLocale(), false);
 
-		doLayout();
-		translator.translate(this);
-		// Navigate to the correct start point
+        doLayout();
+        translator.translate(this);
+        // Navigate to the correct start point
 		try {
-			String fragment = getPage().getUriFragment();
+        String fragment = getPage().getUriFragment();
 			getV7Navigator().navigateTo(fragment!=null?fragment:"");
 		} catch (Exception e) {
 			errorHandler.error(new com.vaadin.server.ErrorEvent(e));
 		}		
-	}
+    }
 
     public V7Navigator getV7Navigator() {
         return navigator;
     }
 
-	/**
-	 * Provides a locale sensitive title for your application (which appears in the browser tab). The title is defined
-	 * by the {@link #applicationTitle}, which should be specified in your sub-class of {@link V7UIModule}
-	 *
-	 * @return
-	 */
-	protected String pageTitle() {
-		return translate.from(applicationTitle.getTitleKey());
-	}
+    /**
+     * Provides a locale sensitive title for your application (which appears in the browser tab). The title is defined
+     * by the {@link #applicationTitle}, which should be specified in your sub-class of {@link V7UIModule}
+     *
+     * @return
+     */
+    protected String pageTitle() {
+        return translate.from(applicationTitle.getTitleKey());
+    }
 
-	/**
-	 * Uses the {@link #screenLayout} defined by sub-class implementations of {@link #screenLayout()}, expands it to
-	 * full size, and sets the View display panel to take up all spare space.
-	 */
-	protected void doLayout() {
-		if (screenLayout == null) {
-			screenLayout = screenLayout();
-		}
-		screenLayout.setSizeFull();
-		if (viewDisplayPanel.getParent() == null) {
+    /**
+     * Uses the {@link #screenLayout} defined by sub-class implementations of {@link #screenLayout()}, expands it to
+     * full size, and sets the View display panel to take up all spare space.
+     */
+    protected void doLayout() {
+        if (screenLayout == null) {
+            screenLayout = screenLayout();
+        }
+        screenLayout.setSizeFull();
+        if (viewDisplayPanel.getParent() == null) {
             String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a " +
                     "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
-			log.error(msg);
-			throw new V7ConfigurationException(msg);
-		}
-		viewDisplayPanel.setSizeFull();
-		setContent(screenLayout);
-	}
+            log.error(msg);
+            throw new V7ConfigurationException(msg);
+        }
+        viewDisplayPanel.setSizeFull();
+        setContent(screenLayout);
+    }
 
-	/**
-	 * Override this to provide your screen layout. In order for Views to work one child component of this layout must
-	 * be provided by {@link #getViewDisplayPanel()}. The simplest example would be
-	 * {@code return new VerticalLayout(getViewDisplayPanel()}, which would set the View to take up all the available
-	 * screen space. {@link BasicUI} is an example of a UI which contains a header and footer bar.
-	 *
-	 * @return
-	 */
-	protected abstract AbstractOrderedLayout screenLayout();
+    /**
+     * Override this to provide your screen layout. In order for Views to work one child component of this layout must
+     * be provided by {@link #getViewDisplayPanel()}. The simplest example would be
+     * {@code return new VerticalLayout(getViewDisplayPanel()}, which would set the View to take up all the available
+     * screen space. {@link BasicUI} is an example of a UI which contains a header and footer bar.
+     *
+     * @return
+     */
+    protected abstract AbstractOrderedLayout screenLayout();
 
-	public Panel getViewDisplayPanel() {
-		return viewDisplayPanel;
-	}
+    public Panel getViewDisplayPanel() {
+        return viewDisplayPanel;
+    }
 
-	@Override
-	public void receiveBroadcast(final String group, final String message) {
-		access(new Runnable() {
-			@Override
-			public void run() {
-				log.debug("receiving message: {}", message);
-				processBroadcastMessage(group, message);
+    @Override
+    public void receiveBroadcast(final String group, final String message) {
+        access(new Runnable() {
+            @Override
+            public void run() {
+                log.debug("receiving message: {}", message);
+                processBroadcastMessage(group, message);
 
-			}
-		});
-	}
+            }
+        });
+    }
 
     /**
      * Distribute the message to listeners within this UIScope
      */
-	protected void processBroadcastMessage(String group, String message) {
-		pushMessageRouter.messageIn(group, message);
-	}
+    protected void processBroadcastMessage(String group, String message) {
+        pushMessageRouter.messageIn(group, message);
+    }
 
-	/**
-	 * Responds to a locale change from {@link CurrentLocale} and updates the translation for this UI and the current
-	 * V7View
-	 */
-	@Override
-	public void localeChanged(Locale toLocale) {
-		translator.translate(this);
+    /**
+     * Responds to a locale change from {@link CurrentLocale} and updates the translation for this UI and the current
+     * V7View
+     */
+    @Override
+    public void localeChanged(Locale toLocale) {
+        translator.translate(this);
         translator.translate(getView());
     }
 
     public V7View getView() {
         return view;
-	}
+    }
 
 }
