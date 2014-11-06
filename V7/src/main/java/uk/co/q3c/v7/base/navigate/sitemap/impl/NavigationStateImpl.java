@@ -26,7 +26,7 @@ public class NavigationStateImpl implements NavigationState {
 	}
 	
 	@Override
-	public Parameters getParameters() {
+	public Parameters parameters() {
 		return parameters;
 	}
 	

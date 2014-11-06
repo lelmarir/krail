@@ -16,13 +16,15 @@ public interface NavigationState extends Serializable {
 	
 	public static interface Parameters {
 
-		Object setParameter(String id, Object value);
+		Object set(String id, Object value);
 
-		String getAsAtring(String group);
+		String getAsString(String id);
+
+		boolean contains(String id);
 		
 	}
 	
     String getFragment();
-    Parameters getParameters();
+    Parameters parameters();
 	SitemapNode getSitemapNode();
 }

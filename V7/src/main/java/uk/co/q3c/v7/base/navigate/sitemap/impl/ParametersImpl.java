@@ -10,21 +10,20 @@ public class ParametersImpl implements Parameters {
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 	
 	public ParametersImpl() {
-		
 	}
 	
 	@Override
-	public Object setParameter(String id, Object value) {
+	public Object set(String id, Object value) {
 		return parameters.put(id, value);
 	}
 
 	@Override
-	public String getAsAtring(String id) {
+	public String getAsString(String id) {
 		return formatAsString(get(id));
 	}
 
 	private String formatAsString(Object object) {
-		return object.toString();
+		return object!=null?object.toString():null;
 	}
 
 	private Object get(String id) {
@@ -34,6 +33,11 @@ public class ParametersImpl implements Parameters {
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "@" + parameters.toString();
+	}
+
+	@Override
+	public boolean contains(String id) {
+		return parameters.containsKey(id);
 	}
 	
 }

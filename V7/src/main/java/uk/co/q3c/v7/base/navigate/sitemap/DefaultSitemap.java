@@ -189,7 +189,7 @@ public class DefaultSitemap implements Sitemap {
 		if (matches.isEmpty()) {
 			throw new PageNotFoundException(
 					"Unable to find the node for the fragment '" + fragment
-							+ "'");
+							+ "'\n "+ nodes.toString());
 		}
 		return matches.getFirst();
 	}
