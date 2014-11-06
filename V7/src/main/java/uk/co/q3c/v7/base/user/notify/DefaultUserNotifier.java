@@ -13,11 +13,13 @@
 package uk.co.q3c.v7.base.user.notify;
 
 import java.io.Serializable;
+
 import uk.co.q3c.v7.i18n.DescriptionKey;
 import uk.co.q3c.v7.i18n.MessageKey;
 import uk.co.q3c.v7.i18n.Translate;
 
 import com.google.inject.Inject;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
@@ -45,6 +47,8 @@ public class DefaultUserNotifier implements UserNotifier, Serializable {
 	public void show(NotificationType type, DescriptionKey description) {
 		Notification n = new Notification(translate.from(
 				description), convertType(type));
+		n.setPosition(Position.TOP_CENTER);
+		n.setDelayMsec(1000);
 		n.show(UI.getCurrent().getPage());
 	}
 
