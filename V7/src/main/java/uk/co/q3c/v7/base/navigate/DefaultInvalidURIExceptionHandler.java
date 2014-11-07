@@ -21,16 +21,18 @@ import com.google.inject.Inject;
 public class DefaultInvalidURIExceptionHandler implements InvalidURIExceptionHandler {
 
 	private final UserNotifier notifier;
+	private final V7Navigator navigator;
 
 	@Inject
-	protected DefaultInvalidURIExceptionHandler(UserNotifier notifier) {
-		super();
+	protected DefaultInvalidURIExceptionHandler(UserNotifier notifier, V7Navigator navigator){
 		this.notifier = notifier;
+		this.navigator = navigator;
 	}
 
 	@Override
 	public void onInvalidUri(InvalidURIException error) {
 		notifier.show(NotificationType.ERROR, MessageKey.invalidURI, error.getTargetURI());
+		navigator.updateUriFragment();
 	}
 
 }

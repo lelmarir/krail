@@ -69,4 +69,9 @@ public interface V7Navigator extends UriFragmentChangedListener,
 
 	void navigateToErrorView(Throwable throwable);
 
+	/**
+	 * Update the visible fragment to the current 
+	 */
+	void updateUriFragment();
+
 }

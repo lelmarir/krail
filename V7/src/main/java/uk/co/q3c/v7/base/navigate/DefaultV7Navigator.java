@@ -302,6 +302,11 @@ public class DefaultV7Navigator implements V7Navigator, AuthenticationListener {
 		previousNavigationState = currentNavigationState;
 		currentNavigationState = navigationState;
 	}
+	
+	@Override
+	public void updateUriFragment() {
+		updateUriFragment(getCurrentNavigationState(), false);
+	}
 
 	private void updateUriFragment(NavigationState navigationState,
 			boolean fireEvents) {
