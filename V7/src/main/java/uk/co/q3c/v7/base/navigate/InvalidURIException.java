@@ -23,7 +23,7 @@ public class InvalidURIException extends PageNotFoundException {
 		this(uri, null);
 	}
 
-	public InvalidURIException(String uri, PageNotFoundException cause) {		
+	public InvalidURIException(String uri, Throwable cause) {
 		super("Unable to find the uri '"+uri+"'", cause);
 		this.uri = uri;
 	}

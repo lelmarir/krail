@@ -64,7 +64,11 @@ public class DefaultNavigationCallbackHandler<T extends V7View> implements
 					Parameters parameters = event.getTargetNavigationState().parameters();
 					String id = parameter.value();
 					//TODO: check that the parameter exist (it could be null, but defined)
-					args[i] = convert(parameters.getAsString(id), parametersTypes[i]);
+					try{
+						args[i] = convert(parameters.getAsString(id), parametersTypes[i]);
+					}catch(ConversionException e) {
+						throw new InvalidURIException(event.getTargetNavigationState().getFragment(), e);
+					}
 					
 				} else {
 					throw new IllegalStateException("Unable to bind parameter "
@@ -108,7 +112,7 @@ public class DefaultNavigationCallbackHandler<T extends V7View> implements
 		return null;
 	}
 	
-	private static Object convert(String string, Class<?> clazz) {
+	private static Object convert(String string, Class<?> clazz) throws ConversionException {
 		
 		if(string == null) {
 			return null;
