@@ -61,7 +61,7 @@ public class DefaultNavigationCallbackHandler<T extends V7View> implements
 							i, parametersTypes[i]);
 				} else if ((parameter = getAnnotation(parametersAnnotations[i],
 						Parameter.class)) != null) {
-					Parameters parameters = event.getNewNavigationState().parameters();
+					Parameters parameters = event.getTargetNavigationState().parameters();
 					String id = parameter.value();
 					//TODO: check that the parameter exist (it could be null, but defined)
 					args[i] = convert(parameters.getAsString(id), parametersTypes[i]);

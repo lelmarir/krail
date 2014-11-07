@@ -27,12 +27,12 @@ public class V7ViewChangeEventImpl implements V7ViewChangeEvent {
 			return delegate.getNavigator();
 		}
 
-		public NavigationState getOldNavigationState() {
-			return delegate.getOldNavigationState();
+		public NavigationState getSourceNavigationState() {
+			return delegate.getSourceNavigationState();
 		}
 
-		public NavigationState getNewNavigationState() {
-			return delegate.getNewNavigationState();
+		public NavigationState getTargetNavigationState() {
+			return delegate.getTargetNavigationState();
 		}
 		
 	}
@@ -55,12 +55,12 @@ public class V7ViewChangeEventImpl implements V7ViewChangeEvent {
 	}
 
 	@Override
-	public NavigationState getOldNavigationState() {
+	public NavigationState getSourceNavigationState() {
 		return oldNavigationState;
 	}
 
 	@Override
-	public NavigationState getNewNavigationState() {
+	public NavigationState getTargetNavigationState() {
 		return newNavigationState;
 	}
 

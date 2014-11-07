@@ -13,7 +13,7 @@ public interface V7ViewChangeEvent {
 	}
 
 	V7Navigator getNavigator();
-	NavigationState getOldNavigationState();
-	NavigationState getNewNavigationState();
+	NavigationState getSourceNavigationState();
+	NavigationState getTargetNavigationState();
 
 }
