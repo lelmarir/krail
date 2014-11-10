@@ -40,16 +40,14 @@ public class DefaultUserNotifier implements UserNotifier, Serializable {
 			Object... arguments) {
 		Notification n = new Notification(translate.from(
 				description, arguments), convertType(type));
-		n.show(UI.getCurrent().getPage());
+		show(n);
 	}
 
 	@Override
 	public void show(NotificationType type, DescriptionKey description) {
 		Notification n = new Notification(translate.from(
 				description), convertType(type));
-		n.setPosition(Position.TOP_CENTER);
-		n.setDelayMsec(1000);
-		n.show(UI.getCurrent().getPage());
+		show(n);
 	}
 
 	private Type convertType(NotificationType type) {
@@ -63,5 +61,11 @@ public class DefaultUserNotifier implements UserNotifier, Serializable {
 		default:
 			return Type.ERROR_MESSAGE;
 		}
+	}
+	
+	private void show(Notification n) {
+		n.setPosition(Position.TOP_CENTER);
+		n.setDelayMsec(1000);
+		n.show(UI.getCurrent().getPage());
 	}
 }
