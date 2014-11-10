@@ -12,10 +12,10 @@
  */
 package uk.q3c.krail.i18n;
 
-import java.util.Locale;
-
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+
+import java.util.Locale;
 
 /**
  * returns translated value parameter for an {@link I18NValueFlex} annotation
@@ -24,8 +24,8 @@ import com.google.inject.Inject;
  * @date 3 May 2014
  */
 public class I18NValueFlexReader extends I18NFlexReaderBase implements I18NValueAnnotationReader<I18NValueFlex> {
+    private final CurrentLocale currentLocale;
 	private I18NValueFlex annotation;
-	private final CurrentLocale currentLocale;
 
 	@Inject
 	protected I18NValueFlexReader(Translate translate, CurrentLocale currentLocale) {
@@ -44,7 +44,9 @@ public class I18NValueFlexReader extends I18NFlexReaderBase implements I18NValue
 			return currentLocale.getLocale();
 		}
 		return Locale.forLanguageTag(annotation.locale());
-	};
+    }
+
+    ;
 
 	@Override
 	public I18NValueFlex getAnnotation() {

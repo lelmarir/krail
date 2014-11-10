@@ -16,13 +16,13 @@ import org.apache.commons.configuration.HierarchicalINIConfiguration;
 
 /**
  * Uses Strings rather than enum because we need the '.' for {@link HierarchicalINIConfiguration}
- * 
+ *
  * @author David Sowerby
  * @date 31 Mar 2014
  */
 public class ConfigKeys {
 
-	public static final String SITEMAP_SOURCES = "sitemap.sources";
-	public static final String SERVER_PUSH_ENABLED = "server.pushEnabled";
+    public static final String SITEMAP_SOURCES = "sitemap.sources";
+    public static final String SERVER_PUSH_ENABLED = "server.pushEnabled";
 
 }

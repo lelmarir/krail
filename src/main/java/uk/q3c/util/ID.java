@@ -17,7 +17,8 @@ import com.google.common.base.Optional;
 /**
  * Utility class used to standardise id setting (setId methods in Components).
  * <p/>
- * The qualifier is just a way of identifying one of several of the same type of component in the same parent component.
+ * The qualifier is just a way of identifying one of several of the same type of component in the same parent
+ * component.
  * (for example, the 'Cancel' button from 'Save' and 'Cancel' buttons in a dialog).
  * <p/>
  * The components list is a notional hierarchy of components (it can be anything that makes sense in your

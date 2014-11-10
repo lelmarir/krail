@@ -17,16 +17,16 @@ import java.util.Set;
 
 public class ReflectionUtils {
 
-	public static Set<Class<?>> allInterfaces(Class<?> clazz) {
-		Set<Class<?>> allInterfaces = new HashSet<>();
-		Class<?> classToCheck = clazz;
-		while (classToCheck != null) {
-			Class<?>[] interfaces = classToCheck.getInterfaces();
-			for (Class<?> intf : interfaces) {
-				allInterfaces.add(intf);
-			}
-			classToCheck = classToCheck.getSuperclass();
-		}
-		return allInterfaces;
-	}
+    public static Set<Class<?>> allInterfaces(Class<?> clazz) {
+        Set<Class<?>> allInterfaces = new HashSet<>();
+        Class<?> classToCheck = clazz;
+        while (classToCheck != null) {
+            Class<?>[] interfaces = classToCheck.getInterfaces();
+            for (Class<?> intf : interfaces) {
+                allInterfaces.add(intf);
+            }
+            classToCheck = classToCheck.getSuperclass();
+        }
+        return allInterfaces;
+    }
 }

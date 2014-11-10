@@ -17,9 +17,9 @@ import com.vaadin.ui.UI;
 
 public class BasicUIProvider extends ScopedUIProvider {
 
-	@Override
-	public Class<? extends UI> getUIClass(UIClassSelectionEvent event) {
-		return BasicUI.class;
-	}
+    @Override
+    public Class<? extends UI> getUIClass(UIClassSelectionEvent event) {
+        return BasicUI.class;
+    }
 
 }

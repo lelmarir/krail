@@ -18,9 +18,8 @@ package uk.q3c.krail.core.view;
  * StandardViewModule. To bind this interface to your own implementation,
  * sub-class {@link ViewModule} and override the appropriate binding
  * method.
- * 
+ *
  * @author David Sowerby 1 Jan 2013
- * 
  */
 public interface RequestSystemAccountCreateView extends KrailView {
 

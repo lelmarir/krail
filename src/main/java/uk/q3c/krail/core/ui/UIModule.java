@@ -13,7 +13,7 @@ import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
-public abstract class KrailUIModule extends AbstractModule {
+public abstract class UIModule extends AbstractModule {
 
 	@Override
 	protected void configure() {

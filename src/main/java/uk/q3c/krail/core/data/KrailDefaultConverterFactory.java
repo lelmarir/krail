@@ -12,24 +12,23 @@
  */
 package uk.q3c.krail.core.data;
 
-import org.joda.time.DateTime;
-
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.util.converter.DefaultConverterFactory;
+import org.joda.time.DateTime;
 
 public class KrailDefaultConverterFactory extends DefaultConverterFactory {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <PRESENTATION, MODEL> Converter<PRESENTATION, MODEL> createConverter(Class<PRESENTATION> presentationType,
-			Class<MODEL> modelType) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public <PRESENTATION, MODEL> Converter<PRESENTATION, MODEL> createConverter(Class<PRESENTATION> presentationType,
+                                                                                Class<MODEL> modelType) {
 
-		if (modelType == DateTime.class) {
-			return (Converter<PRESENTATION, MODEL>) new DateTimeConverter();
-		}
+        if (modelType == DateTime.class) {
+            return (Converter<PRESENTATION, MODEL>) new DateTimeConverter();
+        }
 
-		return super.createConverter(presentationType, modelType);
+        return super.createConverter(presentationType, modelType);
 
-	}
+    }
 
 }

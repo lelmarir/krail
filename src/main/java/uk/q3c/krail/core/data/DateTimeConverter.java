@@ -12,18 +12,16 @@
  */
 package uk.q3c.krail.core.data;
 
-import java.util.Date;
-import java.util.Locale;
-
+import com.vaadin.data.util.converter.Converter;
 import org.joda.time.DateTime;
 
-import com.vaadin.data.util.converter.Converter;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Implements a Converter to handle the Joda DateTime type
  * 
  * @author David Sowerby 1 Apr 2013
- * 
  */
 public class DateTimeConverter implements Converter<Date, DateTime> {
 
@@ -38,14 +36,15 @@ public class DateTimeConverter implements Converter<Date, DateTime> {
 	}
 
 	@Override
-	public DateTime convertToModel(Date value, Class<? extends DateTime> targetType, Locale locale)
-			throws com.vaadin.data.util.converter.Converter.ConversionException {
+    public DateTime convertToModel(Date value, Class<? extends DateTime> targetType,
+                                   Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
 		return new DateTime(value);
 	}
 
 	@Override
-	public Date convertToPresentation(DateTime value, Class<? extends Date> targetType, Locale locale)
-			throws com.vaadin.data.util.converter.Converter.ConversionException {
+    public Date convertToPresentation(DateTime value, Class<? extends Date> targetType,
+                                      Locale locale) throws com.vaadin.data.util.converter.Converter
+            .ConversionException {
 		return value.toDate();
 	}
 

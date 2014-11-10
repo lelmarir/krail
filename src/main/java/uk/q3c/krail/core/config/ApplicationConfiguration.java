@@ -17,9 +17,9 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class ApplicationConfiguration extends InheritingConfiguration {
-	@Inject
-	protected ApplicationConfiguration() {
-		super();
-	}
+    @Inject
+    protected ApplicationConfiguration() {
+        super();
+    }
 
 }

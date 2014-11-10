@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.UriFragmentChangedEvent;
+
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +55,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author David Sowerby
  * @date 18 Apr 2014
  */
-public class DefaultKrailNavigator implements Navigator, AuthenticationListener {
+public class DefaultNavigator implements Navigator, AuthenticationListener {
 
 	private static final long serialVersionUID = -1199874611306964538L;
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DefaultKrailNavigator.class);
+			.getLogger(DefaultNavigator.class);
 
 	private final NavigationCallbackHandler DEFAULT_NAVIGATION_CALLBACK_HANDLER = new DefaultNavigationCallbackHandler();
 
@@ -72,7 +73,7 @@ public class DefaultKrailNavigator implements Navigator, AuthenticationListener 
 	private NavigationState previousNavigationState;
 
 	@Inject
-	public DefaultKrailNavigator(SubjectProvider subjectProvider, Sitemap sitemap,
+	public DefaultNavigator(SubjectProvider subjectProvider, Sitemap sitemap,
 			ScopedUIProvider uiProvider, DefaultViewFactory viewFactory,
 			AuthenticationNotifier authenticationNotifier) {
 		super();

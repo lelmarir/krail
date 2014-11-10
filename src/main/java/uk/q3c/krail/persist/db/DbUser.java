@@ -12,11 +12,11 @@
  */
 package uk.q3c.krail.persist.db;
 
-import static java.lang.annotation.RetentionPolicy.*;
+import com.google.inject.BindingAnnotation;
 
 import java.lang.annotation.Retention;
 
-import com.google.inject.BindingAnnotation;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @BindingAnnotation

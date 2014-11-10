@@ -12,10 +12,10 @@
  */
 package uk.q3c.krail.i18n;
 
-import java.util.Locale;
-
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+
+import java.util.Locale;
 
 /**
  * returns translated parameter values for an {@link I18NFlex} annotation. If a parameter has either a null keyClass or
@@ -39,8 +39,7 @@ public abstract class I18NFlexReaderBase {
 			return "";
 		}
 		try {
-			@SuppressWarnings("unchecked")
-			Enum key = Enum.valueOf(keyClass, keyName);
+            @SuppressWarnings("unchecked") Enum key = Enum.valueOf(keyClass, keyName);
 			I18NKey<?> i18nKey = (I18NKey<?>) key;
 			return translate.from(i18nKey, locale);
 		} catch (Exception e) {

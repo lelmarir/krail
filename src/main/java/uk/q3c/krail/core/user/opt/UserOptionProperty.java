@@ -19,6 +19,6 @@ package uk.q3c.krail.core.user.opt;
  * @date 17 May 2014
  */
 public enum UserOptionProperty {
-	MAX_DEPTH, LOCALE_FLAG_SIZE, SORT_ASCENDING, SORT_TYPE
+    MAX_DEPTH, LOCALE_FLAG_SIZE, SORT_ASCENDING, SORT_TYPE
 
 }

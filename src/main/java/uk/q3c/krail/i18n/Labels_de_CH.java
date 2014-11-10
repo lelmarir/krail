@@ -17,27 +17,26 @@ import com.google.common.collect.ImmutableMap;
 /**
  * The base for the resource bundle of Labels specifically for Locale de_CH. Not currently populated as it is used only
  * for testing
- * 
- * 
+ *
  * @author David Sowerby 9 Feb 2013
- * 
  */
 public class Labels_de_CH extends Labels {
 
-	private static final ImmutableMap<LabelKey, String> map;
-	static {
-		map = new ImmutableMap.Builder<LabelKey, String>()
-// @formatter:off
+    private static final ImmutableMap<LabelKey, String> map;
+
+    static {
+        map = new ImmutableMap.Builder<LabelKey, String>()
+                // @formatter:off
 				
 				.build();
 
 // @formatter:on
 
-	}
+    }
 
-	@Override
-	public ImmutableMap<LabelKey, String> getMap() {
-		return map;
-	}
+    @Override
+    public ImmutableMap<LabelKey, String> getMap() {
+        return map;
+    }
 
 }

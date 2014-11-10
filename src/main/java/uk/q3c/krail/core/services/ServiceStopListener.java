@@ -14,6 +14,6 @@ package uk.q3c.krail.core.services;
 
 public interface ServiceStopListener {
 
-	void dependencyServiceStopped(Service service) throws Exception;
+    void dependencyServiceStopped(Service service) throws Exception;
 
 }

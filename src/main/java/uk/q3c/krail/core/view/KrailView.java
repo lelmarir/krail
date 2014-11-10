@@ -17,30 +17,26 @@ import com.vaadin.ui.Component;
 
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
-import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 
-//TODO: rewrite javadoc
+
 /**
- * A view is constructed by the {@link ViewFactory} from a Provider defined in
- * the sitemap building process. When the view is selected for use, calls are
- * made against {@link KrailViewChangeListener}s added to {@link Navigator}, and
- * {@link NavigationAwareView} inteface, in the following order:
+ * A view is constructed by the {@link ViewFactory} from a Provider defined in the sitemap building process.  When
+ * the view is selected for use, calls are made against {@link KrailViewChangeListener}s added to {@link Navigator},
+ * and
+ * this interface, in the following order:
  * <ol>
- * <li>
- * {@link KrailViewChangeListener#beforeViewChange(CancellableKrailViewChangeEvent)}</li>
- * <li>{@link NavigationAwareView#onOutboundNavigation(CancellableKrailViewChangeEvent)} (on current
- * view)</li>
- * <li>{@link NavigationAwareView#beforeInboundNavigation(CancellableKrailViewChangeEvent)} (on target
- * view)</li>
- * <li>{@link NavigationAwareView#afterInboundNavigation(KrailViewChangeEvent)} (on target view)</li>
+ * <li>{@link KrailViewChangeListener#beforeViewChange(KrailViewChangeEvent)}</li>
+ * <li>{@link #init()}</li>
+ * <li>{@link #beforeBuild}</li>
+ * <li>{@link #buildView}</li>
+ * <li>{@link #afterBuild}</li>
  * <li>{@link KrailViewChangeListener#afterViewChange(KrailViewChangeEvent)}</li>
  * </ol>
- * Each method, is passed a {@link KrailViewChangeEvent}, which contains the
- * current {@link NavigationState} so that, for example, parameter information
- * can be used to determine how the View is to be built or respond in some other
- * way to URL parameters. Up to {@link #beforeInboundNavigation} is passed a
- * {@link CancellableKrailViewChangeEvent} that could be used to cancel the
- * navigation using {@link CancellableKrailViewChangeEvent#cancel()}
+ * where build refers to the creation of UI fields and components which populate the view.  Each method, except
+ * readFromEnvironment(),
+ * is passed a
+ * {@link KrailViewChangeEvent}, which contains the current {@link NavigationState} so that, for example, parameter
+ * information can be used to determine how the View is to be built or respond in some other way to URL parameters.
  */
 public interface KrailView {
 

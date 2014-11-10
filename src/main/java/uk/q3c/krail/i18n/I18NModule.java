@@ -87,7 +87,8 @@ public class I18NModule extends AbstractModule {
 
     /**
      * Add a source for I18NKey patterns. {@code order} determines the order in which multiple sources are accessed.
-     * {@link DefaultTranslate} uses the first result returned, using ascending order (order need not be sequential, but
+     * {@link DefaultTranslate} uses the first result returned, using ascending order (order need not be sequential,
+     * but
      * must be unique).
      * <p/>
      * Other implementations of {@link Translate} may behave differently

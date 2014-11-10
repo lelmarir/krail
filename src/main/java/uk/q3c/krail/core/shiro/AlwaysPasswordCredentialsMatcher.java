@@ -19,21 +19,20 @@ import org.apache.shiro.authc.credential.CredentialsMatcher;
 
 /**
  * Not much use for anything except testing! This "matcher" will return true when the token password=="password"
- * 
+ *
  * @author David Sowerby 13 Jan 2013
- * 
  */
 
 public class AlwaysPasswordCredentialsMatcher implements CredentialsMatcher {
 
-	@Override
-	public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
+    @Override
+    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
 
-		if (token instanceof UsernamePasswordToken) {
-			char[] submittedPassword = ((UsernamePasswordToken) token).getPassword();
-			return "password".equals(String.copyValueOf(submittedPassword));
-		} else {
-			return false;
-		}
-	}
+        if (token instanceof UsernamePasswordToken) {
+            char[] submittedPassword = ((UsernamePasswordToken) token).getPassword();
+            return "password".equals(String.copyValueOf(submittedPassword));
+        } else {
+            return false;
+        }
+    }
 }

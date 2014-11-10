@@ -12,17 +12,15 @@
  */
 package uk.q3c.krail.core.guice.uiscope;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import com.google.inject.ScopeAnnotation;
 
-@Target({ TYPE, METHOD })
-@Retention(RUNTIME)
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
 @ScopeAnnotation
 public @interface UIScoped {
 

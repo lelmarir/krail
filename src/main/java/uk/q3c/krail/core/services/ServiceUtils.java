@@ -15,27 +15,27 @@ package uk.q3c.krail.core.services;
 
 /**
  * A utility class for {@link Service} implementations
- * 
+ *
  * @author David Sowerby
- * 
  */
 public class ServiceUtils {
 
-	/**
-	 * Returns the underlying class un-enhanced by Guice, needed to identify annotations
-	 * 
-	 * @param serviceClass
-	 */
-	public static Class<?> unenhancedClass(Class<?> serviceClass) {
-		Class<?> clazz = serviceClass;
-		while (clazz.getName().contains("EnhancerByGuice")) {
-			clazz = clazz.getSuperclass();
-		}
-		return clazz;
-	}
+    public static Class<?> unenhancedClass(Service service) {
+        Class<?> serviceClass = service.getClass();
+        return unenhancedClass(serviceClass);
+    }
 
-	public static Class<?> unenhancedClass(Service service) {
-		Class<?> serviceClass = service.getClass();
-		return unenhancedClass(serviceClass);
-	}
+    /**
+     * Returns the underlying class un-enhanced by Guice, needed to identify annotations
+     *
+     * @param serviceClass
+     */
+    public static Class<?> unenhancedClass(Class<?> serviceClass) {
+        Class<?> clazz = serviceClass;
+        while (clazz.getName()
+                    .contains("EnhancerByGuice")) {
+            clazz = clazz.getSuperclass();
+        }
+        return clazz;
+    }
 }

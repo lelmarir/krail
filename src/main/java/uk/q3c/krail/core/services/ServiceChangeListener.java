@@ -16,5 +16,5 @@ import uk.q3c.krail.core.services.Service.Status;
 
 public interface ServiceChangeListener {
 
-	void serviceStatusChange(Service service, Status fromStatus, Status toStatus);
+    void serviceStatusChange(Service service, Status fromStatus, Status toStatus);
 }

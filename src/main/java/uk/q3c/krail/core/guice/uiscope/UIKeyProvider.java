@@ -15,12 +15,12 @@ package uk.q3c.krail.core.guice.uiscope;
 import com.google.inject.Provider;
 
 public class UIKeyProvider implements Provider<UIKey> {
-	private static int counter = 0;
+    private static int counter = 0;
 
-	@Override
-	public UIKey get() {
-		counter++;
-		return new UIKey(counter);
-	}
+    @Override
+    public UIKey get() {
+        counter++;
+        return new UIKey(counter);
+    }
 
 }

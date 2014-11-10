@@ -17,16 +17,15 @@ import com.google.common.collect.ImmutableMap;
 /**
  * The base for the resource bundle of Labels for Locale de. Entry is purely for testing
  *
- *
  * @author David Sowerby 9 Feb 2013
- *
  */
 public class Labels_de extends Labels {
 
-	private static final ImmutableMap<LabelKey, String> map;
-	static {
-		map = new ImmutableMap.Builder<LabelKey, String>()
-				// @formatter:off
+    private static final ImmutableMap<LabelKey, String> map;
+
+    static {
+        map = new ImmutableMap.Builder<LabelKey, String>()
+                // @formatter:off
 
                 .put(LabelKey.Cancel, "Stornieren")
                 .put(LabelKey.Enable_Account, "Konto aktivieren")
@@ -79,11 +78,11 @@ public class Labels_de extends Labels {
 				.build();
 
 		// @formatter:on
-	}
+    }
 
-	@Override
-	public ImmutableMap<LabelKey, String> getMap() {
-		return map;
-	}
+    @Override
+    public ImmutableMap<LabelKey, String> getMap() {
+        return map;
+    }
 
 }

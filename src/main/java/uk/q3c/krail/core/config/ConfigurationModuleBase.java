@@ -12,26 +12,25 @@
  */
 package uk.q3c.krail.core.config;
 
-import static com.google.common.base.Preconditions.*;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A base class to define configuration files to be loaded into a {@link InheritingConfiguration} (for example
  * {@link ApplicationConfiguration}.
- * <p>
+ * <p/>
  * An integer index is used to specify the order in which the files are assess (see {@link InheritingConfiguration} for
  * an explanation)
- * <p>
+ * <p/>
  * You can use multiple modules based on this class (or create your own to populate an equivalent MapBinder) and Guice
  * will merge the map binders together. It is up to the developer to ensure that indexes are unique (but do not need to
  * bee contiguous).
- * <p>
+ * <p/>
  * Alternatively, it may be easier to use just one module and specify the files all in one place.
  * 
  * @author David Sowerby
- * 
  */
 public abstract class ConfigurationModuleBase extends AbstractModule {
 	private MapBinder<Integer, IniFileConfig> iniFileConfigs;
@@ -48,18 +47,21 @@ public abstract class ConfigurationModuleBase extends AbstractModule {
 	protected abstract void bindConfigs();
 
 	/**
-	 * Adds an ini file configuration at the specified index. A config will override properties with the same key from a
+     * Adds an ini file configuration at the specified index. A config will override properties with the same key from
+     * a
 	 * config at a lower index.
 	 * 
-	 * @see InheritingConfiguration
 	 * @param filename
 	 * @param index
 	 * @param optional
+     *
+     * @see InheritingConfiguration
 	 */
 	protected void addConfig(String filename, int index, boolean optional) {
 		checkNotNull(filename);
 		IniFileConfig ifc = new IniFileConfig(filename, optional);
-		iniFileConfigs.addBinding(new Integer(index)).toInstance(ifc);
+        iniFileConfigs.addBinding(new Integer(index))
+                      .toInstance(ifc);
 	}
 
 }

@@ -14,18 +14,19 @@ package uk.q3c.krail.core.user.opt;
 
 public interface UserOptionStore {
 
-	/**
-	 * Looks for the option value for the supplied group and option. Null is returned of there is no option for the
-	 * parameters given.
-	 * 
-	 * @param optionGroup
-	 * @param option
-	 * @return
-	 */
-	Object getOptionValue(String optionGroup, String option);
+    /**
+     * Looks for the option value for the supplied group and option. Null is returned of there is no option for the
+     * parameters given.
+     *
+     * @param optionGroup
+     * @param option
+     *
+     * @return
+     */
+    Object getOptionValue(String optionGroup, String option);
 
-	void setOptionValue(String optionGroup, String option, Object value);
+    void setOptionValue(String optionGroup, String option, Object value);
 
-	void clear();
+    void clear();
 
 }

@@ -12,24 +12,22 @@
  */
 package uk.q3c.krail.i18n;
 
+import com.google.inject.BindingAnnotation;
+import com.vaadin.data.Property;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Locale;
 
-import com.google.inject.BindingAnnotation;
-import com.vaadin.data.Property;
-
 /**
  * Annotation used for marking a Vaadin UI component as needing I18N translation. The parameters provide the keys for
  * I18N lookup. All parameters are optional, but the value parameter is relevant only for those components which
  * implement {@link Property}. Its value would be ignored otherwise.
  *
- * @see https://sites.google.com/site/q3cjava/internationalisation-i18n
- *
  * @author David Sowerby 9 Feb 2013
- *
+ * @see https://sites.google.com/site/q3cjava/internationalisation-i18n
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER })
@@ -43,9 +41,11 @@ public @interface I18NValue {
 	LabelKey value() default LabelKey._nullkey_;
 
 	/**
-	 * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional parameter
+     * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional
+     * parameter
 	 * is specified, it will be used instead. This allows specific components to be fixed to display content in a
-	 * language different to the rest of the application. The format of the string should be as the IETF BCP 47 language
+     * language different to the rest of the application. The format of the string should be as the IETF BCP 47
+     * language
 	 * tag string; see {@link Locale#toLanguageTag()}
 	 */
 

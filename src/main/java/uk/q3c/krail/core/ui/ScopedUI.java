@@ -25,8 +25,7 @@ import com.vaadin.ui.UI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.q3c.krail.core.config.KrailConfigurationException;
+import uk.q3c.krail.core.config.ConfigurationException;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -115,7 +114,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     }
 
     /**
-     * The Vaadin navigator has been replaced by the KrailNavigator, use {@link #getKrailNavigator()} instead.
+     * The Vaadin navigator has been replaced by the Navigator, use {@link #getKrailNavigator()} instead.
      *
      * @see com.vaadin.ui.UI#getNavigator()
      */
@@ -188,7 +187,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
 
     /**
      * Provides a locale sensitive title for your application (which appears in the browser tab). The title is defined
-     * by the {@link #applicationTitle}, which should be specified in your sub-class of {@link KrailUIModule}
+     * by the {@link #applicationTitle}, which should be specified in your sub-class of {@link UIModule}
      *
      * @return
      */
@@ -209,7 +208,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
             String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
                     + "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
             log.error(msg);
-            throw new KrailConfigurationException(msg);
+            throw new ConfigurationException(msg);
         }
         viewDisplayPanel.setSizeFull();
         setContent(screenLayout);
@@ -257,8 +256,8 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
         translator.translate(this);
         //during initial set up view has not been created but locale change gets called for other components
         if (getView() != null) {
-        translator.translate(getView());
-    }
+            translator.translate(getView());
+        }
     }
 
     public KrailView getView() {

@@ -16,11 +16,12 @@ import uk.q3c.krail.i18n.I18NKey;
 import uk.q3c.krail.i18n.Translate;
 
 import com.google.inject.Inject;
+import com.vaadin.ui.Component;
 
-public abstract class ViewBaseI18N extends ViewBase {
+public abstract class ViewBaseI18N<R extends Component> extends ViewBase<R> {
 
+    private final Translate translate;
 	private I18NKey<?> nameKey;
-	private final Translate translate;
 
 	@Inject
 	protected ViewBaseI18N(Translate translate) {

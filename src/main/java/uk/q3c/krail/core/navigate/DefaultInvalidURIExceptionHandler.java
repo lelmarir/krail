@@ -33,6 +33,6 @@ public class DefaultInvalidURIExceptionHandler implements InvalidURIExceptionHan
 	public void onInvalidUri(InvalidURIException error) {
 		notifier.show(NotificationType.ERROR, MessageKey.invalidURI, error.getTargetURI());
 		navigator.updateUriFragment();
-	}
+    }
 
 }

@@ -19,7 +19,7 @@ public interface KrailViewChangeListener {
      * li>{@code toState} represents the navigation state which will be moved to if the change is successful.</li></ol>
      * <p/>
      * Listeners are called in registration order. If any listener cancels the event, {@link
-     * KrailViewChangeEvent#cancel()}, the rest of the listeners are not called and the view change is blocked.
+     * V7ViewChangeEvent#cancel()}, the rest of the listeners are not called and the view change is blocked.
 	 */
 	public void beforeViewChange(CancellableKrailViewChangeEvent event);
 

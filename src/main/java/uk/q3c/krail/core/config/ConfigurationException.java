@@ -10,34 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.q3c.krail.core.services;
+package uk.q3c.krail.core.config;
 
-public class ServiceRegistrationException extends RuntimeException {
+public class ConfigurationException extends RuntimeException {
 
-    public ServiceRegistrationException() {
+    public ConfigurationException() {
         super();
-
     }
 
-    public ServiceRegistrationException(String message, Throwable cause, boolean enableSuppression,
-                                        boolean writableStackTrace) {
+    public ConfigurationException(String message, Throwable cause, boolean enableSuppression,
+                                  boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-
     }
 
-    public ServiceRegistrationException(String message, Throwable cause) {
+    public ConfigurationException(String message, Throwable cause) {
         super(message, cause);
-
     }
 
-    public ServiceRegistrationException(String message) {
+    public ConfigurationException(String message) {
         super(message);
-
     }
 
-    public ServiceRegistrationException(Throwable cause) {
+    public ConfigurationException(Throwable cause) {
         super(cause);
-
     }
 
 }

@@ -35,12 +35,13 @@ public class Descriptions extends MapResourceBundle<DescriptionKey> {
 				.put(DescriptionKey.Confirm_Ok, "Confirm this Value is Ok")
 				.put(DescriptionKey.No_Permission, "You do not have permission for that action")
 				.put(DescriptionKey.Application_Configuration_Service, "This service loads the application " +
-                        "configuration from Krail.ini")
+                        "configuration from krail.ini")
 				.put(DescriptionKey.Sitemap_Service, "This service creates the Sitemap using options from the " +
                         "application configuration")
 				.put(DescriptionKey.Unknown_Account, "That username or password was not recognised")
 				.put(DescriptionKey.Account_Expired, "Your account has expired")
-				.put(DescriptionKey.Account_Already_In_Use, "This account is already in use.  You must log out of that" +
+				.put(DescriptionKey.Account_Already_In_Use, "This account is already in use.  You must log out of " +
+                        "that" +
                         " session before you can log in again.")
 				.put(DescriptionKey.Account_Locked, "Your account is locked")
 				.put(DescriptionKey.Too_Many_Login_Attempts,"Login has failed too many times, " +

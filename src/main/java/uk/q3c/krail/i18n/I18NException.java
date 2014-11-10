@@ -14,24 +14,24 @@ package uk.q3c.krail.i18n;
 
 public class I18NException extends RuntimeException {
 
-	public I18NException() {
-		super();
-	}
+    public I18NException() {
+        super();
+    }
 
-	public I18NException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
+    public I18NException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 
-	public I18NException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public I18NException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public I18NException(String message) {
-		super(message);
-	}
+    public I18NException(String message) {
+        super(message);
+    }
 
-	public I18NException(Throwable cause) {
-		super(cause);
-	}
+    public I18NException(Throwable cause) {
+        super(cause);
+    }
 
 }

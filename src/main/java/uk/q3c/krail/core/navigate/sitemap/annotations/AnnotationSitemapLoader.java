@@ -12,13 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.q3c.krail.core.navigate.sitemap.AccesControl;
-import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapLoader;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardViewKey;
-import uk.q3c.krail.core.navigate.sitemap.AccesControl.Permission;
-import uk.q3c.krail.core.navigate.sitemap.AccesControl.Roles;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.ViewNode;
 import uk.q3c.krail.core.view.KrailView;
 
@@ -156,7 +153,7 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 			for (StandardViewKey viewKey : standardViews) {
 				if (sitemap.getStandardView(viewKey) != null) {
 					throw new IllegalStateException("The standard view "
-							+ viewKey + " has been already set");
+							+ viewKey + " has been already set to " + sitemap.getStandardView(viewKey) + " whyle trying to set to " + node);
 				}
 
 				LOGGER.info("Setting standard view {} to {}", viewKey,

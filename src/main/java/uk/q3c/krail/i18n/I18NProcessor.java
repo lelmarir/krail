@@ -15,18 +15,17 @@ package uk.q3c.krail.i18n;
 /**
  * Translate the captions, descriptions and values to the current Locale, depending on criteria set by the
  * implementation (for example by the use of annotations)
- * 
+ *
  * @author David Sowerby 10 Feb 2013
- * 
  */
 public interface I18NProcessor {
 
-	/**
-	 * Translate the captions, descriptions and values of {@code target} to the current Locale. This should only be
-	 * called with a {@code target} which is annotated with {@link I18N}, but no errors occur if it hasn't
-	 * 
-	 * @param target
-	 */
-	public abstract void translate(Object target);
+    /**
+     * Translate the captions, descriptions and values of {@code target} to the current Locale. This should only be
+     * called with a {@code target} which is annotated with {@link I18N}, but no errors occur if it hasn't
+     *
+     * @param target
+     */
+    public abstract void translate(Object target);
 
 }

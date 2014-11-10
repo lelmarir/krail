@@ -40,20 +40,12 @@ public class ResourceUtils {
      */
     public static File applicationBaseDirectory() {
         if (VaadinService.getCurrent() != null) {
-            File baseDir = VaadinService.getCurrent().getBaseDirectory();
-            log.info("Application base directory (from VaadinService) is {}", baseDir);
+            File baseDir = VaadinService.getCurrent()
+                                        .getBaseDirectory();
+            log.info("Application core directory (from VaadinService) is {}", baseDir);
             return baseDir;
         }
         throw new IllegalStateException("There is no current VaadinService");
-    }
-
-    /**
-     * a convenience method equivalent to creating a {@link File} object using the System property 'user.home'
-     *
-     * @return
-     */
-    public static File userHomeDirectory() {
-        return new File(System.getProperty("user.home"));
     }
 
     /**
@@ -63,6 +55,15 @@ public class ResourceUtils {
      */
     public static File userTempDirectory() {
         return new File(userHomeDirectory(), "temp");
+    }
+
+    /**
+     * a convenience method equivalent to creating a {@link File} object using the System property 'user.home'
+     *
+     * @return
+     */
+    public static File userHomeDirectory() {
+        return new File(System.getProperty("user.home"));
     }
 
     public static File configurationDirectory() {

@@ -14,5 +14,5 @@ package uk.q3c.krail.core.services;
 
 public interface ServiceStartListener {
 
-	void dependencyServiceStarted(Service service) throws Exception;
+    void dependencyServiceStarted(Service service) throws Exception;
 }

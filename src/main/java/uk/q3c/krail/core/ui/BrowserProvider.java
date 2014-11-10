@@ -13,16 +13,15 @@
 package uk.q3c.krail.core.ui;
 
 import com.google.inject.Provider;
-
 import com.vaadin.server.Page;
 import com.vaadin.server.WebBrowser;
 
 public class BrowserProvider implements Provider<WebBrowser> {
 
-	@Override
-	public WebBrowser get() {
-		Page page = Page.getCurrent();
-		return (page == null) ? null : page.getWebBrowser();
-	}
+    @Override
+    public WebBrowser get() {
+        Page page = Page.getCurrent();
+        return (page == null) ? null : page.getWebBrowser();
+    }
 
 }

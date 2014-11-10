@@ -18,12 +18,11 @@ import com.vaadin.ui.Notification;
  * Implementations of this provide a means of notifying a user with a message, and are used in conjunction with
  * {@link UserNotifier}. There are a set of sub-interfaces to identify the message as either an Error, Warning or
  * Information message
- * <p>
+ * <p/>
  * The intended use of this, and its sub-interfaces, is via the {@link UserNotifier}, which enables I18N support and
  * provides a configurable way of selecting notification methods.
  * 
  * @author David Sowerby
- * 
  */
 public interface UserNotification {
 

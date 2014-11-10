@@ -16,9 +16,8 @@ package uk.q3c.krail.core.view;
  * The View to use for a user to request that their system account is enabled. The default binding is to
  * {@link DefaultRequestSystemAccountEnableView}. The binding is in StandardViewModule. To bind this interface to your
  * own implementation, sub-class {@link ViewModule} and override the appropriate binding method.
- * 
+ *
  * @author David Sowerby 1 Jan 2013
- * 
  */
 public interface RequestSystemAccountEnableView extends KrailView {
 

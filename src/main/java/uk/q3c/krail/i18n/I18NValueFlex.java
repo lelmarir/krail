@@ -12,13 +12,13 @@
  */
 package uk.q3c.krail.i18n;
 
+import com.google.inject.BindingAnnotation;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Locale;
-
-import com.google.inject.BindingAnnotation;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER })
@@ -30,9 +30,11 @@ public @interface I18NValueFlex {
 	String valueKeyName() default "";
 
 	/**
-	 * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional parameter
+     * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional
+     * parameter
 	 * is specified, it will be used instead. This allows specific components to be fixed to display content in a
-	 * language different to the rest of the application. The format of the string should be as the IETF BCP 47 language
+     * language different to the rest of the application. The format of the string should be as the IETF BCP 47
+     * language
 	 * tag string; see {@link Locale#toLanguageTag()}
 	 */
 

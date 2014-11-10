@@ -17,12 +17,12 @@ import java.util.Locale;
 
 public interface I18NValueAnnotationReader<T extends Annotation> {
 
-	public abstract String value();
+    public abstract String value();
 
-	public abstract Locale locale();
+    public abstract Locale locale();
 
-	public abstract T getAnnotation();
+    public abstract T getAnnotation();
 
-	public abstract void setAnnotation(T annotation);
+    public abstract void setAnnotation(T annotation);
 
 }

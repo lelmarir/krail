@@ -12,14 +12,6 @@
  */
 package uk.q3c.krail.core.ui;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.q3c.krail.core.guice.uiscope.UIKey;
-import uk.q3c.krail.core.guice.uiscope.UIKeyProvider;
-import uk.q3c.krail.core.guice.uiscope.UIScope;
-import uk.q3c.krail.core.guice.uiscope.UIScoped;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -27,15 +19,20 @@ import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.q3c.krail.core.guice.uiscope.UIKey;
+import uk.q3c.krail.core.guice.uiscope.UIKeyProvider;
+import uk.q3c.krail.core.guice.uiscope.UIScope;
+import uk.q3c.krail.core.guice.uiscope.UIScoped;
 
 /**
  * A Vaadin UI provider which supports the use of Guice scoped UI (see {@link UIScoped}). If you do not need UIScope,
  * then just extend from UIProvider directly
- *
+ * <p/>
  * Subclasses should implement getUIClass(UIClassSelectionEvent event) to provide logic for selecting the UI class.
  *
  * @author David Sowerby, Will Temperley
- *
  */
 public abstract class ScopedUIProvider extends UIProvider implements Provider<ScopedUI> {
 	private static Logger log = LoggerFactory.getLogger(ScopedUIProvider.class);

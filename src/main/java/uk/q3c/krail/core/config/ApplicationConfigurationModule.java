@@ -16,7 +16,6 @@ package uk.q3c.krail.core.config;
  * The Guice module used to configure the application configuration service
  *
  * @author David Sowerby
- *
  */
 public class ApplicationConfigurationModule extends ConfigurationModuleBase {
 
@@ -35,7 +34,7 @@ public class ApplicationConfigurationModule extends ConfigurationModuleBase {
 
 	@Override
 	protected void bindConfigs() {
-		addConfig("Krail.ini", 0, true);
+        addConfig("krail.ini", 0, true);
 	}
 
 }

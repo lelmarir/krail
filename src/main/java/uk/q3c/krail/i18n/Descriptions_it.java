@@ -16,21 +16,22 @@ import com.google.common.collect.ImmutableMap;
 
 public class Descriptions_it extends Descriptions {
 
-	private static ImmutableMap<DescriptionKey, String> map;
-	static {
+    private static ImmutableMap<DescriptionKey, String> map;
 
-		map = new ImmutableMap.Builder<DescriptionKey, String>()
-				// @formatter:off
+    static {
+
+        map = new ImmutableMap.Builder<DescriptionKey, String>()
+                // @formatter:off
 				.put(DescriptionKey.Last_Name,"il cognome o il nome di famiglia")
 				.put(DescriptionKey.Confirm_Ok, "Confermare questo valore è Ok")
 				.build();
 				// @formatter:on
 
-	}
+    }
 
-	@Override
-	public ImmutableMap<DescriptionKey, String> getMap() {
-		return map;
-	}
+    @Override
+    public ImmutableMap<DescriptionKey, String> getMap() {
+        return map;
+    }
 
 }

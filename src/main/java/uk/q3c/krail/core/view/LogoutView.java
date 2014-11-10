@@ -13,18 +13,7 @@
 
 package uk.q3c.krail.core.view;
 
-import com.google.inject.Inject;
-import com.vaadin.ui.VerticalLayout;
 
-public abstract class VerticalViewBase extends LayoutViewBase<VerticalLayout> {
-    @Inject
-    protected VerticalViewBase() {
-        super(new VerticalLayout());
-    }
-    
-    @Override
-    public VerticalLayout getLayout() {
-    	return (VerticalLayout) super.getLayout();
-    }
+public interface LogoutView extends KrailView {
 
 }

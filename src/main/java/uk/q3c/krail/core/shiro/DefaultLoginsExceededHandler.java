@@ -14,10 +14,10 @@ package uk.q3c.krail.core.shiro;
 
 public class DefaultLoginsExceededHandler implements LoginsExceededHandler {
 
-	@Override
-	public void invoke() {
-		//
-		throw new RuntimeException("not yet implemented");
-	}
+    @Override
+    public void invoke() {
+        //
+        throw new RuntimeException("not yet implemented");
+    }
 
 }

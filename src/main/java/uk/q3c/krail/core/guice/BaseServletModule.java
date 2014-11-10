@@ -21,7 +21,7 @@ public class BaseServletModule extends ServletModule {
 	 */
 	@Override
 	protected void configureServlets() {
-		serve("/*").with(BaseServlet.class);	
+		serve("/*").with(BaseServlet.class);
 	}
-	
+
 	}

@@ -14,6 +14,6 @@ package uk.q3c.krail.core.push;
 
 public interface PushMessageListener {
 
-	void receiveMessage(String group, String message);
+    void receiveMessage(String group, String message);
 
 }

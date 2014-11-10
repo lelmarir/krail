@@ -16,34 +16,36 @@ import java.util.List;
 
 /**
  * T is the entity class
- * 
- * @author David Sowerby 29 Jan 2013
- * 
+ *
  * @param <T>
+ *
+ * @author David Sowerby 29 Jan 2013
  */
 public interface DAOBase<T> {
 
-	T save(T entity);
+    T save(T entity);
 
-	void commit();
+    void commit();
 
-	void close();
+    void close();
 
-	T newEntity();
+    T newEntity();
 
-	/**
-	 * Returns The object representing the entity id. This has to be an Object so that the DAO can be non-implementation
-	 * specific, but if you call this method make sure the recordId is of a valid type for the implementation
-	 * 
-	 * @param entity
-	 *            for which you want the identity
-	 * @return
-	 */
+    /**
+     * Returns The object representing the entity id. This has to be an Object so that the DAO can be
+     * non-implementation
+     * specific, but if you call this method make sure the recordId is of a valid type for the implementation
+     *
+     * @param entity
+     *         for which you want the identity
+     *
+     * @return
+     */
 
-	Object getIdentity(T entity);
+    Object getIdentity(T entity);
 
-	T load(Object identity);
+    T load(Object identity);
 
-	List<T> findAll();
+    List<T> findAll();
 
 }

@@ -12,17 +12,18 @@
  */
 package uk.q3c.krail.i18n;
 
-import java.lang.annotation.Annotation;
-
 import com.google.inject.Inject;
 
+import java.lang.annotation.Annotation;
+
 /**
- * Reads any annotation which conforms to the standard of an {@link I18N} annotation, that is, that it provides the same
+ * Reads any annotation which conforms to the standard of an {@link I18N} annotation, that is, that it provides the
+ * same
  * parameters as {@link I18N}
  *
- * @see I18NFlexReader
  * @author David Sowerby
  * @date 2 May 2014
+ * @see I18NFlexReader
  */
 public class I18NValueReader extends I18NReaderBase implements I18NValueAnnotationReader<Annotation> {
 
@@ -35,7 +36,6 @@ public class I18NValueReader extends I18NReaderBase implements I18NValueAnnotati
 	}
 
 	/**
-	 *
 	 * @see uk.q3c.krail.i18n.I18NAnnotationReader#caption()
 	 */
 	@Override

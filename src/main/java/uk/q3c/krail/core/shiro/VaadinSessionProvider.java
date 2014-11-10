@@ -12,9 +12,8 @@
  */
 package uk.q3c.krail.core.shiro;
 
-import org.apache.shiro.subject.Subject;
-
 import com.vaadin.server.VaadinSession;
+import org.apache.shiro.subject.Subject;
 
 /**
  * The provides an interface for an implementation to wrap the static method of obtaining the current VaadinSession,
@@ -22,7 +21,6 @@ import com.vaadin.server.VaadinSession;
  * used in a background thread, some other means of storing it would be required
  * 
  * @author David Sowerby 15 Sep 2013
- * 
  */
 public interface VaadinSessionProvider {
 

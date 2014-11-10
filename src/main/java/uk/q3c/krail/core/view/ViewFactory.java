@@ -15,7 +15,9 @@ package uk.q3c.krail.core.view;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 
 /**
- * Implementation return an injected KrailView instance, scoped to {@link UIScoped}. The interface is provided primarily to
+ * Implementation return an injected KrailView instance, scoped to {@link UIScoped}. The interface is provided
+ * primarily
+ * to
  * facilitate testing.
  * 
  * @author David Sowerby
