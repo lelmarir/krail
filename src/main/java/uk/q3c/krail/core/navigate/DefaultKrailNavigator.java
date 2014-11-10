@@ -54,7 +54,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author David Sowerby
  * @date 18 Apr 2014
  */
-public class DefaultKrailNavigator implements KrailNavigator, AuthenticationListener {
+public class DefaultKrailNavigator implements Navigator, AuthenticationListener {
 
 	private static final long serialVersionUID = -1199874611306964538L;
 

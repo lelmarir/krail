@@ -15,7 +15,7 @@ package uk.q3c.krail.core.view;
 
 import com.vaadin.ui.Component;
 
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 
@@ -23,7 +23,7 @@ import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEve
 /**
  * A view is constructed by the {@link ViewFactory} from a Provider defined in
  * the sitemap building process. When the view is selected for use, calls are
- * made against {@link KrailViewChangeListener}s added to {@link KrailNavigator}, and
+ * made against {@link KrailViewChangeListener}s added to {@link Navigator}, and
  * {@link NavigationAwareView} inteface, in the following order:
  * <ol>
  * <li>

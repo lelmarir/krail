@@ -20,7 +20,7 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 
 import com.google.inject.Inject;
 import com.vaadin.server.DefaultErrorHandler;
@@ -42,13 +42,13 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 	private final UnauthenticatedExceptionHandler authenticationHandler;
 	private final UnauthorizedExceptionHandler authorisationHandler;
 	private final InvalidURIExceptionHandler invalidUriHandler;
-	private final KrailNavigator navigator;
+	private final Navigator navigator;
 
 	@Inject
 	protected KrailErrorHandler(
 			UnauthenticatedExceptionHandler authenticationHandler,
 			UnauthorizedExceptionHandler authorisationHandler,
-			InvalidURIExceptionHandler invalidUriHandler, KrailNavigator navigator) {
+			InvalidURIExceptionHandler invalidUriHandler, Navigator navigator) {
 		super();
 		this.authenticationHandler = authenticationHandler;
 		this.authorisationHandler = authorisationHandler;

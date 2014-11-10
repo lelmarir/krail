@@ -1,6 +1,6 @@
 package uk.q3c.krail.core.view;
 
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
 public class KrailViewChangeEventImpl implements KrailViewChangeEvent {
@@ -23,7 +23,7 @@ public class KrailViewChangeEventImpl implements KrailViewChangeEvent {
 			this.cancel = true;
 		}
 
-		public KrailNavigator getNavigator() {
+		public Navigator getNavigator() {
 			return delegate.getNavigator();
 		}
 
@@ -37,12 +37,12 @@ public class KrailViewChangeEventImpl implements KrailViewChangeEvent {
 		
 	}
 	
-	private final KrailNavigator navigator;
+	private final Navigator navigator;
 	private final NavigationState oldNavigationState;
 	private final NavigationState newNavigationState;
 	
 
-	public KrailViewChangeEventImpl(KrailNavigator navigator, NavigationState oldNavigationState, NavigationState newNavigationState) {
+	public KrailViewChangeEventImpl(Navigator navigator, NavigationState oldNavigationState, NavigationState newNavigationState) {
 		super();
 		this.navigator = navigator;
 		this.oldNavigationState = oldNavigationState;
@@ -50,7 +50,7 @@ public class KrailViewChangeEventImpl implements KrailViewChangeEvent {
 	}
 
 	@Override
-	public KrailNavigator getNavigator() {
+	public Navigator getNavigator() {
 		return navigator;
 	}
 

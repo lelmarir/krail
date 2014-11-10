@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.StandardViewKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
@@ -15,10 +15,10 @@ import com.google.inject.Inject;
 public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedExceptionHandler, Serializable {
 
 	private final UserNotifier notifier;
-	private final KrailNavigator navigator;
+	private final Navigator navigator;
 
 	@Inject
-	protected DefaultUnauthenticatedExceptionHandler(UserNotifier notifier, KrailNavigator navigator) {
+	protected DefaultUnauthenticatedExceptionHandler(UserNotifier notifier, Navigator navigator) {
 		super();
 		this.notifier = notifier;
 		this.navigator = navigator;

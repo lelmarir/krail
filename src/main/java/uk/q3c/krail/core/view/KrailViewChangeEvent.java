@@ -1,6 +1,6 @@
 package uk.q3c.krail.core.view;
 
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
 public interface KrailViewChangeEvent {
@@ -12,7 +12,7 @@ public interface KrailViewChangeEvent {
 
 	}
 
-	KrailNavigator getNavigator();
+	Navigator getNavigator();
 	NavigationState getSourceNavigationState();
 	NavigationState getTargetNavigationState();
 

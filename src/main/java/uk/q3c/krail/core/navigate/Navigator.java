@@ -27,7 +27,7 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
  * @author David Sowerby 20 Jan 2013
  * 
  */
-public interface KrailNavigator extends UriFragmentChangedListener,
+public interface Navigator extends UriFragmentChangedListener,
 		KrailViewChangeNotifier {
 
 	void navigateTo(String fragment) throws InvalidURIException;

@@ -17,7 +17,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.VerticalLayout;
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.push.Broadcaster;
 import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.user.notify.UserNotifier;
@@ -37,7 +37,7 @@ public class DefaultApplicationUI extends ScopedUI {
 	private VerticalLayout baseLayout;
 
 	@Inject
-	protected DefaultApplicationUI(KrailNavigator navigator,
+	protected DefaultApplicationUI(Navigator navigator,
 			ErrorHandler errorHandler, ConverterFactory converterFactory,
 			Broadcaster broadcaster, PushMessageRouter pushMessageRouter,
 			ApplicationTitle applicationTitle, Translate translate,

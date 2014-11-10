@@ -14,7 +14,6 @@ package uk.q3c.krail.core.ui;
 
 import com.vaadin.annotations.Push;
 import com.vaadin.data.util.converter.ConverterFactory;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
@@ -23,13 +22,15 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.q3c.krail.core.config.KrailConfigurationException;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.push.Broadcaster;
 import uk.q3c.krail.core.push.Broadcaster.BroadcastListener;
 import uk.q3c.krail.core.push.PushMessageRouter;
@@ -60,7 +61,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     private final ErrorHandler errorHandler;
     private final ConverterFactory converterFactory;
     private final PushMessageRouter pushMessageRouter;
-    private final KrailNavigator navigator;
+    private final Navigator navigator;
     private final ApplicationTitle applicationTitle;
     private final Translate translate;
     private final I18NProcessor translator;
@@ -70,7 +71,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     private KrailView view;
 
 	//FIXME: too many parameters
-    protected ScopedUI(KrailNavigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
+    protected ScopedUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
                        Broadcaster broadcaster, PushMessageRouter pushMessageRouter,
                        ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
                        I18NProcessor translator) {
@@ -120,12 +121,12 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
      */
     @Override
     @Deprecated
-    public Navigator getNavigator() {
+    public com.vaadin.navigator.Navigator getNavigator() {
         return null;
     }
 
     @Override
-    public void setNavigator(Navigator navigator) {
+    public void setNavigator(com.vaadin.navigator.Navigator navigator) {
         throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
     }
 
@@ -181,7 +182,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
 		}		
     }
 
-    public KrailNavigator getKrailNavigator() {
+    public Navigator getKrailNavigator() {
         return navigator;
     }
 

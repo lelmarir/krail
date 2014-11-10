@@ -21,10 +21,10 @@ import com.google.inject.Inject;
 public class DefaultInvalidURIExceptionHandler implements InvalidURIExceptionHandler {
 
 	private final UserNotifier notifier;
-	private final KrailNavigator navigator;
+	private final Navigator navigator;
 
 	@Inject
-	protected DefaultInvalidURIExceptionHandler(UserNotifier notifier, KrailNavigator navigator){
+	protected DefaultInvalidURIExceptionHandler(UserNotifier notifier, Navigator navigator){
 		this.notifier = notifier;
 		this.navigator = navigator;
 	}

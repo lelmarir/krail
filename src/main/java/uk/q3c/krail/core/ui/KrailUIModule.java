@@ -3,7 +3,7 @@ package uk.q3c.krail.core.ui;
 import uk.q3c.krail.core.data.KrailDefaultConverterFactory;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.DefaultKrailNavigator;
-import uk.q3c.krail.core.navigate.KrailNavigator;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.i18n.I18NKey;
 import uk.q3c.krail.i18n.LabelKey;
 
@@ -52,7 +52,7 @@ public abstract class KrailUIModule extends AbstractModule {
 	protected abstract void bindUIProvider();
 
 	protected void bindNavigator() {
-		bind(KrailNavigator.class).to(DefaultKrailNavigator.class).in(UIScoped.class);
+		bind(Navigator.class).to(DefaultKrailNavigator.class).in(UIScoped.class);
 	}
 
 	/**
