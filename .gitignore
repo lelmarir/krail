@@ -15,7 +15,10 @@ README.md~
 .idea/workspace.xml
 .idea/tasks.xml
 /error-screenshots
+*.properties~
 
 
 
 .idea/libraries/
+
+gradle
