@@ -44,20 +44,20 @@ import uk.co.q3c.v7.base.view.V7ViewChangeEvent.CancellableV7ViewChangeEvent;
  */
 public interface V7View {
 
-	/**
+    /**
 	 * To enable implementations to implement this interface without descending
 	 * from Component. If the implementation does descend from Component, just
 	 * return 'this'. Throws a ViewBuildException if the root component has not
 	 * been set
-	 * 
-	 * @return
-	 */
-	public Component getRootComponent();
+     *
+     * @return
+     */
+    public Component getRootComponent();
 
-	/**
-	 * A name for the view, typically displayed in a title bar
-	 * 
-	 * @return
-	 */
-	public String viewName();
+    /**
+     * A name for the view, typically displayed in a title bar
+     *
+     * @return
+     */
+    public String viewName();
 }

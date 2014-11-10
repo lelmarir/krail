@@ -162,13 +162,13 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
         Page page = getPage();
         page.addUriFragmentChangedListener(navigator);
 
+
         setErrorHandler(errorHandler);
         page.setTitle(pageTitle());
 
-        //remove this because it results in a confusing model for setting locale.  DefaultCurrentLocale already has a
-        // logic for setting locale from user options and the browser
-        // We want to use the same default locale as Vaadin (held by the session and usually the browser locale)
-        //        currentLocale.setLocale(session.getLocale(), false);
+        // now that browser is active, and user sitemap loaded, set up currentLocale
+        currentLocale.readFromEnvironment();
+
 
         doLayout();
         translator.translate(this);
@@ -205,8 +205,8 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
         }
         screenLayout.setSizeFull();
         if (viewDisplayPanel.getParent() == null) {
-            String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a " +
-                    "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
+            String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
+                    + "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
             log.error(msg);
             throw new V7ConfigurationException(msg);
         }
@@ -254,7 +254,10 @@ public abstract class ScopedUI extends UI implements V7ViewHolder, BroadcastList
     @Override
     public void localeChanged(Locale toLocale) {
         translator.translate(this);
+        //during initial set up view has not been created but locale change gets called for other components
+        if (getView() != null) {
         translator.translate(getView());
+    }
     }
 
     public V7View getView() {
