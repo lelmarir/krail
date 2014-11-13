@@ -21,10 +21,5 @@ public abstract class VerticalViewBase extends LayoutViewBase<VerticalLayout> {
     protected VerticalViewBase() {
         super(new VerticalLayout());
     }
-    
-    @Override
-    public VerticalLayout getLayout() {
-    	return (VerticalLayout) super.getLayout();
-    }
 
 }

@@ -19,7 +19,6 @@ import com.vaadin.ui.GridLayout;
 public abstract class GridViewBase extends LayoutViewBase<GridLayout> {
     @Inject
     protected GridViewBase() {
-        super();
-        setRootComponent(new GridLayout());
+        super(new GridLayout());
     }
 }
