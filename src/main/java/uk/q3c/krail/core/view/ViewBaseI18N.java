@@ -21,25 +21,28 @@ import com.vaadin.ui.Component;
 public abstract class ViewBaseI18N<R extends Component> extends ViewBase<R> {
 
     private final Translate translate;
-	private I18NKey<?> nameKey;
+    private I18NKey nameKey;
 
-	@Inject
-	protected ViewBaseI18N(Translate translate) {
-		super();
-		this.translate = translate;
-	}
+    @Inject
+    protected ViewBaseI18N(Translate translate) {
+        super();
+        this.translate = translate;
+    }
 
-	public I18NKey<?> getNameKey() {
-		return nameKey;
-	}
+    public I18NKey getNameKey() {
+        return nameKey;
+    }
 
-	public void setNameKey(I18NKey<?> nameKey) {
-		this.nameKey = nameKey;
-	}
+    public <E extends Enum<E> & I18NKey> void setNameKey(E nameKey) {
+        this.nameKey = nameKey;
+    }
 
-	@Override
-	public String viewName() {
-		return translate.from(nameKey);
-	}
+    @Override
+    public String viewName() {
+        return translateKey();
+    }
 
+    private <E extends Enum<E> & I18NKey> String translateKey() {
+        return translate.from((E) nameKey);
+    }
 }

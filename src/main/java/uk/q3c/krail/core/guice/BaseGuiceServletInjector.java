@@ -35,6 +35,7 @@ import uk.q3c.krail.core.services.ServicesMonitorModule;
 import uk.q3c.krail.core.shiro.ShiroVaadinModule;
 import uk.q3c.krail.core.shiro.StandardShiroModule;
 import uk.q3c.krail.core.user.UserModule;
+import uk.q3c.krail.core.user.opt.UserOptionModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.i18n.I18NModule;
 
@@ -47,144 +48,155 @@ import com.google.inject.servlet.ServletModule;
 public abstract class BaseGuiceServletInjector extends GuiceServletContextListener {
 	private static Logger log = LoggerFactory.getLogger(BaseGuiceServletInjector.class);
 
-	protected static Injector injector;
+    protected static Injector injector;
 
-	protected BaseGuiceServletInjector() {
-		super();
-	}
-	
+    protected BaseGuiceServletInjector() {
+        super();
+    }
+
 	public Injector getInjector(boolean create) {
 		if (injector == null && create) {
 			createInjector();
-		}
+        }
 		return injector;
-	}
-	
-	/**
-	 * Module instances for the base should be added in {@link #getModules()}. Module instance for the app using Krail
-	 * should be added to {@link AppModules#appModules()}
-	 *
-	 * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
-	 */
-	@Override
+    }
+
+    /**
+     * Module instances for the base should be added in {@link #getModules()}. Module instance for the app using Krail
+     * should be added to {@link AppModules#appModules()}
+     *
+     * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
+     */
+    @Override
 	protected Injector getInjector() {
 		return getInjector(true);
-	}
+    }
 
-	protected void createInjector() {
-		injector = Guice.createInjector(getModules());
-		log.debug("injector created");
+    protected void createInjector() {
+        injector = Guice.createInjector(getModules());
+        log.debug("injector created");
 
-		// By default Shiro provides a binding to DefaultSecurityManager, but that is replaced by a binding to
-		// KrailSecurityManager in DefaultShiroModule#bindSecurityManager (or potentially to another security manager if
-		// the developer overrides that method)
-		SecurityManager securityManager = injector.getInstance(SecurityManager.class);
-		SecurityUtils.setSecurityManager(securityManager);
+        // By default Shiro provides a binding to DefaultSecurityManager, but that is replaced by a binding to
+        // KrailSecurityManager in DefaultShiroModule#bindSecurityManager (or potentially to another security manager if
+        // the developer overrides that method)
+        SecurityManager securityManager = injector.getInstance(SecurityManager.class);
+        SecurityUtils.setSecurityManager(securityManager);
 
-	}
+    }
 
-	private List<Module> getModules() {
-		List<Module> baseModules = new ArrayList<>();
+    private List<Module> getModules() {
+        List<Module> baseModules = new ArrayList<>();
 
-		baseModules.add(i18NModule());
-		baseModules.add(applicationConfigurationModule());
+        baseModules.add(i18NModule());
+        baseModules.add(applicationConfigurationModule());
 		baseModules.add(sitemapModule());
 
-		baseModules.add(new ThreadScopeModule());
-		baseModules.add(new UIScopeModule());
-		baseModules.add(new VaadinSessionScopeModule());
+        baseModules.add(new ThreadScopeModule());
+        baseModules.add(new UIScopeModule());
+        baseModules.add(new VaadinSessionScopeModule());
 
-		baseModules.add(new ServicesMonitorModule());
+        baseModules.add(new ServicesMonitorModule());
 
-		baseModules.add(shiroModule());
-		baseModules.add(shiroVaadinModule());
-		baseModules.add(new ShiroAopModule());
+        baseModules.add(shiroModule());
+        baseModules.add(shiroVaadinModule());
+        baseModules.add(new ShiroAopModule());
 
-		baseModules.add(servletModule());
+        baseModules.add(servletModule());
 
-		baseModules.add(viewModule());
+        baseModules.add(viewModule());
 
-		baseModules.add(userModule());
+        baseModules.add(userModule());
 
-		addAppModules(baseModules);
-		addSitemapModules(baseModules);
-		return baseModules;
-	}
+        baseModules.add(userOptionModule());
 
-	protected Module i18NModule() {
-		return new I18NModule();
-	}
+        addAppModules(baseModules);
+        addSitemapModules(baseModules);
+        return baseModules;
+    }
 
-	protected Module applicationConfigurationModule() {
-		return new ApplicationConfigurationModule();
-	}
+    /**
+     * Override this if you have provided your own {@link UserOptionModule}
+     *
+     * @return
+     */
+    protected Module userOptionModule() {
+        return new UserOptionModule();
+    }
 
-	/**
+    protected Module i18NModule() {
+        return new I18NModule();
+    }
+
+    protected Module applicationConfigurationModule() {
+        return new ApplicationConfigurationModule();
+    }
+
+    /**
 	 * Modules used in the creation of the {@link MasterSitemap} do not actually need to be separated, this just makes a
-	 * convenient way of seeing them as a group
-	 *
-	 * @param baseModules
-	 */
-	protected void addSitemapModules(List<Module> baseModules) {
-	}
+     * convenient way of seeing them as a group
+     *
+     * @param baseModules
+     */
+    protected void addSitemapModules(List<Module> baseModules) {
+    }
 
-	/**
-	 * Override this if you have provided your own {@link ServletModule}
-	 *
-	 * @return
-	 */
-	protected Module servletModule() {
-		return new BaseServletModule();
-	}
+    /**
+     * Override this if you have provided your own {@link ServletModule}
+     *
+     * @return
+     */
+    protected Module servletModule() {
+        return new BaseServletModule();
+    }
 
-	/**
-	 * Override this method if you have sub-classed {@link ShiroVaadinModule} to provide your own bindings for Shiro
-	 * related exceptions.
-	 *
-	 * @return
-	 */
-	protected Module shiroVaadinModule() {
-		return new ShiroVaadinModule();
-	}
+    /**
+     * Override this method if you have sub-classed {@link ShiroVaadinModule} to provide your own bindings for Shiro
+     * related exceptions.
+     *
+     * @return
+     */
+    protected Module shiroVaadinModule() {
+        return new ShiroVaadinModule();
+    }
 
 	private Module sitemapModule() {
 		return new SitemapModule();
-	}
+    }
 
-	/**
-	 * Override this if you have sub-classed {@link ViewModule} to provide bindings to your own standard page views
-	 */
-	protected Module viewModule() {
-		return new ViewModule();
-	}
+    /**
+     * Override this if you have sub-classed {@link ViewModule} to provide bindings to your own standard page views
+     */
+    protected Module viewModule() {
+        return new ViewModule();
+    }
 
-	/**
-	 * Override this method if you have sub-classed {@link StandardShiroModule} to provide bindings to your Shiro
-	 * related implementations (for example, {@link Realm} and {@link CredentialsMatcher}
-	 *
-	 * @param servletContext
-	 * @param ini
-	 * @return
-	 */
+    /**
+     * Override this method if you have sub-classed {@link StandardShiroModule} to provide bindings to your Shiro
+     * related implementations (for example, {@link Realm} and {@link CredentialsMatcher}
+     *
+     * @param servletContext
+     * @param ini
+     * @return
+     */
 
-	protected Module shiroModule() {
-		return new StandardShiroModule();
-	}
+    protected Module shiroModule() {
+        return new StandardShiroModule();
+    }
 
-	/**
+    /**
 	 * Override this if you have sub-classed {@link UserModule} to provide bindings to your user related implementations
-	 */
-	private Module userModule() {
-		return new UserModule();
-	}
+     */
+    private Module userModule() {
+        return new UserModule();
+    }
 
-	/**
-	 * Add as many application specific Guice modules as you wish by overriding this method.
-	 *
-	 * @param baseModules
-	 * @param ini
-	 */
-	protected abstract void addAppModules(List<Module> baseModules);
+    /**
+     * Add as many application specific Guice modules as you wish by overriding this method.
+     *
+     * @param baseModules
+     * @param ini
+     */
+    protected abstract void addAppModules(List<Module> baseModules);
 
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {

@@ -38,7 +38,7 @@ public abstract class KrailUIModule extends AbstractModule {
 	 * override this method to provide the I18Nkey which defines your application title (which appears in your browser
 	 * tab)
 	 */
-	protected I18NKey<?> applicationTitleKey() {
+	protected I18NKey applicationTitleKey() {
 		return LabelKey.Krail;
 	}
 

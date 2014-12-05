@@ -31,7 +31,8 @@ public class DefaultTranslate implements Translate {
 
 
     private final CurrentLocale currentLocale;
-    private TreeMap<Integer, PatternSource> patternSources;
+    private final Set<Locale> supportedLocales;
+    private PatternSource patternSource;
 
     /**
      * Creates a local TreeMap copy (to sort by key)
@@ -40,10 +41,11 @@ public class DefaultTranslate implements Translate {
      * @param currentLocale
      */
     @Inject
-    protected DefaultTranslate(@PatternSources Map<Integer, PatternSource> patternSources,
-                               CurrentLocale currentLocale) {
+    protected DefaultTranslate(PatternSource patternSource, CurrentLocale
+            currentLocale, @SupportedLocales Set<Locale> supportedLocales) {
         super();
-        this.patternSources = new TreeMap<>(patternSources);
+        this.patternSource = patternSource;
+        this.supportedLocales = supportedLocales;
         this.currentLocale = currentLocale;
     }
 
@@ -59,7 +61,7 @@ public class DefaultTranslate implements Translate {
      * @return the translated value, or "key is null" if {@code key} is null
      */
     @Override
-    public String from(I18NKey<?> key, Object... arguments) {
+    public String from(I18NKey key, Object... arguments) {
         return from(key, currentLocale.getLocale(), arguments);
     }
 
@@ -69,8 +71,7 @@ public class DefaultTranslate implements Translate {
      * <p/>
      * <p/>
      * If the key does not provide a pattern from any of the sources, and key is an Enum, the enum.name() is returned.
-     * Before returning the
-     * enum.name(), underscores are replaced with spaces.
+     * Before returning the enum.name(), underscores are replaced with spaces.
      * <p/>
      * If the key does not provide a pattern from any of the sources, and key is not an Enum, the key.toString() is
      * returned
@@ -83,22 +84,20 @@ public class DefaultTranslate implements Translate {
      * @param arguments
      *         the arguments used to expand the pattern, if required
      *
+     * @throws UnsupportedLocaleException if locale is not in {@link #supportedLocales}
+     *
      * @return the translated value as described above, or "key is null" if {@code key} is null
      */
     @Override
-    public String from(I18NKey<?> key, Locale locale, Object... arguments) {
+    public <E extends Enum<E> & I18NKey> String from(I18NKey key, Locale locale, Object... arguments) {
+        if (!supportedLocales.contains(locale)) {
+            throw new UnsupportedLocaleException(locale);
+        }
         if (key == null) {
             return "key is null";
         }
-
-        Optional<String> pattern = Optional.absent();
-        for (Integer patternIndex : patternSources.keySet()) {
-            pattern = patternSources.get(patternIndex)
-                                    .retrievePattern(key, locale);
-            if (pattern.isPresent()) {
-                break;
-            }
-        }
+        E k = typeBridge(key);
+        Optional<String> pattern = patternSource.retrievePattern((E) key, locale);
 
 
         //If no pattern defined use the enum name or toString()
@@ -120,7 +119,7 @@ public class DefaultTranslate implements Translate {
         List<Object> args = new ArrayList(Arrays.asList(arguments));
         for (int i = 0; i < args.size(); i++) {
             if (args.get(i) instanceof I18NKey) {
-                String translation = from((I18NKey) args.get(i));
+                String translation = from((E) args.get(i));
                 args.remove(i);
                 args.add(i, translation);
             }
@@ -137,5 +136,9 @@ public class DefaultTranslate implements Translate {
     @Override
     public Collator collator() {
         return Collator.getInstance(currentLocale.getLocale());
+    }
+
+    private <E extends Enum<E> & I18NKey> E typeBridge(I18NKey k) {
+        return (E) k;
     }
 }

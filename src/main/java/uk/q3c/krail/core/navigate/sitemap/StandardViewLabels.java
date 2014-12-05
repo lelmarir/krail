@@ -10,30 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.q3c.krail.i18n;
+package uk.q3c.krail.core.navigate.sitemap;
+
+import uk.q3c.krail.i18n.Descriptions;
+import uk.q3c.krail.i18n.EnumResourceBundle;
 
 /**
- * The base for the resource bundle of {@link Messages}. The separation between them is arbitrary, but helps break down
+ * The base for the resource bundle of {@link StandardPageLabels}. The separation between them is arbitrary, but helps
+ * break down
  * what could other wise be long lists, and only one of them needs to look up parameter values:
  * <ol>
- * <li>{@link Labels} : short, usually one or two words, no parameters, generally used as captions
+ * <li>{@link StandardPageLabels} : short, usually one or two words, no parameters, generally used as captions
  * <li>{@link Descriptions} : longer, typically several words, no parameters, generally used in tooltips
  * <li>{@link Messages} : contains parameters, typically used for user messages.
  *
  * @author David Sowerby 3 Aug 2013
  */
-public class Messages extends EnumResourceBundle<MessageKey> {
+public class StandardViewLabels extends EnumResourceBundle<StandardViewKey> {
 
 
-    public Messages() {
-        super(MessageKey.class);
+    public StandardViewLabels() {
+        super(StandardViewKey.class);
     }
 
     @Override
     protected void loadMap(Class<Enum<?>> enumKeyClass) {
-        put(MessageKey.invalidURI, "{0} is not a valid page");
-        put(MessageKey.Service_not_Started, "You cannot use service {0} until it has been started");
-                put(MessageKey.LocaleChange, "Language and Country changed to {0}");
 
     }
 

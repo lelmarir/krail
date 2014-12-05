@@ -12,25 +12,30 @@
  */
 package uk.q3c.krail.i18n;
 
-public enum DescriptionKey implements I18NKey<Descriptions> {
-	_nullkey_,
-	Account_Already_In_Use,
-	Account_is_Disabled,
-	Account_Expired,
-	Account_Locked,
-	Application_Configuration_Service,
-	Confirm_Ok,
-	Enter_your_user_name,
-	Invalid_Login,
-	Last_Name,
-	No_Permission,
-	Please_log_in,
-	Select_from_available_languages,
-	Sitemap_Service,
-	Too_Many_Login_Attempts,
-	Unknown_Account,
+public enum DescriptionKey implements I18NKey {
+    _nullkey_,
+    Account_Already_In_Use,
+    Account_is_Disabled,
+    Account_Expired,
+    Account_Locked,
+    Application_Configuration_Service,
+    Confirm_Ok,
+    Enter_your_user_name,
+    Invalid_Login,
+    Last_Name,
+    No_Permission,
+    Please_log_in,
+    Select_from_available_languages,
+    Sitemap_Service,
+    Too_Many_Login_Attempts,
+    Unknown_Account,
 	You_have_not_logged_in,
 	Generic_Authentication_Exception, 
 	Login_Error_Caption;
+
+	@Override
+	public String bundleName() {
+		return "uk.q3c.krail.i18n.Descriptions";
+	}
 
 }

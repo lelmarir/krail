@@ -35,10 +35,7 @@ import uk.q3c.krail.core.push.Broadcaster.BroadcastListener;
 import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
-import uk.q3c.krail.i18n.CurrentLocale;
-import uk.q3c.krail.i18n.I18NProcessor;
-import uk.q3c.krail.i18n.LocaleChangeListener;
-import uk.q3c.krail.i18n.Translate;
+import uk.q3c.krail.i18n.*;
 
 import java.util.Locale;
 
@@ -192,7 +189,8 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
      * @return
      */
     protected String pageTitle() {
-        return translate.from(applicationTitle.getTitleKey());
+        I18NKey key = applicationTitle.getTitleKey();
+        return translate.from(key);
     }
 
     /**

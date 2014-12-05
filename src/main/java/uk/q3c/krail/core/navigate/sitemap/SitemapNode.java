@@ -4,7 +4,7 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
 import uk.q3c.krail.core.view.KrailView;
 
 public interface SitemapNode {
-	
+
 	String getUriPattern();
 
 	Class<? extends KrailView> getViewClass();

@@ -12,36 +12,36 @@
  */
 package uk.q3c.krail.core.navigate;
 
-import java.util.Set;
-
 import uk.q3c.krail.i18n.I18NKey;
+
+import java.util.Set;
 
 @SuppressWarnings("rawtypes")
 public class LabelKeyForName {
-	private final Class<? extends Enum> labelKeysClass;
+    private final Class<? extends Enum> labelKeysClass;
 
-	public LabelKeyForName(Class<? extends Enum> labelKeysClass) {
-		super();
-		this.labelKeysClass = labelKeysClass;
+    public LabelKeyForName(Class<? extends Enum> labelKeysClass) {
+        super();
+        this.labelKeysClass = labelKeysClass;
 
-	}
+    }
 
-	@SuppressWarnings({ "unchecked" })
-	public I18NKey<?> keyForName(String keyName, Set<String> missingEnums) {
-		if (keyName == null) {
-			// don't add to missingEnums, null can be legitimate
-			return null;
-		}
-		try {
-			Enum labelKey = Enum.valueOf(labelKeysClass, keyName);
-			I18NKey<?> i18nKey = (I18NKey<?>) labelKey;
-			return i18nKey;
-		} catch (Exception e) {
-			// flagAsMissing
-			if (missingEnums != null) {
-				missingEnums.add(keyName);
-			}
-			return null;
-		}
-	}
+    @SuppressWarnings({"unchecked"})
+    public I18NKey keyForName(String keyName, Set<String> missingEnums) {
+        if (keyName == null) {
+            // don't add to missingEnums, null can be legitimate
+            return null;
+        }
+        try {
+            Enum labelKey = Enum.valueOf(labelKeysClass, keyName);
+            I18NKey i18nKey = (I18NKey) labelKey;
+            return i18nKey;
+        } catch (Exception e) {
+            // flagAsMissing
+            if (missingEnums != null) {
+                missingEnums.add(keyName);
+            }
+            return null;
+        }
+    }
 }

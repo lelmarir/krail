@@ -25,30 +25,30 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 
 public class DefaultUserNotifier implements UserNotifier, Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final Translate translate;
+    private final Translate translate;
 
-	@Inject
+    @Inject
 	protected DefaultUserNotifier(Translate translate) {
-		this.translate = translate;
+        this.translate = translate;
 
-	}
+    }
 
-	@Override
+    @Override
 	public void show(NotificationType type, MessageKey description,
 			Object... arguments) {
 		Notification n = new Notification(translate.from(
 				description, arguments), convertType(type));
 		show(n);
-	}
+    }
 
-	@Override
+    @Override
 	public void show(NotificationType type, DescriptionKey description) {
 		Notification n = new Notification(translate.from(
 				description), convertType(type));
 		show(n);
-	}
+        }
 
 	private Type convertType(NotificationType type) {
 		switch (type) {
@@ -60,9 +60,9 @@ public class DefaultUserNotifier implements UserNotifier, Serializable {
 			return Type.HUMANIZED_MESSAGE;
 		default:
 			return Type.ERROR_MESSAGE;
-		}
-	}
-	
+        }
+    }
+
 	private void show(Notification n) {
 		n.setPosition(Position.TOP_CENTER);
 		n.setDelayMsec(1000);

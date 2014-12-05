@@ -14,54 +14,65 @@ package uk.q3c.krail.core.user.opt;
 
 import org.joda.time.DateTime;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- *
- * A set of user options. Although not mandatory, typically the option group and option are the simple class name and
+ *  * A set of user options. Although not mandatory, typically the option group and option are the simple class name and
  * field of the object (respectively) requiring the option value. <br>
  * <br>
  * The {@link UserOptionStore} into the constructor of the implementation of this interface to enable use of different
  * storage methods. See {@link DefaultUserOption} for an example <br>
  * <br>
- * all the get methods follow the same principle - a default value is supplied by the caller and returned if there is no
- * value for the required option in the store. This means that the default value is set by the caller from a point close
+ * all the get methods follow the same principle - a default value is supplied by the caller and returned if there is
+ * no
+ * value for the required option in the store. This means that the default value is set by the caller from a point
+ * close
  * to where that value is used.<br>
  * <br>
  * There is both a String and enum option to specify the option property - enums are better for type safety, but there
  * may also be a need to generated the property name dynamically
  *
  * @author David Sowerby 17 Jul 2013
- *
  */
 public interface UserOption {
 
-	public void setOption(String optionGroup, String option, Object value);
+    public void setOption(String optionGroup, String option, Object value);
 
-	public void setOption(String optionGroup, UserOptionProperty option, Object value);
+    public void setOption(String optionGroup, Enum<?> option, Object value);
 
-	public int getOptionAsInt(String optionGroup, String option, int defaultValue);
+    public boolean getOptionAsBoolean(String optionGroup, String option, boolean defaultValue);
 
-	public String getOptionAsString(String optionGroup, String option, String defaultValue);
+    public boolean getOptionAsBoolean(String optionGroup, Enum<?> option, boolean defaultValue);
 
-	public DateTime getOptionAsDateTime(String optionGroup, String option, DateTime defaultValue);
+    public DateTime getOptionAsDateTime(String optionGroup, String option, DateTime defaultValue);
 
-	public double getOptionAsDouble(String optionGroup, String option, double defaultValue);
+    public DateTime getOptionAsDateTime(String optionGroup, Enum<?> option, DateTime defaultValue);
 
-	public boolean getOptionAsBoolean(String optionGroup, String option, boolean defaultValue);
+    public double getOptionAsDouble(String optionGroup, String option, double defaultValue);
 
-	public Enum<?> getOptionAsEnum(String optionGroup, String option, Enum<?> defaultValue);
+    public double getOptionAsDouble(String optionGroup, Enum<?> option, double defaultValue);
 
-	public int getOptionAsInt(String optionGroup, UserOptionProperty option, int defaultValue);
+    public Enum<?> getOptionAsEnum(String optionGroup, String option, Enum<?> defaultValue);
 
-	public String getOptionAsString(String optionGroup, UserOptionProperty option, String defaultValue);
+    public Enum<?> getOptionAsEnum(String optionGroup, Enum<?> option, Enum<?> defaultValue);
 
-	public DateTime getOptionAsDateTime(String optionGroup, UserOptionProperty option, DateTime defaultValue);
+    public int getOptionAsInt(String optionGroup, String option, int defaultValue);
 
-	public double getOptionAsDouble(String optionGroup, UserOptionProperty option, double defaultValue);
+    public int getOptionAsInt(String optionGroup, Enum<?> option, int defaultValue);
 
-	public boolean getOptionAsBoolean(String optionGroup, UserOptionProperty option, boolean defaultValue);
+    public List<String> getOptionAsList(String optionGroup, String option, List<String> defaultValue);
 
-	public Enum<?> getOptionAsEnum(String optionGroup, UserOptionProperty option, Enum<?> defaultValue);
+    public List<String> getOptionAsList(String optionGroup, Enum<?> option, List<String> defaultValue);
 
-	public void clear();
+    public Map<String, String> getOptionAsMap(String optionGroup, String option, Map<String, String> defaultValue);
+
+    public Map<String, String> getOptionAsMap(String optionGroup, Enum<?> option, Map<String, String> defaultValue);
+
+    public String getOptionAsString(String optionGroup, String option, String defaultValue);
+
+    public String getOptionAsString(String optionGroup, Enum<?> option, String defaultValue);
+
+    public void clear();
 
 }

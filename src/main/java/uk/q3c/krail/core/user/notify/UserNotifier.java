@@ -26,7 +26,7 @@ import uk.q3c.krail.i18n.MessageKey;
  * <p/>
  * User options are supplied to enable users to determine which notifications they prefer - assuming that the developer
  * makes the selection of those options available to the user.
- * 
+ *
  * @author David Sowerby
  */
 public interface UserNotifier {

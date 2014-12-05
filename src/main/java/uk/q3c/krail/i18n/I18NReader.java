@@ -26,31 +26,31 @@ import java.lang.annotation.Annotation;
  * @see I18NFlexReader
  */
 public class I18NReader extends I18NReaderBase implements I18NAnnotationReader<Annotation> {
-	private final Translate translate;
+    private final Translate translate;
 
-	@Inject
-	protected I18NReader(Translate translate, CurrentLocale currentLocale) {
-		super(currentLocale);
-		this.translate = translate;
+    @Inject
+    protected I18NReader(Translate translate, CurrentLocale currentLocale) {
+        super(currentLocale);
+        this.translate = translate;
 
-	}
+    }
 
-	/**
-	 * @see uk.q3c.krail.i18n.I18NAnnotationReader#caption()
-	 */
-	@Override
-	public String caption() {
-		I18NKey<?> captionKey = (I18NKey<?>) annotationParam("caption");
-		return translate.from(captionKey, locale());
-	}
+    /**
+     * @see uk.q3c.krail.i18n.I18NAnnotationReader#caption()
+     */
+    @Override
+    public String caption() {
+        I18NKey captionKey = (I18NKey) annotationParam("caption");
+        return translate.from(captionKey, locale());
+    }
 
-	/**
-	 * @see uk.q3c.krail.i18n.I18NAnnotationReader#description()
-	 */
-	@Override
-	public String description() {
-		I18NKey<?> descriptionKey = (I18NKey<?>) annotationParam("description");
-		return translate.from(descriptionKey);
-	}
+    /**
+     * @see uk.q3c.krail.i18n.I18NAnnotationReader#description()
+     */
+    @Override
+    public String description() {
+        I18NKey descriptionKey = (I18NKey) annotationParam("description");
+        return translate.from(descriptionKey);
+    }
 
 }

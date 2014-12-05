@@ -14,42 +14,22 @@ package uk.q3c.krail.core.user;
 
 import uk.q3c.krail.core.user.notify.DefaultUserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier;
-import uk.q3c.krail.core.user.opt.DefaultUserOption;
-import uk.q3c.krail.core.user.opt.DefaultUserOptionStore;
-import uk.q3c.krail.core.user.opt.UserOption;
-import uk.q3c.krail.core.user.opt.UserOptionStore;
 import com.google.inject.AbstractModule;
 
 public class UserModule extends AbstractModule {
-	@Override
-	protected void configure() {
-		
-		bindUserNotifier();
-		bindUserOption();
-		bindUserOptionStore();
-	}
+    @Override
+    protected void configure() {
 
-	/**
-	 * Override this method to bind your own UserNotifier implementation
-	 */
-	protected void bindUserNotifier() {
-		bind(UserNotifier.class).to(DefaultUserNotifier.class);
-	}
+        bindUserNotifier();
 
-	/**
-	 * Override this method to provide your own {@link UserOption} implementation. If all you want to do is change the
-	 * storage method, override {@link #bindUserOptionStore()} instead
-	 */
-	protected void bindUserOption() {
-		bind(UserOption.class).to(DefaultUserOption.class);
-	}
+    }
 
-	/**
-	 * Override this method to provide your own store implementation for user options. This is in effect a DAO
-	 * implementation
-	 */
-	protected void bindUserOptionStore() {
-		bind(UserOptionStore.class).to(DefaultUserOptionStore.class);
+    /**
+     * Override this method to bind your own UserNotifier implementation
+     */
+    protected void bindUserNotifier() {
+        bind(UserNotifier.class).to(DefaultUserNotifier.class);
+    }
 
-	}
+
 }

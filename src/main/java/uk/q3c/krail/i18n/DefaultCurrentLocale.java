@@ -163,8 +163,7 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
                 }
             }
         } else {
-            String msg = MessageFormat.format("{0} locale is not supported.", locale);
-            throw new UnsupportedLocaleException(msg);
+            throw new UnsupportedLocaleException(locale);
         }
 
     }

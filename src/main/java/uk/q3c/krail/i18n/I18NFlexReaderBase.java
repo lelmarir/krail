@@ -25,26 +25,26 @@ import java.util.Locale;
  * @date 3 May 2014
  */
 public abstract class I18NFlexReaderBase {
-	private final Translate translate;
+    private final Translate translate;
 
-	@Inject
-	protected I18NFlexReaderBase(Translate translate) {
-		this.translate = translate;
+    @Inject
+    protected I18NFlexReaderBase(Translate translate) {
+        this.translate = translate;
 
-	}
+    }
 
-	@SuppressWarnings("rawtypes")
-	protected String decode(Class<? extends Enum> keyClass, String keyName, Locale locale) {
-		if (keyClass == null || Strings.isNullOrEmpty(keyName)) {
-			return "";
-		}
-		try {
+    @SuppressWarnings("rawtypes")
+    protected String decode(Class<? extends Enum> keyClass, String keyName, Locale locale) {
+        if (keyClass == null || Strings.isNullOrEmpty(keyName)) {
+            return "";
+        }
+        try {
             @SuppressWarnings("unchecked") Enum key = Enum.valueOf(keyClass, keyName);
-			I18NKey<?> i18nKey = (I18NKey<?>) key;
-			return translate.from(i18nKey, locale);
-		} catch (Exception e) {
-			throw new I18NException("Check that the key class and key make a valid combination");
-		}
-	}
+            I18NKey i18nKey = (I18NKey) key;
+            return translate.from(i18nKey, locale);
+        } catch (Exception e) {
+            throw new I18NException("Check that the key class and key make a valid combination");
+        }
+    }
 
 }

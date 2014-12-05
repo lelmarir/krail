@@ -27,21 +27,21 @@ import java.lang.annotation.Annotation;
  */
 public class I18NValueReader extends I18NReaderBase implements I18NValueAnnotationReader<Annotation> {
 
-	private final Translate translate;
+    private final Translate translate;
 
-	@Inject
-	protected I18NValueReader(Translate translate, CurrentLocale currentLocale) {
-		super(currentLocale);
-		this.translate = translate;
-	}
+    @Inject
+    protected I18NValueReader(Translate translate, CurrentLocale currentLocale) {
+        super(currentLocale);
+        this.translate = translate;
+    }
 
-	/**
-	 * @see uk.q3c.krail.i18n.I18NAnnotationReader#caption()
-	 */
-	@Override
-	public String value() {
-		I18NKey<?> captionKey = (I18NKey<?>) annotationParam("value");
-		return translate.from(captionKey, locale());
-	}
+    /**
+     * @see uk.q3c.krail.i18n.I18NAnnotationReader#caption()
+     */
+    @Override
+    public String value() {
+        I18NKey captionKey = (I18NKey) annotationParam("value");
+        return translate.from(captionKey, locale());
+    }
 
 }
