@@ -237,6 +237,8 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 			}
 		}
 
+		checkViewRootComponentNotNull(view);
+		
 		setCurrentNavigationState(navigationState);
 
 		// make sure the page uri is updated if necessary, but do not fire any
@@ -250,6 +252,16 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 		// and tell listeners its changed
 		fireAfterViewChange(event);
 
+	}
+
+	private void checkViewRootComponentNotNull(KrailView view) {
+		try {
+			if(view.getRootComponent() == null) {
+				throw new RuntimeException("getRootComponent() should have trowned a ViewBuildException instead of returning null");
+			}
+		} catch (ViewBuildException e) {
+			throw new RuntimeException("The rootComponent shuld not be null after BeforeInboundNavigation()", e);
+		}
 	}
 
 	/**

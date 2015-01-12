@@ -48,7 +48,7 @@ public interface KrailView {
      *
      * @return
      */
-    public Component getRootComponent();
+    public Component getRootComponent() throws ViewBuildException;
 
     /**
      * A name for the view, typically displayed in a title bar
