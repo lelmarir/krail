@@ -27,81 +27,82 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 
 /**
  * Implementations should handle all Shiro exceptions captured during the login process.
- * 
+ *
  * @author David Sowerby 14 Jan 2013
- * 
  */
 public interface LoginExceptionHandler {
-	/**
-	 * Response to an {@link UnknownAccountException}. This would be the response to a "normal" login failure - that is,
-	 * before it becomes an {@link #excessiveAttempts(LoginView, UsernamePasswordToken)} event
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to an {@link UnknownAccountException}. This would be the response to a "normal" login failure - that
+     * is,
+     * before it becomes an {@link #excessiveAttempts(LoginView, UsernamePasswordToken)} event
+     *
+     * @param loginView
+     * @param token
+     */
 	void unknownAccount(AuthenticationToken token,
 			UnknownAccountException uae);
 
-	/**
-	 * Response to {@link IncorrectCredentialsException}. See the javadoc of the exception
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to {@link IncorrectCredentialsException}. See the javadoc of the exception
+     *
+     * @param loginView
+     * @param token
+     */
 	void incorrectCredentials(AuthenticationToken token,
 			IncorrectCredentialsException ice);
 
-	/**
-	 * Response to {@link ExpiredCredentialsException}. See the javadoc of the exception. Typically, the implementation
-	 * of this method will navigate to a KrailView which allows the user to update their password.
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to {@link ExpiredCredentialsException}. See the javadoc of the exception. Typically, the implementation
+     * of this method will navigate to a KrailView which allows the user to update their password.
+     *
+     * @param loginView
+     * @param token
+     */
 	void expiredCredentials(AuthenticationToken token,
 			ExpiredCredentialsException ece);
 
-	/**
-	 * Response to {@link AccountLockedException}. See the javadoc of the exception. Typically, the implementation of
-	 * this method will navigate to a KrailView which allows the user to request that their account is unlocked, although
-	 * it perhaps just inform the user and do nothing else.
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to {@link AccountLockedException}. See the javadoc of the exception. Typically, the implementation of
+     * this method will navigate to a KrailView which allows the user to request that their account is unlocked,
+     * although it perhaps just inform the user and do nothing else.
+     *
+     * @param loginView
+     * @param token
+     */
 	void accountLocked(AuthenticationToken token,
 			LockedAccountException lae);
 
-	/**
-	 * Response to an {@link ExcessiveAttemptsException}, which occurs when a system is configured to raise an exception
-	 * when there is a specified limit to the number of times a user can try and login. A login failure before that
-	 * threshold is reached is handled by {@link #unknownAccount(LoginView, UsernamePasswordToken)}. Typically, the
-	 * implementation of this method will navigate to a KrailView which allows the user to request a reset after filling in
-	 * appropriate security answers.
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to an {@link ExcessiveAttemptsException}, which occurs when a system is configured to raise an
+     * exception when there is a specified limit to the number of times a user can try and login. A login failure
+     * before that threshold is reached is handled by {@link #unknownAccount(LoginView, UsernamePasswordToken)}.
+     * Typically, the implementation of this method will navigate to a KrailView which allows the user to request a
+     * reset after filling in appropriate security answers.
+     *
+     * @param loginView
+     * @param token
+     */
 	void excessiveAttempts(AuthenticationToken token,
 			ExcessiveAttemptsException excess);
 
-	/**
-	 * Response to {@link ConcurrentAccessException}. See the javadoc of the exception
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to {@link ConcurrentAccessException}. See the javadoc of the exception
+     *
+     * @param loginView
+     * @param token
+     */
 	void concurrentAccess(AuthenticationToken token,
 			ConcurrentAccessException cae);
 
-	/**
-	 * Response to {@link DisabledAcoountException}. See the javadoc of the exception. Typically, the implementation of
-	 * this method will navigate to a KrailView which allows the user to request that their account is re-enabled, although
-	 * exact behaviour is up to the implementation.
-	 * 
-	 * @param loginView
-	 * @param token
-	 */
+    /**
+     * Response to {@link DisabledAcoountException}. See the javadoc of the exception. Typically, the implementation of
+     * this method will navigate to a KrailView which allows the user to request that their account is re-enabled,
+     * although
+     * exact behaviour is up to the implementation.
+     *
+     * @param loginView
+     * @param token
+     */
 	void disabledAccount(AuthenticationToken token,
 			DisabledAccountException dae);
 

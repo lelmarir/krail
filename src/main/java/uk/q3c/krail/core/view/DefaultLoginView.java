@@ -13,22 +13,22 @@
 
 package uk.q3c.krail.core.view;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ChameleonTheme;
-
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
-
-import uk.q3c.util.ID;
+import uk.q3c.krail.core.shiro.LoginExceptionHandler;
 import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.i18n.*;
+import uk.q3c.util.ID;
 
-public class DefaultLoginView extends GridViewBase implements ClickListener {
+import java.util.Optional;
+
+public class DefaultLoginView extends GridViewBase implements  ClickListener {
     private final Provider<Subject> subjectProvider;
     private final Translate translate;
     @I18N(caption = LabelKey.Log_In)
@@ -65,10 +65,8 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
         usernameBox = new TextField();
         passwordBox = new PasswordField();
 
-		demoInfoLabel = new Label(
-				"for this demo, enter any user name, and a password of 'password'");
-		demoInfoLabel2 = new Label(
-				"In a real application your Shiro Realm implementation defines how to authenticate");
+        demoInfoLabel = new Label("for this demo, enter any user name, and a password of 'password'");
+        demoInfoLabel2 = new Label("In a real application your Shiro Realm implementation defines how to authenticate");
 
         submitButton = new Button();
         submitButton.setDisableOnClick(true);
@@ -95,12 +93,12 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
     @Override
     protected void setIds() {
         super.setIds();
-        submitButton.setId(ID.getId(Optional.absent(), this, submitButton));
+        submitButton.setId(ID.getId(Optional.empty(), this, submitButton));
         usernameBox.setId(ID.getId(Optional.of("username"), this, usernameBox));
         passwordBox.setId(ID.getId(Optional.of("password"), this, passwordBox));
-		statusMsgLabel.setId(ID.getId(Optional.of("status"), this,
-				statusMsgLabel));
+        statusMsgLabel.setId(ID.getId(Optional.of("status"), this, statusMsgLabel));
     }
+
 
     @Override
     public void buttonClick(ClickEvent event) {
@@ -139,8 +137,11 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 		setStatusMessage(translate.from(messageKey));
     }
 
-	private void setStatusMessage(String msg) {
-		statusMsgLabel.setValue(msg);
+    public void setStatusMessage(I18NKey messageKey) {
+        setStatusMessage(translate.from(messageKey));
     }
 
+    public void setStatusMessage(String msg) {
+        statusMsgLabel.setValue(msg);
+    }
 }

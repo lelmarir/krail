@@ -30,25 +30,25 @@ import java.util.Locale;
  * @see https://sites.google.com/site/q3cjava/internationalisation-i18n
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER })
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER})
 @BindingAnnotation
 public @interface I18NValue {
-	/**
-	 * Usually only used with Vaadin Labels
-	 *
-	 * @return
-	 */
-	LabelKey value() default LabelKey._nullkey_;
+    /**
+     * Usually only used with Vaadin Labels
+     *
+     * @return
+     */
+    LabelKey value() default LabelKey.nullKey;
 
-	/**
+    /**
      * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional
      * parameter
-	 * is specified, it will be used instead. This allows specific components to be fixed to display content in a
+     * is specified, it will be used instead. This allows specific components to be fixed to display content in a
      * language different to the rest of the application. The format of the string should be as the IETF BCP 47
      * language
-	 * tag string; see {@link Locale#toLanguageTag()}
-	 */
+     * tag string; see {@link Locale#toLanguageTag()}
+     */
 
-	String locale() default "";
+    String locale() default "";
 
 }

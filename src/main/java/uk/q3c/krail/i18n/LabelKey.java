@@ -17,7 +17,7 @@ package uk.q3c.krail.i18n;
  * @see Labels
  */
 public enum LabelKey implements I18NKey {
-    _nullkey_,
+    nullKey,
     Alphabetic_Ascending,
     Alphabetic_Descending,
     Application_Configuration_Service,
@@ -35,6 +35,7 @@ public enum LabelKey implements I18NKey {
     Invalid_Page,
     Insertion_Order_Ascending,
     Insertion_Order_Descending,
+    JPA,
     Krail,
     Last_Name,
     Log_In,

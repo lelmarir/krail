@@ -75,7 +75,7 @@ public class DefaultSitemap implements Sitemap {
 			.getLogger(DefaultSitemap.class);
 
 	private LinkedList<AbstractNode> nodes = new LinkedList<>();
-	private HashMap<StandardViewKey, AbstractNode> standardViews = new HashMap<>();
+	private HashMap<StandardPageKey, AbstractNode> standardViews = new HashMap<>();
 	private HashMap<Class<? extends KrailView>, AbstractNode> nodesByClass = new HashMap<>();
 
 	public DefaultSitemap() {
@@ -141,12 +141,12 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
-	public SitemapNode getStandardView(StandardViewKey key) {
+	public SitemapNode getStandardView(StandardPageKey key) {
 		return standardViews.get(key);
 	}
 
 	@Override
-	public void setStandardView(StandardViewKey key, ViewNode view) {
+	public void setStandardView(StandardPageKey key, ViewNode view) {
 		standardViews.put(key, view);
 	}
 
@@ -195,7 +195,7 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
-	public NavigationState buildNavigationStateFor(StandardViewKey pageKey)
+	public NavigationState buildNavigationStateFor(StandardPageKey pageKey)
 			throws PageNotFoundException {
 		AbstractNode node = standardViews.get(pageKey);
 		if (node == null) {

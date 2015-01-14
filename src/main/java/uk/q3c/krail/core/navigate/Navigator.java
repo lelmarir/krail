@@ -1,7 +1,7 @@
 package uk.q3c.krail.core.navigate;
 
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
-import uk.q3c.krail.core.navigate.sitemap.StandardViewKey;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewChangeNotifier;
@@ -10,7 +10,7 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
 
 /**
  * Uses the {@link UserSitemap} to control navigation from one 'page' to another, using a uri String, or a
- * {@link StandardViewKey} or a {@link UserSitemapNode} to identify a page.<br>
+ * {@link StandardPageKey} or a {@link UserSitemapNode} to identify a page.<br>
  * <br>
  * Even though {@link UserSitemapNode} should have already been verified for authorisation, all page navigation is
  * checked for authorisation. <br>
@@ -33,11 +33,11 @@ public interface Navigator extends UriFragmentChangedListener,
 	void navigateTo(String fragment) throws InvalidURIException;
 
 	/**
-	 * A convenience method to look up the URI fragment for the {@link StandardViewKey} and navigate to it
+	 * A convenience method to look up the URI fragment for the {@link StandardPageKey} and navigate to it
 	 * 
 	 * @param pageKey
 	 */
-	void navigateTo(StandardViewKey pageKey);
+	void navigateTo(StandardPageKey pageKey);
 
 	/**
 	 * Navigates to the location represented by {@code navigationState}, which may include parameters

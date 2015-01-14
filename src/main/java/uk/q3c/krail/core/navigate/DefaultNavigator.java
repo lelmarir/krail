@@ -105,7 +105,7 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 	 * they were on before going to the login page. If they have gone straight
 	 * to the login page (maybe they bookmarked it), or they were on the logout
 	 * page, they will be routed to the 'private home page' (the StandardPage
-	 * for {@link StandardViewKey#PrivateHome})
+	 * for {@link StandardPageKey#Private_Home})
 	 */
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
@@ -118,13 +118,13 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 				&& !isLogOutPage(previousNavigationState)) {
 			navigateTo(previousNavigationState);
 		} else {
-			navigateTo(StandardViewKey.PrivateHome);
+			navigateTo(StandardPageKey.Private_Home);
 		}
 	}
 
 	private boolean isLogOutPage(NavigationState navigationState) {
 		return navigationState.getSitemapNode().equals(
-				sitemap.getStandardView(StandardViewKey.Log_Out));
+				sitemap.getStandardView(StandardPageKey.Log_Out));
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 	public void onLogout(LogoutEvent event) {
 		LOGGER.info("logging out");
 		subjectProvider.get().logout();
-		navigateTo(StandardViewKey.Log_Out);
+		navigateTo(StandardPageKey.Log_Out);
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 	}
 
 	@Override
-	public void navigateTo(StandardViewKey pageKey) {
+	public void navigateTo(StandardPageKey pageKey) {
 		navigateTo(sitemap.buildNavigationStateFor(pageKey));
 	}
 

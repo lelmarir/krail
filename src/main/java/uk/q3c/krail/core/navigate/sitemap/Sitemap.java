@@ -11,7 +11,7 @@ public interface Sitemap {
 	
 	NavigationState buildNavigationStateFor(String fragment) throws InvalidURIException;
 
-	NavigationState buildNavigationStateFor(StandardViewKey pageKey) throws PageNotFoundException;
+	NavigationState buildNavigationStateFor(StandardPageKey pageKey) throws PageNotFoundException;
 	
 	NavigationState buildNavigationStateFor(SitemapNode node);
 
@@ -19,9 +19,9 @@ public interface Sitemap {
 
 	NavigationState buildNavigationState(Class<? extends KrailView> viewClass) throws PageNotFoundException;
 	
-	SitemapNode getStandardView(StandardViewKey key);
+	SitemapNode getStandardView(StandardPageKey key);
 	
-	void setStandardView(StandardViewKey publicHome, ViewNode addView);
+	void setStandardView(StandardPageKey publicHome, ViewNode addView);
 
 	ViewNode addView(String uri, Class<? extends KrailView> view);
 

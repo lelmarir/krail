@@ -12,17 +12,16 @@
  */
 package uk.q3c.krail.core.shiro;
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Singleton;
+import org.apache.shiro.authc.ExcessiveAttemptsException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.apache.shiro.authc.ExcessiveAttemptsException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.joda.time.DateTime;
-
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Singleton;
 
 @Singleton
 public class DefaultLoginAttemptLog implements LoginAttemptLog {
@@ -30,129 +29,128 @@ public class DefaultLoginAttemptLog implements LoginAttemptLog {
 	public enum LogOutcome {
 		PASS, FAIL, RESET
 	}
+    private final Map<String, List<LogEntry>> history = new TreeMap<>();
+    private final Map<String, Integer> unsuccessfulAttempts = new TreeMap<>();
+    private final Map<String, LocalDateTime> lastSuccessful = new TreeMap<>();
+    private int maxAttempts = 3;
 
-	public class LogEntry {
-		public LogEntry(LogOutcome logOutcome) {
-			this.logOutcome = logOutcome;
-			dateTime = DateTime.now();
-		}
+    @Override
+    public void setMaximumAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
 
-		private final DateTime dateTime;
-		private final LogOutcome logOutcome;
+    @Override
+    public void recordSuccessfulAttempt(UsernamePasswordToken upToken) {
+        LogEntry log = createLog(upToken, LogOutcome.PASS);
+        unsuccessfulAttempts.remove(upToken.getUsername());
+        lastSuccessful.put(upToken.getUsername(), log.dateTime);
+    }
 
-		public DateTime getDateTime() {
-			return dateTime;
-		}
+    private LogEntry createLog(UsernamePasswordToken upToken, LogOutcome logOutcome) {
+        String username = upToken.getUsername();
+        return createLog(username, logOutcome);
+    }
 
-		public LogOutcome getLogOutcome() {
-			return logOutcome;
-		}
-	}
+    private LogEntry createLog(String username, LogOutcome logOutcome) {
+        LogEntry logEntry = new LogEntry(logOutcome);
+        List<LogEntry> list = history.get(username);
+        if (list == null) {
+            list = new ArrayList<>();
+            history.put(username, list);
 
-	private int maxAttempts = 3;
-	private final Map<String, List<LogEntry>> history = new TreeMap<>();
-	private final Map<String, Integer> unsuccessfulAttempts = new TreeMap<>();
-	private final Map<String, DateTime> lastSuccessful = new TreeMap<>();
+        }
+        list.add(logEntry);
+        return logEntry;
+    }
 
-	@Override
-	public void setMaximumAttempts(int maxAttempts) {
-		this.maxAttempts = maxAttempts;
-	}
+    /**
+     * records a failed login attempt and throws a ExcessiveAttemptsException if the number of attempts exceeds
+     * {@link #maxAttempts}
+     *
+     * @see uk.q3c.krail.core.shiro.LoginAttemptLog#recordFailedAttempt(org.apache.shiro.authc.UsernamePasswordToken)
+     */
+    @Override
+    public void recordFailedAttempt(UsernamePasswordToken upToken) {
+        createLog(upToken, LogOutcome.FAIL);
 
-	@Override
-	public void recordSuccessfulAttempt(UsernamePasswordToken upToken) {
-		LogEntry log = createLog(upToken, LogOutcome.PASS);
-		unsuccessfulAttempts.remove(upToken.getUsername());
-		lastSuccessful.put(upToken.getUsername(), log.dateTime);
-	}
+        Integer failedAttempts = unsuccessfulAttempts.get(upToken.getUsername());
+        if (failedAttempts == null) {
+            failedAttempts = 0;
+        }
+        unsuccessfulAttempts.put(upToken.getUsername(), new Integer(failedAttempts + 1));
+        int attemptsLeft = attemptsRemaining(upToken.getUsername());
+        if (attemptsLeft == 0) {
+            throw new ExcessiveAttemptsException("Login failed after maximum attempts");
+        }
+    }
 
-	private LogEntry createLog(String username, LogOutcome logOutcome) {
-		LogEntry logEntry = new LogEntry(logOutcome);
-		List<LogEntry> list = history.get(username);
-		if (list == null) {
-			list = new ArrayList<>();
-			history.put(username, list);
+    @Override
+    public int attemptsRemaining(String username) {
+        Integer attemptsMade = unsuccessfulAttempts.get(username);
+        // no unsuccessful attempt has been made to login, there won't be an entry
+        if (attemptsMade == null) {
+            attemptsMade = 0;
+        }
+        return maxAttempts - attemptsMade;
+    }
 
-		}
-		list.add(logEntry);
-		return logEntry;
-	}
+    @Override
+    public void clearHistory(String username) {
+        history.remove(username);
+    }
 
-	private LogEntry createLog(UsernamePasswordToken upToken, LogOutcome logOutcome) {
-		String username = upToken.getUsername();
-		return createLog(username, logOutcome);
-	}
+    @Override
+    public void resetAttemptCount(String username) {
+        unsuccessfulAttempts.remove(username);
+        createLog(username, LogOutcome.RESET);
+    }
 
-	/**
-	 * records a failed login attempt and throws a ExcessiveAttemptsException if the number of attempts exceeds
-	 * {@link #maxAttempts}
-	 * 
-	 * @see uk.q3c.krail.core.shiro.LoginAttemptLog#recordFailedAttempt(org.apache.shiro.authc.UsernamePasswordToken)
-	 */
-	@Override
-	public void recordFailedAttempt(UsernamePasswordToken upToken) {
-		createLog(upToken, LogOutcome.FAIL);
+    @Override
+    public void clearHistory() {
+        history.clear();
+    }
 
-		Integer failedAttempts = unsuccessfulAttempts.get(upToken.getUsername());
-		if (failedAttempts == null) {
-			failedAttempts = 0;
-		}
-		unsuccessfulAttempts.put(upToken.getUsername(), new Integer(failedAttempts + 1));
-		int attemptsLeft = attemptsRemaining(upToken.getUsername());
-		if (attemptsLeft == 0) {
-			throw new ExcessiveAttemptsException("Login failed after maximum attempts");
-		}
-	}
+    @Override
+    public void resetAttemptCount() {
+        unsuccessfulAttempts.clear();
+    }
 
-	@Override
-	public void clearHistory(String username) {
-		history.remove(username);
-	}
+    @Override
+    public LocalDateTime dateOfLastSuccess(String username) {
+        return lastSuccessful.get(username);
+    }
 
-	@Override
-	public void resetAttemptCount(String username) {
-		unsuccessfulAttempts.remove(username);
-		createLog(username, LogOutcome.RESET);
-	}
+    @Override
+    public LogEntry latestLog(String username) {
+        List<LogEntry> list = history.get(username);
+        return list.get(list.size() - 1);
+    }
 
-	@Override
-	public int attemptsRemaining(String username) {
-		Integer attemptsMade = unsuccessfulAttempts.get(username);
-		// no unsuccessful attempt has been made to login, there won't be an entry
-		if (attemptsMade == null) {
-			attemptsMade = 0;
-		}
-		return maxAttempts - attemptsMade;
-	}
+    @Override
+    public ImmutableList<LogEntry> historyFor(String username) {
+        List<LogEntry> list = history.get(username);
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        return ImmutableList.copyOf(list);
+    }
 
-	@Override
-	public void clearHistory() {
-		history.clear();
-	}
+    public class LogEntry {
+        private final LocalDateTime dateTime;
+        private final LogOutcome logOutcome;
 
-	@Override
-	public void resetAttemptCount() {
-		unsuccessfulAttempts.clear();
-	}
+        public LogEntry(LogOutcome logOutcome) {
+            this.logOutcome = logOutcome;
+            dateTime = LocalDateTime.now();
+        }
 
-	@Override
-	public DateTime dateOfLastSuccess(String username) {
-		return lastSuccessful.get(username);
-	}
+        public LocalDateTime getDateTime() {
+            return dateTime;
+        }
 
-	@Override
-	public LogEntry latestLog(String username) {
-		List<LogEntry> list = history.get(username);
-		return list.get(list.size() - 1);
-	}
-
-	@Override
-	public ImmutableList<LogEntry> historyFor(String username) {
-		List<LogEntry> list = history.get(username);
-		if (list == null) {
-			list = new ArrayList<>();
-		}
-		return ImmutableList.copyOf(list);
-	}
+        public LogOutcome getLogOutcome() {
+            return logOutcome;
+        }
+    }
 
 }

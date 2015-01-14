@@ -45,12 +45,11 @@ import com.google.inject.Module;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
-public abstract class BaseGuiceServletInjector extends GuiceServletContextListener {
-	private static Logger log = LoggerFactory.getLogger(BaseGuiceServletInjector.class);
-
+public abstract class DefaultBindingManager extends GuiceServletContextListener {
     protected static Injector injector;
+    private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
 
-    protected BaseGuiceServletInjector() {
+    protected DefaultBindingManager() {
         super();
     }
 
@@ -62,7 +61,7 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
     }
 
     /**
-     * Module instances for the base should be added in {@link #getModules()}. Module instance for the app using Krail
+     * Module instances for the core should be added in {@link #getModules()}. Module instances for the app using Krail
      * should be added to {@link AppModules#appModules()}
      *
      * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
@@ -85,33 +84,33 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
     }
 
     private List<Module> getModules() {
-        List<Module> baseModules = new ArrayList<>();
+        List<Module> coreModules = new ArrayList<>();
 
-        baseModules.add(i18NModule());
-        baseModules.add(applicationConfigurationModule());
-		baseModules.add(sitemapModule());
+        coreModules.add(i18NModule());
+        coreModules.add(applicationConfigurationModule());
+		coreModules.add(sitemapModule());
 
-        baseModules.add(new ThreadScopeModule());
-        baseModules.add(new UIScopeModule());
-        baseModules.add(new VaadinSessionScopeModule());
+        coreModules.add(new ThreadScopeModule());
+        coreModules.add(new UIScopeModule());
+        coreModules.add(new VaadinSessionScopeModule());
 
-        baseModules.add(new ServicesMonitorModule());
+        coreModules.add(new ServicesMonitorModule());
 
-        baseModules.add(shiroModule());
-        baseModules.add(shiroVaadinModule());
-        baseModules.add(new ShiroAopModule());
+        coreModules.add(shiroModule());
+        coreModules.add(shiroVaadinModule());
+        coreModules.add(new ShiroAopModule());
 
-        baseModules.add(servletModule());
+        coreModules.add(servletModule());
 
-        baseModules.add(viewModule());
+        coreModules.add(viewModule());
 
-        baseModules.add(userModule());
+        coreModules.add(userModule());
 
-        baseModules.add(userOptionModule());
+        coreModules.add(userOptionModule());
 
-        addAppModules(baseModules);
-        addSitemapModules(baseModules);
-        return baseModules;
+        addAppModules(coreModules);
+        addSitemapModules(coreModules);
+        return coreModules;
     }
 
     /**
@@ -132,7 +131,8 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
     }
 
     /**
-	 * Modules used in the creation of the {@link MasterSitemap} do not actually need to be separated, this just makes a
+     * Modules used in the creation of the {@link MasterSitemap} do not actually need to be separated, this just makes
+     * a
      * convenient way of seeing them as a group
      *
      * @param baseModules
@@ -176,6 +176,7 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
      *
      * @param servletContext
      * @param ini
+     *
      * @return
      */
 
@@ -184,7 +185,8 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
     }
 
     /**
-	 * Override this if you have sub-classed {@link UserModule} to provide bindings to your user related implementations
+     * Override this if you have sub-classed {@link UserModule} to provide bindings to your user related
+     * implementations
      */
     private Module userModule() {
         return new UserModule();
@@ -209,6 +211,10 @@ public abstract class BaseGuiceServletInjector extends GuiceServletContextListen
 		} catch (Exception e) {
 			log.error("Exception while stopping services", e);
 		}
-		super.contextDestroyed(servletContextEvent);
+		
+		//context may not have been crated, and super does not check for it
+        if (servletContextEvent.getServletContext() != null) {
+            super.contextDestroyed(servletContextEvent);
+		}
 	}
 }

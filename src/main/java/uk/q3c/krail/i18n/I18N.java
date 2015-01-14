@@ -30,22 +30,22 @@ import java.util.Locale;
  * @see https://sites.google.com/site/q3cjava/internationalisation-i18n
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER })
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER})
 @BindingAnnotation
 public @interface I18N {
-	LabelKey caption() default LabelKey._nullkey_;
+    LabelKey caption() default LabelKey.nullKey;
 
-	DescriptionKey description() default DescriptionKey._nullkey_;
+    DescriptionKey description() default DescriptionKey.nullKey;
 
-	/**
+    /**
      * The locale for an annotated component is usually taken from {@link CurrentLocale}, but if this optional
      * parameter
-	 * is specified, it will be used instead. This allows specific components to be fixed to display content in a
+     * is specified, it will be used instead. This allows specific components to be fixed to display content in a
      * language different to the rest of the application. The format of the string should be as the IETF BCP 47
      * language
-	 * tag string; see {@link Locale#toLanguageTag()}
-	 */
+     * tag string; see {@link Locale#toLanguageTag()}
+     */
 
-	String locale() default "";
+    String locale() default "";
 
 }

@@ -53,25 +53,25 @@ public class SitemapModule extends AbstractModule {
 		}
 
 		private void setMissingStandardViews(Sitemap sitemap) {
-			if (sitemap.getStandardView(StandardViewKey.Public_Home) == null) {
+			if (sitemap.getStandardView(StandardPageKey.Public_Home) == null) {
 				ViewNode node = sitemap.addView("", DefaultPublicHomeView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
-				sitemap.setStandardView(StandardViewKey.Public_Home, node);
+				sitemap.setStandardView(StandardPageKey.Public_Home, node);
 			}
-			if (sitemap.getStandardView(StandardViewKey.PrivateHome) == null) {
+			if (sitemap.getStandardView(StandardPageKey.Private_Home) == null) {
 				ViewNode node = sitemap.addView("private", DefaultPrivateHomeView.class);
 				node.setAccesControlRule(AccesControl.AUTHENTICATED);
-				sitemap.setStandardView(StandardViewKey.PrivateHome, node);
+				sitemap.setStandardView(StandardPageKey.Private_Home, node);
 			}
-			if (sitemap.getStandardView(StandardViewKey.Log_In) == null) {
+			if (sitemap.getStandardView(StandardPageKey.Log_In) == null) {
 				ViewNode node = sitemap.addView("login", DefaultLoginView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
-				sitemap.setStandardView(StandardViewKey.Log_In, node);
+				sitemap.setStandardView(StandardPageKey.Log_In, node);
 			}
-			if (sitemap.getStandardView(StandardViewKey.Log_Out) == null) {
+			if (sitemap.getStandardView(StandardPageKey.Log_Out) == null) {
 				ViewNode node = sitemap.addView("logout", DefaultLogoutView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
-				sitemap.setStandardView(StandardViewKey.Log_Out, node);
+				sitemap.setStandardView(StandardPageKey.Log_Out, node);
 			}
 		}
 	}

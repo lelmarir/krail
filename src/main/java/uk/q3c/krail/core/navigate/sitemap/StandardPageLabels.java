@@ -26,15 +26,15 @@ import uk.q3c.krail.i18n.EnumResourceBundle;
  *
  * @author David Sowerby 3 Aug 2013
  */
-public class StandardViewLabels extends EnumResourceBundle<StandardViewKey> {
+public class StandardPageLabels extends EnumResourceBundle<StandardPageKey> {
 
 
-    public StandardViewLabels() {
-        super(StandardViewKey.class);
+    public StandardPageLabels() {
+        super();
     }
 
     @Override
-    protected void loadMap(Class<Enum<?>> enumKeyClass) {
+    protected void loadMap() {
 
     }
 

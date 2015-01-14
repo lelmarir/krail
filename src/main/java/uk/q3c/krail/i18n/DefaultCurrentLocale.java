@@ -29,6 +29,7 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import uk.q3c.krail.core.ui.BrowserProvider;
 import uk.q3c.krail.core.user.opt.UserOption;
+import uk.q3c.krail.core.user.opt.UserOptionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,12 +48,12 @@ import java.util.Set;
  * When a user logs in after initialisation, the UserOption value for preferred locale is used, and the locale changed
  * if required.
  * When a user logs out, no change to locale is made, as the user may still have public pages they can view.
- * <p/>
+ * <p>
  * Scope for this class is set in {@link I18NModule} or its sub-class - this enables the developer to choose
  * between {@link UIScoped} or {@link VaadinSessionScoped}, depending on whether they want their users to set the
  * language for each browser tab or each browser instance, respectively.  By default it is set to {@link
  * VaadinSessionScoped}
- * <p/>
+ * <p>
  * {@link #defaultLocale} and {@link #supportedLocales} are set in {@link I18NModule} or its sub-class.  An {@link
  * UnsupportedLocaleException} will be thrown if an attempt is made to set a locale which is not in {@link
  * #supportedLocales}, or if {@link #defaultLocale} the is not in {@link #supportedLocales}.
@@ -61,7 +62,9 @@ import java.util.Set;
  * @date 5 May 2014
  */
 
-public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListener {
+public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListener, UserOptionContext {
+	public enum UserOptionProperty {PREFERRED_LOCALE}
+
     private static Logger log = LoggerFactory.getLogger(DefaultCurrentLocale.class);
     private final List<LocaleChangeListener> listeners = new ArrayList<>();
     private BrowserProvider browserProvider;
@@ -80,6 +83,7 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
         this.defaultLocale = defaultLocale;
         this.userOption = userOption;
         this.subjectProvider = subjectProvider;
+ 		userOption.configure(this, UserOptionProperty.class);
         authNotifier.addListener(this);
         locale = defaultLocale;
         if (!supportedLocales.contains(defaultLocale)) {
@@ -155,7 +159,7 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
 
             if (locale != this.locale) {
                 this.locale = locale;
-                Locale.setDefault(locale);
+                //                Locale.setDefault(locale);
                 log.debug("CurrentLocale set to {}", locale);
                 if (fireListeners) {
                     log.debug("firing listeners");
@@ -228,9 +232,7 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
      */
     private boolean setLocaleFromUserOption(boolean fireListeners) {
         if (subjectProvider.get().isAuthenticated()) {
-            String preferredLocale = userOption.getOptionAsString(DefaultCurrentLocale.class.getSimpleName(),
-                    "preferredLocale", defaultLocale.toLanguageTag());
-            Locale selectedLocale = Locale.forLanguageTag(preferredLocale);
+            Locale selectedLocale = userOption.get(defaultLocale, UserOptionProperty.PREFERRED_LOCALE);
             if (supportedLocales.contains(selectedLocale)) {
                 setLocale(selectedLocale, fireListeners);
                 return true;
@@ -238,4 +240,10 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
         }
         return false;
     }
+
+    @Override
+    public UserOption getUserOption() {
+        return userOption;
+    }
+
 }

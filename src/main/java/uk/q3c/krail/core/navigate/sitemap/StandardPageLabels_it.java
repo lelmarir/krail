@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 David Sowerby
+ * Copyright (C) 2013 David Sowerby
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,15 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package uk.q3c.krail.core.user.opt;
+package uk.q3c.krail.core.navigate.sitemap;
 
 /**
- * Just to avoid using string literals for property names in the {@link UserOption} class
+ * The base for the resource bundle of Labels for Locale it.
  *
- * @author David Sowerby
- * @date 17 May 2014
+ * @author David Sowerby 9 Feb 2013
  */
-public enum UserOptionProperty {
-    MAX_DEPTH, LOCALE_FLAG_SIZE, SORT_ASCENDING, SORT_TYPE
+public class StandardPageLabels_it extends StandardPageLabels {
+
+    @Override
+    protected void loadMap() {
+        put(StandardPageKey.Public_Home, "Pagina Pubblica ");
+    }
+
 
 }

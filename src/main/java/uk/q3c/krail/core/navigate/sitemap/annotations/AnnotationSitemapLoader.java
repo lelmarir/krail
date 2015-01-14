@@ -15,7 +15,7 @@ import uk.q3c.krail.core.navigate.sitemap.AccesControl;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapLoader;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
-import uk.q3c.krail.core.navigate.sitemap.StandardViewKey;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.ViewNode;
 import uk.q3c.krail.core.view.KrailView;
 
@@ -149,8 +149,8 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 			Class<KrailView> viewClass) {
 		StandardPage annotation = viewClass.getAnnotation(StandardPage.class);
 		if (annotation != null) {
-			StandardViewKey[] standardViews = annotation.value();
-			for (StandardViewKey viewKey : standardViews) {
+			StandardPageKey[] standardViews = annotation.value();
+			for (StandardPageKey viewKey : standardViews) {
 				if (sitemap.getStandardView(viewKey) != null) {
 					throw new IllegalStateException("The standard view "
 							+ viewKey + " has been already set to " + sitemap.getStandardView(viewKey) + " whyle trying to set to " + node);
