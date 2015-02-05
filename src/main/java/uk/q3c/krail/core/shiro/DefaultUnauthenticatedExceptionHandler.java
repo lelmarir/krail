@@ -18,6 +18,7 @@ import java.io.Serializable;
 import org.apache.shiro.authz.UnauthenticatedException;
 
 import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
@@ -27,6 +28,8 @@ import com.google.inject.Inject;
 
 public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedExceptionHandler, Serializable {
 
+	private static final long serialVersionUID = 7883073068352609958L;
+	
 	private final UserNotifier notifier;
 	private final Navigator navigator;
 
@@ -38,7 +41,7 @@ public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedEx
 	}
 
 	@Override
-	public void onUnauthenticatedException(UnauthenticatedException throwable) {
+	public void onUnauthenticatedException(NavigationState targetNavigationState, UnauthenticatedException throwable) {
 		navigator.navigateTo(StandardPageKey.Log_In);
 		notifier.show(NotificationType.WARNING, DescriptionKey.You_have_not_logged_in);
 		

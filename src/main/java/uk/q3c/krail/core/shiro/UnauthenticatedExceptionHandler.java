@@ -15,15 +15,18 @@ package uk.q3c.krail.core.shiro;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
+
 public interface UnauthenticatedExceptionHandler {
 
 	/**
 	 * invoke the handler
+	 * @param targetNavigationState 
 	 * @param throwable 
 	 * 
 	 * @param t
 	 * @return
 	 */
-	void onUnauthenticatedException(UnauthenticatedException throwable);
+	void onUnauthenticatedException(NavigationState targetNavigationState, UnauthenticatedException throwable);
 
 }

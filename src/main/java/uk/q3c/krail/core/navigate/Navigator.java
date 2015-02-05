@@ -38,6 +38,14 @@ public interface Navigator extends UriFragmentChangedListener,
 	 * @param pageKey
 	 */
 	void navigateTo(StandardPageKey pageKey);
+	
+	/**
+	 * A convenience method to look up the URI fragment for the {@link StandardPageKey} and navigate to it
+	 * 
+	 * @param pageKey
+	 * @param callbackHandler
+	 */
+	<T extends KrailView> void navigateTo(StandardPageKey pageKey, NavigationCallbackHandler<T> callbackHandler);
 
 	/**
 	 * Navigates to the location represented by {@code navigationState}, which may include parameters

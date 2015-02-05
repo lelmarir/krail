@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
 import uk.q3c.krail.i18n.DescriptionKey;
@@ -35,7 +36,7 @@ public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptio
 	}
 
 	@Override
-	public void onUnauthorizedException(UnauthorizedException throwable) {
+	public void onUnauthorizedException(NavigationState targetNavigationState, UnauthorizedException throwable) {
 		notifier.show(NotificationType.ERROR, DescriptionKey.No_Permission);
 	}
 }

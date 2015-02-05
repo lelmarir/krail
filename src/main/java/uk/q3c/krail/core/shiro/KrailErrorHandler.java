@@ -18,9 +18,12 @@ import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
+
 import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
+import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
 import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
 import com.google.inject.Inject;
 import com.vaadin.server.DefaultErrorHandler;
@@ -87,18 +90,22 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			return true;
 		}
 
-		// handle an unauthenticated access attempt
-		if (throwable instanceof UnauthenticatedException) {
-			authenticationHandler
-					.onUnauthenticatedException((UnauthenticatedException) throwable);
-			return true;
-		}
+		if (throwable instanceof NavigationAuthorizationException) {
+			NavigationState targetNavigationState = ((NavigationAuthorizationException) throwable).getTargetNavigationState();
+			Throwable cause = throwable.getCause();
+			// handle an unauthenticated access attempt
+			if (cause instanceof UnauthenticatedException) {
+				authenticationHandler
+						.onUnauthenticatedException(targetNavigationState, (UnauthenticatedException) cause);
+				return true;
+			}
 
-		// handle an unauthorised access attempt
-		if (throwable instanceof UnauthorizedException) {
-			authorisationHandler
-					.onUnauthorizedException((UnauthorizedException) throwable);
-			return true;
+			// handle an unauthorised access attempt
+			if (cause instanceof UnauthorizedException) {
+				authorisationHandler
+						.onUnauthorizedException(targetNavigationState, (UnauthorizedException) cause);
+				return true;
+			}
 		}
 
 		return false;

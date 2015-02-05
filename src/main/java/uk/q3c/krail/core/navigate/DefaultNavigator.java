@@ -17,6 +17,9 @@ import com.google.inject.Provider;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.UriFragmentChangedEvent;
 
+import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,9 +154,15 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 
 	@Override
 	public void navigateTo(StandardPageKey pageKey) {
-		navigateTo(sitemap.buildNavigationStateFor(pageKey));
+		navigateTo(pageKey, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
+	}
+	
+	@Override
+	public void navigateTo(StandardPageKey pageKey, NavigationCallbackHandler callbackHandler) {
+		navigateTo(sitemap.buildNavigationStateFor(pageKey), callbackHandler);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends KrailView> void navigateTo(Class<T> viewClass) {
 		navigateTo(viewClass, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
@@ -172,7 +181,7 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 	}
 
 	public void navigateTo(NavigationState navigationState,
-			NavigationCallbackHandler callbackHandler) {
+			NavigationCallbackHandler callbackHandler) throws AuthorizationException {
 		checkNotNull(navigationState);
 		checkNotNull(callbackHandler);
 
@@ -190,7 +199,12 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 		Subject subject = subjectProvider.get();
 		// throw an exception if not authorized
 		assert node.getAccesControlRule() != null : node;
-		node.getAccesControlRule().checkAuthorization(subject);
+		try {
+			node.getAccesControlRule().checkAuthorization(subject);
+		} catch (AuthorizationException e) {
+			throw new NavigationAuthorizationException(navigationState, e);
+		}
+		
 
 		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this,
 				currentNavigationState, navigationState);
