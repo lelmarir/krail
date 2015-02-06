@@ -255,9 +255,6 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 		
 		setCurrentNavigationState(navigationState);
 
-		// make sure the page uri is updated if necessary, but do not fire any
-		// change events as we have already responded to the change
-		updateUriFragment(navigationState, false);
 		// now change the view
 		changeView(view);
 
@@ -265,6 +262,10 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 
 		// and tell listeners its changed
 		fireAfterViewChange(event);
+		
+		// make sure the page uri is updated if necessary, but do not fire any
+		// change events as we have already responded to the change
+		updateUriFragment(navigationState, false);
 
 	}
 
