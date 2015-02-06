@@ -34,7 +34,8 @@ public class Messages extends EnumResourceBundle<MessageKey> {
         put(MessageKey.Invalid_URI, "{0} is not a valid page");
         put(MessageKey.Service_not_Started, "You cannot use service {0} until it has been started");
         put(MessageKey.Locale_Change, "Language and Country changed to {0}");
-
+        put(MessageKey.Something_went_wrong, "Something_went_wrong");
+        put(MessageKey.show_more, "show more");
     }
 
 
