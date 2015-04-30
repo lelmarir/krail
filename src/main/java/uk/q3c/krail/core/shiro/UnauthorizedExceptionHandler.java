@@ -13,16 +13,8 @@
 
 package uk.q3c.krail.core.shiro;
 
-import org.apache.shiro.authz.UnauthorizedException;
+import uk.q3c.krail.core.guice.errors.ErrorHandler;
 
-import uk.q3c.krail.core.navigate.sitemap.NavigationState;
-
-
-public interface UnauthorizedExceptionHandler {
-	/**
-	 * Returns true if exception is handled
-	 */
-	void onUnauthorizedException(NavigationState targetNavigationState,
-			UnauthorizedException cause);
-
+public interface UnauthorizedExceptionHandler extends ErrorHandler {
+	
 }

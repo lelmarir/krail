@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.PageNotFoundException;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
@@ -187,7 +188,7 @@ public class DefaultSitemap implements Sitemap {
 			LOGGER.warn(sb.toString());
 		}
 		if (matches.isEmpty()) {
-			throw new PageNotFoundException(
+			throw new InvalidURIException(
 					"Unable to find the node for the fragment '" + fragment
 							+ "'\n "+ nodes.toString());
 		}

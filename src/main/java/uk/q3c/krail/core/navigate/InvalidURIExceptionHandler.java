@@ -12,7 +12,8 @@
  */
 package uk.q3c.krail.core.navigate;
 
-public interface InvalidURIExceptionHandler {
+import uk.q3c.krail.core.guice.errors.ErrorHandler;
 
-	public void onInvalidUri(InvalidURIException exception);
+public interface InvalidURIExceptionHandler extends ErrorHandler {
+	
 }

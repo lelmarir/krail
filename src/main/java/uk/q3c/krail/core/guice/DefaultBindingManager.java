@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.q3c.krail.core.config.ApplicationConfigurationModule;
+import uk.q3c.krail.core.guice.errors.ErrorModule;
 import uk.q3c.krail.core.guice.threadscope.ThreadScopeModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
@@ -96,6 +97,8 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 
         coreModules.add(new ServicesMonitorModule());
 
+        coreModules.add(ErrorModule());
+        
         coreModules.add(shiroModule());
         coreModules.add(shiroVaadinModule());
         coreModules.add(new ShiroAopModule());
@@ -113,7 +116,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
         return coreModules;
     }
 
-    /**
+	/**
      * Override this if you have provided your own {@link UserOptionModule}
      *
      * @return
@@ -216,5 +219,9 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
         if (servletContextEvent.getServletContext() != null) {
             super.contextDestroyed(servletContextEvent);
 		}
+	}
+
+    protected Module ErrorModule() {
+		return new ErrorModule();
 	}
 }

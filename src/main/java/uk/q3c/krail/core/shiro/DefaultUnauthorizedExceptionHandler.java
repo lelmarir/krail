@@ -11,13 +11,13 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-
 package uk.q3c.krail.core.shiro;
 
 import java.io.Serializable;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
@@ -25,7 +25,8 @@ import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
 
-public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptionHandler, Serializable {
+public class DefaultUnauthorizedExceptionHandler implements
+		UnauthorizedExceptionHandler, Serializable {
 
 	private final UserNotifier notifier;
 
@@ -35,8 +36,23 @@ public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptio
 		this.notifier = notifier;
 	}
 
-	@Override
-	public void onUnauthorizedException(NavigationState targetNavigationState, UnauthorizedException throwable) {
+	protected void onUnauthorizedException(NavigationState targetNavigationState,
+			UnauthorizedException throwable) {
 		notifier.show(NotificationType.ERROR, DescriptionKey.No_Permission);
+	}
+
+	@Override
+	public boolean handle(ErrorEvent event) {
+		Throwable throwable = event.getThrowable();
+		if (throwable instanceof NavigationAuthorizationException) {
+			Throwable cause = throwable.getCause();
+			NavigationState targetNavigationState = ((NavigationAuthorizationException) throwable).getTargetNavigationState();
+			// handle an unauthorised access attempt
+			if (cause instanceof UnauthorizedException) {
+				onUnauthorizedException(targetNavigationState, (UnauthorizedException) cause);
+				return true;
+			}
+		}
+		return false;
 	}
 }

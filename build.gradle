@@ -13,6 +13,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
+apply plugin: 'project-report'
 
 sourceCompatibility = '1.8'
 
@@ -105,8 +106,8 @@ dependencies {
     compile "javax.servlet:javax.servlet-api:3.+"
 
     //testing
-    testCompile 'uk.q3c.util:util-testUtil:0.7.1'
-    testCompile 'uk.q3c.krail:krail-testUtil:1.0.3'
+    //testCompile 'uk.q3c.util:util-testUtil:0.7.1'
+    //testCompile 'uk.q3c.krail:krail-testUtil:1.0.3'
     testCompile 'com.mycila:mycila-guice:2.10.ga'
     testCompile 'com.mycila.testing.plugins:mycila-testing-guice:2.8'
     testCompile 'com.mycila.testing.plugins:mycila-testing-mockito:2.8'
@@ -141,6 +142,5 @@ dependencies {
     // needed for Vaadin javadoc only
     compile "javax.portlet:portlet-api:2.0"
     compile "org.atmosphere:atmosphere-runtime:2.1.6"
-
 
 }

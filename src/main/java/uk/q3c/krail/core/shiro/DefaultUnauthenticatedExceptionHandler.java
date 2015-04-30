@@ -17,6 +17,7 @@ import java.io.Serializable;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
+import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
@@ -26,25 +27,46 @@ import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
 
-public class DefaultUnauthenticatedExceptionHandler implements UnauthenticatedExceptionHandler, Serializable {
+public class DefaultUnauthenticatedExceptionHandler implements
+		UnauthenticatedExceptionHandler, Serializable {
 
 	private static final long serialVersionUID = 7883073068352609958L;
-	
+
 	private final UserNotifier notifier;
 	private final Navigator navigator;
 
 	@Inject
-	protected DefaultUnauthenticatedExceptionHandler(UserNotifier notifier, Navigator navigator) {
+	protected DefaultUnauthenticatedExceptionHandler(UserNotifier notifier,
+			Navigator navigator) {
 		super();
 		this.notifier = notifier;
 		this.navigator = navigator;
 	}
 
-	@Override
-	public void onUnauthenticatedException(NavigationState targetNavigationState, UnauthenticatedException throwable) {
+	protected void onUnauthenticatedException(
+			NavigationState targetNavigationState,
+			UnauthenticatedException throwable) {
 		navigator.navigateTo(StandardPageKey.Log_In);
-		notifier.show(NotificationType.WARNING, DescriptionKey.You_have_not_logged_in);
-		
+		notifier.show(NotificationType.WARNING,
+				DescriptionKey.You_have_not_logged_in);
+
+	}
+	
+	@Override
+	public boolean handle(ErrorEvent event) {
+		Throwable throwable = event.getThrowable();
+		if (throwable instanceof NavigationAuthorizationException) {
+			NavigationState targetNavigationState = ((NavigationAuthorizationException) throwable)
+					.getTargetNavigationState();
+			Throwable cause = throwable.getCause();
+			// handle an unauthenticated access attempt
+			if (cause instanceof UnauthenticatedException) {
+				onUnauthenticatedException(targetNavigationState,
+								(UnauthenticatedException) cause);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

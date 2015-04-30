@@ -321,11 +321,14 @@ public class DefaultNavigator implements Navigator, AuthenticationListener {
 	
 	@Override
 	public void updateUriFragment() {
-		updateUriFragment(getCurrentNavigationState(), false);
+		NavigationState navigationState = getCurrentNavigationState();
+		assert navigationState != null;
+		updateUriFragment(navigationState, false);
 	}
 
 	private void updateUriFragment(NavigationState navigationState,
 			boolean fireEvents) {
+		assert navigationState != null;
 		ScopedUI ui = uiProvider.get();
 		Page page = ui.getPage();
 		if (!navigationState.getFragment().equals(page.getUriFragment())) {
