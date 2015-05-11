@@ -14,6 +14,9 @@ package uk.q3c.krail.core.shiro;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.config.ConfigurationException;
 import org.apache.shiro.guice.ShiroModule;
@@ -33,6 +36,11 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
  */
 public class StandardShiroModule extends ShiroModule {
 
+	@Inject
+	public static void setSecurityManager(SecurityManager securityManager) {
+		SecurityUtils.setSecurityManager(securityManager);
+	}
+
 	public StandardShiroModule() {
 		super();
 	}
@@ -47,6 +55,9 @@ public class StandardShiroModule extends ShiroModule {
 		bindSubjectIdentifier();
 		expose(SubjectIdentifier.class);
 		bindSubjectProvider();
+		
+		//to inject the method setSecurityManager()
+		requestStaticInjection(StandardShiroModule.class);
 	}
 
 	/**
