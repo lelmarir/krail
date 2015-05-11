@@ -56,7 +56,8 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 
 	public Injector getInjector(boolean create) {
 		if (injector == null && create) {
-			createInjector();
+			injector = createInjector();
+			log.debug("injector created");
         }
 		return injector;
     }
@@ -72,19 +73,11 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		return getInjector(true);
     }
 
-    protected void createInjector() {
-        injector = Guice.createInjector(getModules());
-        log.debug("injector created");
-
-        // By default Shiro provides a binding to DefaultSecurityManager, but that is replaced by a binding to
-        // KrailSecurityManager in DefaultShiroModule#bindSecurityManager (or potentially to another security manager if
-        // the developer overrides that method)
-        SecurityManager securityManager = injector.getInstance(SecurityManager.class);
-        SecurityUtils.setSecurityManager(securityManager);
-
+    protected Injector createInjector() {
+        return Guice.createInjector(getModules());
     }
 
-    private List<Module> getModules() {
+    protected List<Module> getModules() {
         List<Module> coreModules = new ArrayList<>();
 
         coreModules.add(i18NModule());
