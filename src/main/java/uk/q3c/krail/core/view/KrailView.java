@@ -21,16 +21,16 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
 /**
  * A view is constructed by the {@link ViewFactory} from a Provider defined in the sitemap building process.  When
- * the view is selected for use, calls are made against {@link KrailViewChangeListener}s added to {@link Navigator},
+ * the view is selected for use, calls are made against {@link KrailBeforeViewChangeListener}s added to {@link Navigator},
  * and
  * this interface, in the following order:
  * <ol>
- * <li>{@link KrailViewChangeListener#beforeViewChange(KrailViewChangeEvent)}</li>
+ * <li>{@link KrailBeforeViewChangeListener#beforeViewChange(KrailViewChangeEvent)}</li>
  * <li>{@link #init()}</li>
  * <li>{@link #beforeBuild}</li>
  * <li>{@link #buildView}</li>
  * <li>{@link #afterBuild}</li>
- * <li>{@link KrailViewChangeListener#afterViewChange(KrailViewChangeEvent)}</li>
+ * <li>{@link KrailBeforeViewChangeListener#afterViewChange(KrailViewChangeEvent)}</li>
  * </ol>
  * where build refers to the creation of UI fields and components which populate the view.  Each method, except
  * readFromEnvironment(),

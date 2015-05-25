@@ -3,8 +3,12 @@ package uk.q3c.krail.core.navigate;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.ui.ScopedUI;
+import uk.q3c.krail.core.view.KrailAfterViewChangeListener;
+import uk.q3c.krail.core.view.KrailAfterViewChangeNotifier;
+import uk.q3c.krail.core.view.KrailBeforeSecurityCheckListener;
+import uk.q3c.krail.core.view.KrailBeforeSecurityCheckNotifier;
 import uk.q3c.krail.core.view.KrailView;
-import uk.q3c.krail.core.view.KrailViewChangeNotifier;
+import uk.q3c.krail.core.view.KrailBeforeViewChangeNotifier;
 
 import com.vaadin.server.Page.UriFragmentChangedListener;
 
@@ -28,7 +32,7 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
  * 
  */
 public interface Navigator extends UriFragmentChangedListener,
-		KrailViewChangeNotifier {
+		KrailBeforeViewChangeNotifier, KrailAfterViewChangeNotifier, KrailBeforeSecurityCheckNotifier {
 
 	void navigateTo(String fragment) throws InvalidURIException;
 

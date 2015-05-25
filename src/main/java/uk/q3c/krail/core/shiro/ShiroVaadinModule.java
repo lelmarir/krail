@@ -17,10 +17,12 @@ public class ShiroVaadinModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder.newSetBinder(binder(), ErrorHandler.class);		
+		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder
+				.newSetBinder(binder(), ErrorHandler.class);
 		errorHandlersBinder.addBinding().to(UnauthorizedExceptionHandler.class);
-		errorHandlersBinder.addBinding().to(UnauthenticatedExceptionHandler.class);
-		
+		errorHandlersBinder.addBinding().to(
+				UnauthenticatedExceptionHandler.class);
+
 		bindUnauthenticatedHandler();
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
@@ -30,7 +32,7 @@ public class ShiroVaadinModule extends AbstractModule {
 	KrailSecurityManager providesSecurityManager() {
 		return (KrailSecurityManager) SecurityUtils.getSecurityManager();
 	}
-	
+
 	/**
 	 * the {@link DefaultErrorHandler} calls this handler in response to an
 	 * attempted unauthorised action. If you have defined your own ErrorHandler
@@ -48,7 +50,7 @@ public class ShiroVaadinModule extends AbstractModule {
 	 */
 	protected void bindUnauthenticatedHandler() {
 		bind(UnauthenticatedExceptionHandler.class).to(
-				DefaultUnauthenticatedExceptionHandler.class);
+				AutenticationHandler.class);
 	}
 
 	/**

@@ -10,9 +10,8 @@
 
 package uk.q3c.krail.core.view;
 
-import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 
-public interface KrailViewChangeListener {
+public interface KrailBeforeViewChangeListener {
 	/**
      * Receives an event fired before an imminent view change.  At this point the event:<ol> <
      * <li><{@code fromState} represents the current navigation state/li>
@@ -21,16 +20,5 @@ public interface KrailViewChangeListener {
      * Listeners are called in registration order. If any listener cancels the event, {@link
      * V7ViewChangeEvent#cancel()}, the rest of the listeners are not called and the view change is blocked.
 	 */
-	public void beforeViewChange(CancellableKrailViewChangeEvent event);
-
-	/**
-	 * Invoked after the view is changed. If a <code>beforeViewChange</code> method blocked the view change, this method
-	 * is not called. Be careful of unbounded recursion if you decide to change the view again in the listener. Note
-	 * that this is fired even if the view does not change, but the URL does (this would only happen if the same view
-	 * class is used for multiple URLs). This is because some listeners actually want to know about the URL change
-	 * 
-	 * @param event
-	 *            view change event
-	 */
-	public void afterViewChange(KrailViewChangeEvent event);
+	public void beforeViewChange(KrailViewChangeEvent event);
 }
