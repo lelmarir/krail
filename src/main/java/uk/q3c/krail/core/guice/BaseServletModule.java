@@ -12,22 +12,7 @@
  */
 package uk.q3c.krail.core.guice;
 
-import org.apache.shiro.ShiroException;
-
-import uk.q3c.krail.core.guice.errors.ErrorHandler;
-import uk.q3c.krail.core.guice.errors.KrailErrorHandler;
-import uk.q3c.krail.core.navigate.DefaultInvalidURIExceptionHandler;
-import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
-import uk.q3c.krail.core.shiro.DefaultLoginExceptionHandler;
-import uk.q3c.krail.core.shiro.DefaultUnauthenticatedExceptionHandler;
-import uk.q3c.krail.core.shiro.DefaultUnauthorizedExceptionHandler;
-import uk.q3c.krail.core.shiro.LoginExceptionHandler;
-import uk.q3c.krail.core.shiro.UnauthenticatedExceptionHandler;
-import uk.q3c.krail.core.shiro.UnauthorizedExceptionHandler;
-
-import com.google.inject.multibindings.Multibinder;
 import com.google.inject.servlet.ServletModule;
-import com.vaadin.server.DefaultErrorHandler;
 
 public class BaseServletModule extends ServletModule {
 
