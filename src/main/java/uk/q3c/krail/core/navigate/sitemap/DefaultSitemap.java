@@ -21,16 +21,16 @@ public class DefaultSitemap implements Sitemap {
 	public class ViewNode extends AbstractNode {
 
 		private AccesControl accesControlRule;
-		private final Class<? extends KrailView> view;
+		private final Class<? extends KrailView> viewClass;
 
 		public ViewNode(String uri, Class<? extends KrailView> view) {
 			super(uri);
-			this.view = view;
+			this.viewClass = view;
 		}
 
 		@Override
 		public Class<? extends KrailView> getViewClass() {
-			return view;
+			return viewClass;
 		}
 
 		@Override
@@ -40,6 +40,12 @@ public class DefaultSitemap implements Sitemap {
 
 		public void setAccesControlRule(AccesControl accesControlRule) {
 			this.accesControlRule = accesControlRule;
+		}
+
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + "@" + "{pattern="
+					+ getUriPattern() + ", class=" + viewClass + "}";
 		}
 	}
 
@@ -190,7 +196,7 @@ public class DefaultSitemap implements Sitemap {
 		if (matches.isEmpty()) {
 			throw new InvalidURIException(
 					"Unable to find the node for the fragment '" + fragment
-							+ "'\n "+ nodes.toString());
+							+ "'\n " + nodes.toString());
 		}
 		return matches.getFirst();
 	}
