@@ -39,8 +39,7 @@ public class DefaultNavigationCallbackHandler<T extends KrailView> implements
 
 		if (!methods.isEmpty()) {
 			Method method = methods.get(0);
-			LOGGER.debug("found method annotated with " + annotation.getClass()
-					+ ": ", method);
+			LOGGER.debug("found method annotated with {} : {}", annotation.getName(), method);
 
 			if (!method.getReturnType().equals(Void.TYPE)) {
 				throw new IllegalStateException("The method annotated with "
