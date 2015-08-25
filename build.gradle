@@ -53,6 +53,22 @@ uploadArchives {
                 }
             }
         }
+        mavenDeployer {
+            repository(url: "http://192.168.0.5:8081/nexus/content/repositories/snapshots"){
+                authentication(userName: "admin", password: "servsif")
+            }
+            pom {
+                project {
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
