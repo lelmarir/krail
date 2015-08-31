@@ -55,10 +55,7 @@ public class SubjectProvider implements Provider<Subject> {
 
 		} catch (IllegalStateException ise) {
 			// this may happen in background threads which are not using a session, or during testing
-			log.debug("There is no VaadinSession, creating a new Subject");
-			subject = new Subject.Builder().buildSubject();
-			return subject;
-
+			throw new IllegalStateException("There is no VaadinSession, no user can be logged in", ise);
 		}
 
 	}
