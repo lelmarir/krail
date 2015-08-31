@@ -25,3 +25,4 @@ gradle
 /.idea
 /src/test
 /src/resources/test
+sh.exe.stackdump
