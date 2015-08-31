@@ -6,8 +6,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.q3c.krail.core.user.opt.UserOption;
-import uk.q3c.krail.core.user.opt.UserOptionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,25 +18,20 @@ import java.util.Locale;
  * Created by David Sowerby on 07/12/14.
  */
 
-public class DefaultPatternSource implements UserOptionContext, PatternSource<LoadingCache<PatternCacheKey, String>> {
-    public enum UserOptionProperty {MAX_CACHE_SIZE}
-
+public class DefaultPatternSource implements PatternSource<LoadingCache<PatternCacheKey, String>> {
+    //TODO put in a config file, but not related to the user
+	private static final int MAX_CACHE_SIZE = 1000;
 
     private static Logger log = LoggerFactory.getLogger(DefaultPatternSource.class);
     private LoadingCache<PatternCacheKey, String> cache;
-    private UserOption userOption;
 
 
     @Inject
-
-    protected DefaultPatternSource(UserOption userOption,
-                                   PatternCacheLoader cacheLoader) {
-        this.userOption = userOption;
-        userOption.configure(this, UserOptionProperty.class);
+    protected DefaultPatternSource(PatternCacheLoader cacheLoader) {
         //CacheLoader has no interface so the cast is necessary to allow alternative PatternCacheLLoader implementations
         //although all implementations would need to extend CacheLoader
         cache = CacheBuilder.newBuilder()
-                            .maximumSize(userOption.get(1000L, UserOptionProperty.MAX_CACHE_SIZE))
+                            .maximumSize(MAX_CACHE_SIZE)
                             .build((CacheLoader) cacheLoader);
 
     }
@@ -71,11 +64,6 @@ public class DefaultPatternSource implements UserOptionContext, PatternSource<Lo
     @Override
     public LoadingCache<PatternCacheKey, String> getCache() {
         return cache;
-    }
-
-    @Override
-    public UserOption getUserOption() {
-        return userOption;
     }
 
     @Override
