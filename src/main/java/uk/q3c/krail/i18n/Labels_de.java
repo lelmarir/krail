@@ -46,7 +46,6 @@ public class Labels_de extends Labels {
         put(LabelKey.Yes, "Ja");
         put(LabelKey.Alphabetic_Ascending, "alphabetisch aufsteigend");
         put(LabelKey.Alphabetic_Descending, "alphabetisch absteigend");
-        put(LabelKey.Application_Configuration_Service, "Anwendung " + "Konfigurations-Service");
         put(LabelKey.Authentication, "Authentifzierung");
         put(LabelKey.Authorisation, "Berechtigung");
         put(LabelKey.Broadcast_Messages, "Nachricht an alle Benutzer");
@@ -62,7 +61,6 @@ public class Labels_de extends Labels {
         put(LabelKey.Position_Index_Ascending, "Positionsindex aufsteigend");
         put(LabelKey.Position_Index_Descending, "Positionsindex absteigend");
         put(LabelKey.Pull, "ziehen");
-        put(LabelKey.Sitemap_Service, "Sitemap Service");
         put(LabelKey.Splash, "Splash");
         put(LabelKey.Unlock_Account, "Konto entsperren");
         put(LabelKey.Unnamed, "unbenannt");

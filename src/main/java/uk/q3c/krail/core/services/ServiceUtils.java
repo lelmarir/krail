@@ -20,9 +20,9 @@ package uk.q3c.krail.core.services;
  */
 public class ServiceUtils {
 
-    public static Class<?> unenhancedClass(Service service) {
+    public static Class<?> getUnenhancedClass(Service service) {
         Class<?> serviceClass = service.getClass();
-        return unenhancedClass(serviceClass);
+        return getUnenhancedClass(serviceClass);
     }
 
     /**
@@ -30,7 +30,7 @@ public class ServiceUtils {
      *
      * @param serviceClass
      */
-    public static Class<?> unenhancedClass(Class<?> serviceClass) {
+    public static Class<?> getUnenhancedClass(Class<?> serviceClass) {
         Class<?> clazz = serviceClass;
         while (clazz.getName()
                     .contains("EnhancerByGuice")) {

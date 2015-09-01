@@ -66,9 +66,22 @@ public abstract class AbstractService implements Service, ServiceStartListener, 
 		}
 
 	}
+	
+	private String name;
+	private String description;
 
 	protected AbstractService() {
 		super();
+	}
+	
+	protected AbstractService(String name) {
+		this();
+		this.name = name;
+	}
+	
+	protected AbstractService(String name, String description) {
+		this(name);
+		this.description = description;
 	}
 
 	protected Status status = Status.INITIAL;
@@ -124,7 +137,7 @@ public abstract class AbstractService implements Service, ServiceStartListener, 
 		return status == Status.STOPPED || (status == Status.FAILED) || status == Status.DEPENDENCY_FAILED;
 	}
 
-	protected void setStatus(Status status) throws Exception {
+	private void setStatus(Status status) throws Exception {
 		if (status != this.status) {
 			Status previousStatus = this.status;
 			this.status = status;
@@ -199,7 +212,7 @@ public abstract class AbstractService implements Service, ServiceStartListener, 
 	private List<DependencyRecord> getDependencies() throws IllegalArgumentException, IllegalAccessException {
 		if (dependencies == null) {
 			dependencies = new ArrayList<>();
-			Class<?> clazz = ServiceUtils.unenhancedClass(this);
+			Class<?> clazz = ServiceUtils.getUnenhancedClass(this);
 			Field[] declaredFields = clazz.getDeclaredFields();
 			for (Field field : declaredFields) {
 				Class<?> fieldClass = field.getType();
@@ -262,14 +275,16 @@ public abstract class AbstractService implements Service, ServiceStartListener, 
 	
 	@Override
 	public String getDescription() {
-		//TODO: read form annotation
-		return "";
+		return description;
 	}
 	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	@Override
 	public String getName() {
-		// TODO: read from annotation
-		return this.getClass().getSimpleName();
+		return name;
 	}
 
 }

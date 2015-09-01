@@ -65,18 +65,14 @@ public class DefaultApplicationConfigurationService extends AbstractService impl
 	@Inject
 	protected DefaultApplicationConfigurationService(Translate translate, ApplicationConfiguration configuration,
 			Map<Integer, IniFileConfig> iniFiles) {
-		super();
+		super("ApplicationConfigurationService", "This service loads the application configuration from krail.ini");
 		this.configuration = configuration;
 		this.iniFiles = iniFiles;
 		configure();
 	}
 
-	/**
-	 * Override this method if you want to change the name or description keys.
-	 */
 	protected void configure() {
-//		setNameKey(LabelKey.Application_Configuration_Service);
-//		setDescriptionKey(DescriptionKey.Application_Configuration_Service);
+		
 	}
 
 	/**
