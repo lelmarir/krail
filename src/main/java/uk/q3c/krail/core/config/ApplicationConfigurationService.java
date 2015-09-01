@@ -14,6 +14,6 @@ package uk.q3c.krail.core.config;
 
 import uk.q3c.krail.core.services.ServiceI18N;
 
-public interface ApplicationConfigurationService extends ServiceI18N {
+public interface ApplicationConfigurationService {
 
 }

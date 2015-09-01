@@ -14,17 +14,17 @@ package uk.q3c.krail.core.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.q3c.util.ResourceUtils;
-import uk.q3c.krail.core.services.AbstractServiceI18N;
+import uk.q3c.krail.core.services.AbstractService;
 import uk.q3c.krail.core.services.Service;
-import uk.q3c.krail.i18n.DescriptionKey;
-import uk.q3c.krail.i18n.LabelKey;
 import uk.q3c.krail.i18n.Translate;
 
 import java.io.File;
@@ -53,7 +53,7 @@ import java.util.TreeSet;
  * 
  */
 @Singleton
-public class DefaultApplicationConfigurationService extends AbstractServiceI18N implements
+public class DefaultApplicationConfigurationService extends AbstractService implements
 		ApplicationConfigurationService {
 
 	private static Logger log = LoggerFactory.getLogger(DefaultApplicationConfigurationService.class);
@@ -65,7 +65,7 @@ public class DefaultApplicationConfigurationService extends AbstractServiceI18N 
 	@Inject
 	protected DefaultApplicationConfigurationService(Translate translate, ApplicationConfiguration configuration,
 			Map<Integer, IniFileConfig> iniFiles) {
-		super(translate);
+		super();
 		this.configuration = configuration;
 		this.iniFiles = iniFiles;
 		configure();
@@ -75,8 +75,8 @@ public class DefaultApplicationConfigurationService extends AbstractServiceI18N 
 	 * Override this method if you want to change the name or description keys.
 	 */
 	protected void configure() {
-		setNameKey(LabelKey.Application_Configuration_Service);
-		setDescriptionKey(DescriptionKey.Application_Configuration_Service);
+//		setNameKey(LabelKey.Application_Configuration_Service);
+//		setDescriptionKey(DescriptionKey.Application_Configuration_Service);
 	}
 
 	/**
@@ -88,6 +88,7 @@ public class DefaultApplicationConfigurationService extends AbstractServiceI18N 
 	 *             if an error occurs while loading a file
 	 * 
 	 */
+	//TODO: use lyfecigle method annotation instead of interface
 	@Override
 	protected void doStart() throws ConfigurationException {
 		Set<Integer> keySorter = new TreeSet<>(iniFiles.keySet());
