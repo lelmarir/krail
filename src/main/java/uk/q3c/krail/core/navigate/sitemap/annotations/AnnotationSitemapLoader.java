@@ -33,19 +33,20 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 	@Override
 	public void configure(Sitemap sitemap) {
 
-		LOGGER.debug("scanning {} for View annotations", basePackage);
+		LOGGER.info("scanning {} for View annotations", basePackage);
 		Reflections reflections = new Reflections(basePackage);
 
 		// find the View annotations
 		Set<Class<?>> typesWithView = reflections
 				.getTypesAnnotatedWith(View.class);
-		LOGGER.debug("{} KrailViews with View annotation found",
+		LOGGER.info("{} KrailViews with View annotation found",
 				typesWithView.size());
 
 		checkRedirectAnnotations(reflections, typesWithView);
 
 		// process the View annotations
 		for (Class<?> clazz : typesWithView) {
+			LOGGER.debug("processing annotated View {}", clazz.getName());
 			if (!KrailView.class.isAssignableFrom(clazz)) {
 				throw new IllegalStateException(
 						"Classes annotated with View should be a KrailView");
