@@ -38,7 +38,7 @@ public abstract class ViewBaseI18N<R extends Component> extends ViewBase<R> {
     }
 
     @Override
-    public String viewName() {
+    public String getViewName() {
         return translateKey();
     }
 

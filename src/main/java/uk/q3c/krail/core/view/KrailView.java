@@ -47,6 +47,7 @@ public interface KrailView {
 	 * been set
      *
      * @return
+     * @throws ViewBuildException
      */
     public Component getRootComponent() throws ViewBuildException;
 
@@ -55,5 +56,5 @@ public interface KrailView {
      *
      * @return
      */
-    public String viewName();
+    public String getViewName();
 }

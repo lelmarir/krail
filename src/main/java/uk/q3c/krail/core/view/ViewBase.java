@@ -58,9 +58,9 @@ public abstract class ViewBase<R extends Component> implements KrailView {
     public void setRootComponent(R rootComponent) {
         this.rootComponent = rootComponent;
     }
-
+    
     @Override
-    public String viewName() {
+    public String getViewName() {
         return getClass().getSimpleName();
     }
 
