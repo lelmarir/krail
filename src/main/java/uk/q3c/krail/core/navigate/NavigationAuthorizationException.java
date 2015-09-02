@@ -18,5 +18,10 @@ public class NavigationAuthorizationException extends AuthorizationException {
 
 	public NavigationState getTargetNavigationState() {
 		return navigationState;
-	}	
+	}
+	
+	@Override
+	public String toString() {
+		return this.getClass().getName() + " {navigationState="+navigationState+"}";
+	}
 }

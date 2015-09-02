@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.q3c.krail.core.guice.errors.ErrorHandler.ErrorEvent;
 import uk.q3c.krail.core.navigate.Navigator;
@@ -39,6 +41,7 @@ import com.vaadin.server.DefaultErrorHandler;
 public class KrailErrorHandler extends DefaultErrorHandler {
 
 	private static final long serialVersionUID = -8722893607740326862L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(KrailErrorHandler.class);
 
 	private LinkedList<ErrorHandler> errorHandlers;
 	private final Navigator navigator;
@@ -74,6 +77,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 
 		if (handled == false) {
+			LOGGER.error("Unable to handle the error: navigating to the error page", event.getThrowable());
 			navigator.navigateToErrorView(event.getThrowable());
 		}
 	}
@@ -85,6 +89,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			
 			boolean handled = handler.handle(e);
 			if (handled == true) {
+				LOGGER.debug("Error handled by {} : {}", handler, e.getThrowable());
 				return true;
 			}
 		}
