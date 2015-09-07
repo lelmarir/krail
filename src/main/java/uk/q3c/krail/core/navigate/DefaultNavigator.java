@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
@@ -69,7 +70,7 @@ public class DefaultNavigator implements Navigator {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigator.class);
 
-	private final NavigationCallbackHandler DEFAULT_NAVIGATION_CALLBACK_HANDLER = new DefaultNavigationCallbackHandler();
+	private final NavigationCallbackHandler callbackHandler = new DefaultNavigationCallbackHandler();
 
 	private final List<KrailBeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<KrailBeforeSecurityCheckListener>();
 	private final List<KrailBeforeViewChangeListener> beforeViewChangeListeners = new LinkedList<KrailBeforeViewChangeListener>();
@@ -97,11 +98,6 @@ public class DefaultNavigator implements Navigator {
 		navigateTo(fragment != null ? fragment : "");
 	}
 
-	private boolean isLogOutPage(NavigationState navigationState) {
-		return navigationState.getSitemapNode().equals(
-				sitemap.getStandardView(StandardPageKey.Log_Out));
-	}
-
 	@Override
 	public void navigateTo(String fragment) throws InvalidURIException {
 		LOGGER.debug("Navigating to fragment: {}", fragment);
@@ -114,35 +110,27 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateTo(StandardPageKey pageKey) {
-		navigateTo(pageKey, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
+		navigateTo(sitemap.buildNavigationStateFor(pageKey));
 	}
-
-	@Override
-	public void navigateTo(StandardPageKey pageKey,
-			NavigationCallbackHandler callbackHandler) {
-		navigateTo(sitemap.buildNavigationStateFor(pageKey), callbackHandler);
-	}
-
-	@SuppressWarnings("unchecked")
+	
 	@Override
 	public <T extends KrailView> void navigateTo(Class<T> viewClass) {
-		navigateTo(viewClass, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
-	}
-
-	@Override
-	public <T extends KrailView> void navigateTo(Class<T> viewClass,
-			NavigationCallbackHandler<T> callbackHandler) {
 		NavigationState ns = sitemap.buildNavigationState(viewClass);
-		navigateTo(ns, callbackHandler);
+		navigateTo(ns);
 	}
 
 	@Override
-	public void navigateTo(NavigationState navigationState) {
-		navigateTo(navigationState, DEFAULT_NAVIGATION_CALLBACK_HANDLER);
+	public <T extends KrailView> void navigateTo(Class<T> viewClass, Parameters parameters) {
+		NavigationState ns = sitemap.buildNavigationState(viewClass, parameters);
+		navigateTo(ns);
 	}
-
-	public void navigateTo(NavigationState navigationState,
-			NavigationCallbackHandler callbackHandler)
+	
+	@Override
+	public void navigateTo(NavigationTarget target) {
+		navigateTo(target.getView(), target.getParaeters());
+	}
+	
+	public void navigateTo(NavigationState navigationState)
 			throws AuthorizationException {
 		checkNotNull(navigationState);
 		checkNotNull(callbackHandler);
@@ -217,7 +205,7 @@ public class DefaultNavigator implements Navigator {
 		// now change the view
 		changeView(view);
 
-		fireViewAfterInboundNavigationEvent(view, event, callbackHandler);
+		fireViewAfterInboundNavigationEvent(view, event);
 
 		// and tell listeners its changed
 		fireAfterViewChange(event);
@@ -332,8 +320,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	private void fireViewAfterInboundNavigationEvent(KrailView view,
-			KrailViewChangeEvent event,
-			NavigationCallbackHandler callbackHandler) {
+			KrailViewChangeEvent event) {
 		callbackHandler.afterInbounNavigationEvent(view, event);
 	}
 
@@ -357,14 +344,17 @@ public class DefaultNavigator implements Navigator {
 				"A {} Error has been thrown, reporting via the Error View",
 				error.getClass().getName(), error);
 
-		navigateTo(ErrorView.class,
-				new DefaultNavigationCallbackHandler<ErrorView>() {
-					@Override
-					public void beforeInboundNavigationEvent(ErrorView view,
-							CancellableKrailViewChangeEvent cancellable) {
-						view.beforeInboundNavigation(error);
-					}
-				});
+		NavigationTarget navigationTarget = new NavigationTarget(ErrorView.class);
+		navigationTarget.putParameter("error", error);
+		navigateTo(navigationTarget);
+//		navigateTo(ErrorView.class,
+//				new DefaultNavigationCallbackHandler<ErrorView>() {
+//					@Override
+//					public void beforeInboundNavigationEvent(ErrorView view,
+//							CancellableKrailViewChangeEvent cancellable) {
+//						view.beforeInboundNavigation(error);
+//					}
+//				});
 	}
 
 	@Override

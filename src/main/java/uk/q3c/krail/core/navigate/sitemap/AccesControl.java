@@ -11,6 +11,8 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.subject.Subject;
 
+import com.google.common.base.Joiner;
+
 public interface AccesControl {
 
 	static class Public implements AccesControl {
@@ -19,6 +21,11 @@ public interface AccesControl {
 		public void checkAuthorization(Subject subject)
 				throws AuthorizationException {
 			;
+		}
+		
+		@Override
+		public String toString() {
+			return "Public";
 		}
 
 	}
@@ -33,6 +40,10 @@ public interface AccesControl {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "Authenticated";
+		}
 	}
 
 	static class Guest implements AccesControl {
@@ -45,6 +56,10 @@ public interface AccesControl {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "Guest";
+		}
 	}
 
 	static class Permission implements AccesControl {
@@ -83,6 +98,11 @@ public interface AccesControl {
 					subject.checkPermission(permissions[0]);
 			}
 		}
+		
+		@Override
+		public String toString() {
+			return "Permission("+Joiner.on(" "+logical.name()+" ").join(permissions)+")";
+		}
 
 	}
 
@@ -115,8 +135,15 @@ public interface AccesControl {
 	        }
 		}
 
+		@Override
+		public String toString() {
+			return "Roles("+Joiner.on(" "+logical.name()+" ").join(roles)+")";
+		}
 	}
 
+	/**
+	 * Less strict than Authenticated. The user my be Remembered but not yet Authenticated
+	 */
 	static class User implements AccesControl {
 
 		@Override
@@ -127,6 +154,10 @@ public interface AccesControl {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "User";
+		}
 	}
 
 	public static final Public PUBLIC = new Public();

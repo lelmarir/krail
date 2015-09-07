@@ -19,6 +19,8 @@ public interface Sitemap {
 
 	NavigationState buildNavigationState(Class<? extends KrailView> viewClass) throws PageNotFoundException;
 	
+	NavigationState buildNavigationState(Class<? extends KrailView> viewClass, Parameters parameters) throws PageNotFoundException;
+	
 	SitemapNode getStandardView(StandardPageKey key);
 	
 	void setStandardView(StandardPageKey publicHome, ViewNode addView);

@@ -27,6 +27,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
+import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
+import uk.q3c.krail.core.navigate.Parameter;
 import uk.q3c.krail.i18n.MessageKey;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.util.StackTraceUtil;
@@ -100,8 +102,8 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		return error;
 	}
 
-	@Override
-	public void beforeInboundNavigation(Throwable error) {
+	@BeforeInboundNavigation
+	protected void beforeInboundNavigation(@Parameter("error") Throwable error) {
 		for (Window w : UI.getCurrent().getWindows()) {
 			w.close();
 		}

@@ -13,7 +13,7 @@ public class ParametersImpl implements Parameters {
 	}
 	
 	@Override
-	public Object set(String id, Object value) {
+	public Object put(String id, Object value) {
 		return parameters.put(id, value);
 	}
 
@@ -26,7 +26,8 @@ public class ParametersImpl implements Parameters {
 		return object!=null?object.toString():null;
 	}
 
-	private Object get(String id) {
+	@Override
+	public Object get(String id) {
 		return parameters.get(id);
 	}
 	

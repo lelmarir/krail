@@ -101,7 +101,7 @@ public abstract class AbstractNode implements SitemapNode {
 			for (int i = 0; i < parametersId.size(); i++) {
 				String id = parametersId.get(i);
 				Object value = m.group(i + 1);// groups are 1 based
-				params.set(id, value);
+				params.put(id, value);
 			}
 			return new NavigationStateImpl(this, params);
 
@@ -165,12 +165,6 @@ public abstract class AbstractNode implements SitemapNode {
 		}else{
 			return sb;
 		}
-	}
-
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() + "@" + "{pattern="
-				+ rawUriPattern + "}";
 	}
 
 	@Override

@@ -1,7 +1,10 @@
 package uk.q3c.krail.core.navigate.sitemap;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +65,10 @@ public class DefaultSitemap implements Sitemap {
 			this.target = target;
 		}
 
+		public SitemapNode getTargetNode() {
+			return target;
+		}
+		
 		@Override
 		public Class<? extends KrailView> getViewClass() {
 			return target.getViewClass();
@@ -75,6 +82,12 @@ public class DefaultSitemap implements Sitemap {
 		@Override
 		public String buildFragment(Parameters parameters) {
 			return target.buildFragment(parameters);
+		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + "@" + "{pattern="
+					+ getUriPattern() + ", target=" + target + "}";
 		}
 	}
 
@@ -106,18 +119,30 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	private void add(AbstractNode node) {
-		checkUniqueUriPattern(node.getUriPattern());
+		checkUniqueUriPattern(node);
 
 		nodes.add(node);
 		nodesByClass.put(node.getViewClass(), node);
 	}
+	
+	/**
+	 * Return all the nodes in the sitemap (views and redirects)
+	 * @return
+	 */
+	public Collection<AbstractNode> getNodes() {
+		return Collections.unmodifiableCollection(nodes);
+	}
+	
+	public Map<StandardPageKey, AbstractNode> getStandardViews() {
+		return Collections.unmodifiableMap(standardViews);
+	}
 
-	private void checkUniqueUriPattern(String uri) {
-		AbstractNode n = get(uri);
+	private void checkUniqueUriPattern(AbstractNode node) {
+		AbstractNode n = get(node.getUriPattern());
 		if (n != null) {
 			throw new IllegalStateException(
-					"Unable to register again this uri (" + uri
-							+ "), remove it first: \n" + "\t " + n);
+					"Unable to register again this uri (" + node
+							+ ") for "+node+". It is already mapped for "+n);
 		}
 	}
 
@@ -140,7 +165,7 @@ public class DefaultSitemap implements Sitemap {
 		for (AbstractNode node : nodes) {
 			// TODO: consider regex expressio equality intead of siple string
 			// equal
-			if (node.getUriPattern().equals(nodes)) {
+			if (node.getUriPattern().equals(uriPattern)) {
 				return node;
 			}
 		}
@@ -187,7 +212,7 @@ public class DefaultSitemap implements Sitemap {
 		assert LOGGER.isDebugEnabled();
 		if (matches.size() > 1) {
 			StringBuilder sb = new StringBuilder(
-					"Multiple URI match the current fragment, this implementation cant tell wich one is the right one, it will use the first one:\n");
+					"Multiple URI match the current fragment, this implementation can't tell wich one is the right one, it will use the first one:\n");
 			for (NavigationState n : matches) {
 				sb.append("\t " + n.toString() + " \n");
 			}
@@ -220,9 +245,17 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
+	public NavigationState buildNavigationState(
+			Class<? extends KrailView> viewClass, Parameters parameters)
+			throws PageNotFoundException {
+		return buildNavigationStateFor(get(viewClass), parameters);
+	}
+	
+	@Override
 	public NavigationState buildNavigationStateFor(SitemapNode node,
 			Parameters parameters) {
 		return new NavigationStateImpl(node, parameters != null ? parameters
 				: new ParametersImpl());
 	}
+
 }

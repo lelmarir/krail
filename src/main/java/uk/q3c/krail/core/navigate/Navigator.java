@@ -1,6 +1,7 @@
 package uk.q3c.krail.core.navigate;
 
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.view.KrailAfterViewChangeListener;
@@ -42,14 +43,6 @@ public interface Navigator extends UriFragmentChangedListener,
 	 * @param pageKey
 	 */
 	void navigateTo(StandardPageKey pageKey);
-	
-	/**
-	 * A convenience method to look up the URI fragment for the {@link StandardPageKey} and navigate to it
-	 * 
-	 * @param pageKey
-	 * @param callbackHandler
-	 */
-	<T extends KrailView> void navigateTo(StandardPageKey pageKey, NavigationCallbackHandler<T> callbackHandler);
 
 	/**
 	 * Navigates to the location represented by {@code navigationState}, which may include parameters
@@ -59,9 +52,10 @@ public interface Navigator extends UriFragmentChangedListener,
 	void navigateTo(NavigationState navigationState);
 
 	<T extends KrailView> void navigateTo(Class<T> viewClass);
+	
+	<T extends KrailView> void navigateTo(Class<T> viewClass, Parameters parameters);
 
-	<T extends KrailView> void navigateTo(Class<T> viewClass,
-			NavigationCallbackHandler<T> callbackHandler);
+	void navigateTo(NavigationTarget target);
 
 	/**
 	 * Returns the NavigationState representing the current position of the

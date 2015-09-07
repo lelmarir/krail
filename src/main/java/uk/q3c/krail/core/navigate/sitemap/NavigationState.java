@@ -16,7 +16,9 @@ public interface NavigationState extends Serializable {
 	
 	public static interface Parameters {
 
-		Object set(String id, Object value);
+		Object get(String id);
+		
+		Object put(String id, Object value);
 
 		String getAsString(String id);
 
@@ -24,7 +26,7 @@ public interface NavigationState extends Serializable {
 		
 	}
 	
-    String getFragment();
-    Parameters parameters();
+	String getFragment();
+	Parameters parameters();
 	SitemapNode getSitemapNode();
 }

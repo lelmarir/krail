@@ -1,5 +1,6 @@
 package uk.q3c.krail.core.navigate.sitemap.annotations;
 
+import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
@@ -55,6 +56,9 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 				Class<KrailView> viewClass = (Class<KrailView>) clazz;
 
 				View annotation = viewClass.getAnnotation(View.class);
+
+				LOGGER.debug("Adding {} view to sitemap for {} url", viewClass,
+						annotation.uri());
 				ViewNode node = sitemap.addView(annotation.uri(), viewClass);
 
 				configurePageAccesControl(node, viewClass);
@@ -67,13 +71,13 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 	}
 
 	private void configurePageAccesControl(ViewNode node, Class<?> clazz) {
-		RequiresAuthentication requireAuthentication = clazz
-				.getAnnotation(RequiresAuthentication.class);
-		RequiresPermissions requiresPermissions = clazz
-				.getAnnotation(RequiresPermissions.class);
-		RequiresRoles requireRoles = clazz.getAnnotation(RequiresRoles.class);
-		RequiresGuest requiresGuest = clazz.getAnnotation(RequiresGuest.class);
-		RequiresUser requiresUser = clazz.getAnnotation(RequiresUser.class);
+		RequiresAuthentication requireAuthentication = getAnnotation(clazz,
+				RequiresAuthentication.class);
+		RequiresPermissions requiresPermissions = getAnnotation(clazz,
+				RequiresPermissions.class);
+		RequiresRoles requireRoles = getAnnotation(clazz, RequiresRoles.class);
+		RequiresGuest requiresGuest = getAnnotation(clazz, RequiresGuest.class);
+		RequiresUser requiresUser = getAnnotation(clazz, RequiresUser.class);
 
 		checkOnlyOneNotNull(requireAuthentication, requiresPermissions,
 				requireRoles, requiresGuest, requiresUser);
@@ -93,6 +97,21 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 		} else {
 			node.setAccesControlRule(AccesControl.PUBLIC);
 		}
+		LOGGER.debug("Setting AccesControlRule for {} to {}", clazz,
+				node.getAccesControlRule());
+	}
+
+	private <A extends Annotation> A getAnnotation(Class<?> clazz,
+			Class<A> annotationType) {
+		assert clazz != null;
+		while (clazz != null) {
+			A annotation = clazz.getAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return null;
 	}
 
 	private void checkOnlyOneNotNull(Object... objects) {
@@ -138,9 +157,13 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 		}
 
 		if (redirect != null) {
+			LOGGER.debug("Adding redirect for url {} to node {}",
+					redirect.uri(), node);
 			sitemap.addRedirect(redirect.uri(), node);
 		} else if (redirects != null) {
 			for (Redirect r : redirects.redirects()) {
+				LOGGER.debug("Adding redirect for url {} to node {}", r.uri(),
+						node);
 				sitemap.addRedirect(r.uri(), node);
 			}
 		}
@@ -154,14 +177,14 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 			for (StandardPageKey viewKey : standardViews) {
 				if (sitemap.getStandardView(viewKey) != null) {
 					throw new IllegalStateException("The standard view "
-							+ viewKey + " has been already set to " + sitemap.getStandardView(viewKey) + " whyle trying to set to " + node);
+							+ viewKey + " has been already set to "
+							+ sitemap.getStandardView(viewKey)
+							+ " whyle trying to set to " + node);
 				}
 
-				LOGGER.info("Setting standard view {} to {}", viewKey,
-						node);
+				LOGGER.debug("Setting standard view {} to {}", viewKey, node);
 				sitemap.setStandardView(viewKey, node);
 			}
 		}
 	}
-
 }

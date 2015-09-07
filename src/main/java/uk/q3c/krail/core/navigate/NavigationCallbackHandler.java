@@ -5,14 +5,14 @@ import uk.q3c.krail.core.view.KrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEventImpl.CancellableWrapper;
 
-public interface NavigationCallbackHandler<T extends KrailView> {
+public interface NavigationCallbackHandler {
 
-	void beforeOutboundNavigationEvent(T view,
+	void beforeOutboundNavigationEvent(KrailView view,
 			CancellableWrapper cancellable);
 
-	void beforeInboundNavigationEvent(T view,
+	void beforeInboundNavigationEvent(KrailView view,
 			CancellableKrailViewChangeEvent cancellable);
 
-	void afterInbounNavigationEvent(T view, KrailViewChangeEvent event);
+	void afterInbounNavigationEvent(KrailView view, KrailViewChangeEvent event);
 
 }
