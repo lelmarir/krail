@@ -11,7 +11,7 @@
 package uk.q3c.krail.core.view;
 
 
-public interface KrailBeforeViewChangeListener {
+public interface BeforeViewChangeListener {
 	/**
      * Receives an event fired before an imminent view change.  At this point the event:<ol> <
      * <li><{@code fromState} represents the current navigation state/li>

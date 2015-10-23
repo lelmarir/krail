@@ -11,7 +11,7 @@
 package uk.q3c.krail.core.view;
 
 
-public interface KrailBeforeSecurityCheckListener {
+public interface BeforeSecurityCheckListener {
 
 	public void beforeSecurityCheck(KrailViewChangeEvent event);
 

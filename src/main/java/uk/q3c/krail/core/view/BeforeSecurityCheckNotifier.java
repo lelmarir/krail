@@ -3,7 +3,7 @@ package uk.q3c.krail.core.view;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 
-public interface KrailBeforeSecurityCheckNotifier {
+public interface BeforeSecurityCheckNotifier {
 
 	/**
 	 * Listen to changes of the active view.
@@ -17,7 +17,7 @@ public interface KrailBeforeSecurityCheckNotifier {
 	 * @param listener
 	 *            Listener to invoke during a view change.
 	 */
-	void addKrailBeforeSecurityCheckListener(KrailBeforeSecurityCheckListener listener);
+	void addBeforeSecurityCheckListener(BeforeSecurityCheckListener listener);
 
 	/**
 	 * Removes a view change listener.
@@ -25,6 +25,6 @@ public interface KrailBeforeSecurityCheckNotifier {
 	 * @param listener
 	 *            Listener to remove.
 	 */
-	void removeKrailBeforeSecurityCheckListener(KrailBeforeSecurityCheckListener listener);
+	void removeBeforeSecurityCheckListener(BeforeSecurityCheckListener listener);
 	
 }

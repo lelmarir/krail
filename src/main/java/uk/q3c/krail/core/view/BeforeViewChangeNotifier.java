@@ -3,7 +3,7 @@ package uk.q3c.krail.core.view;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 
-public interface KrailAfterViewChangeNotifier {
+public interface BeforeViewChangeNotifier {
 
 	/**
 	 * Listen to changes of the active view.
@@ -17,7 +17,7 @@ public interface KrailAfterViewChangeNotifier {
 	 * @param listener
 	 *            Listener to invoke during a view change.
 	 */
-	void addKrailAfterViewChangeListenerListener(KrailAfterViewChangeListener listener);
+	void addBeforeViewChangeListener(BeforeViewChangeListener listener);
 
 	/**
 	 * Removes a view change listener.
@@ -25,6 +25,6 @@ public interface KrailAfterViewChangeNotifier {
 	 * @param listener
 	 *            Listener to remove.
 	 */
-	void removeKrailAfterViewChangeListener(KrailAfterViewChangeListener listener);
-
+	void removeBeforeViewChangeListener(BeforeViewChangeListener listener);
+	
 }

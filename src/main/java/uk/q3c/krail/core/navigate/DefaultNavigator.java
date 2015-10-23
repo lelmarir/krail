@@ -32,9 +32,9 @@ import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 import uk.q3c.krail.core.view.DefaultViewFactory;
 import uk.q3c.krail.core.view.ErrorView;
-import uk.q3c.krail.core.view.KrailAfterViewChangeListener;
-import uk.q3c.krail.core.view.KrailBeforeSecurityCheckListener;
-import uk.q3c.krail.core.view.KrailBeforeViewChangeListener;
+import uk.q3c.krail.core.view.AfterViewChangeListener;
+import uk.q3c.krail.core.view.BeforeSecurityCheckListener;
+import uk.q3c.krail.core.view.BeforeViewChangeListener;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
@@ -72,9 +72,9 @@ public class DefaultNavigator implements Navigator {
 
 	private final NavigationCallbackHandler callbackHandler = new DefaultNavigationCallbackHandler();
 
-	private final List<KrailBeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<KrailBeforeSecurityCheckListener>();
-	private final List<KrailBeforeViewChangeListener> beforeViewChangeListeners = new LinkedList<KrailBeforeViewChangeListener>();
-	private final List<KrailAfterViewChangeListener> afterViewChangeListeners = new LinkedList<KrailAfterViewChangeListener>();
+	private final List<BeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<BeforeSecurityCheckListener>();
+	private final List<BeforeViewChangeListener> beforeViewChangeListeners = new LinkedList<BeforeViewChangeListener>();
+	private final List<AfterViewChangeListener> afterViewChangeListeners = new LinkedList<AfterViewChangeListener>();
 	private final Provider<Subject> subjectProvider;
 	private final Sitemap sitemap;
 	private final ScopedUIProvider uiProvider;
@@ -247,7 +247,7 @@ public class DefaultNavigator implements Navigator {
 	 *         block the navigation operation
 	 */
 	protected void fireBeforeViewChange(CancellableKrailViewChangeEvent event) {
-		for (KrailBeforeViewChangeListener l : beforeViewChangeListeners) {
+		for (BeforeViewChangeListener l : beforeViewChangeListeners) {
 			l.beforeViewChange(event);
 		}
 	}
@@ -261,7 +261,7 @@ public class DefaultNavigator implements Navigator {
 	 *            view change event (not null)
 	 */
 	protected void fireAfterViewChange(KrailViewChangeEvent event) {
-		for (KrailAfterViewChangeListener l : afterViewChangeListeners) {
+		for (AfterViewChangeListener l : afterViewChangeListeners) {
 			l.afterViewChange(event);
 		}
 	}
@@ -275,7 +275,7 @@ public class DefaultNavigator implements Navigator {
 	 *            view change event (not null)
 	 * */
 	private void fireBeforeSecurityCheck(KrailViewChangeEvent event) {
-		for (KrailBeforeSecurityCheckListener l : beforeSecurityCheckListener) {
+		for (BeforeSecurityCheckListener l : beforeSecurityCheckListener) {
 			l.beforeSecurityCheck(event);
 		}
 	}
@@ -358,38 +358,38 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void addKrailBeforeViewChangeListener(
-			KrailBeforeViewChangeListener listener) {
+	public void addBeforeViewChangeListener(
+			BeforeViewChangeListener listener) {
 		beforeViewChangeListeners.add(listener);
 	}
 
 	@Override
-	public void removeKrailBeforeViewChangeListener(
-			KrailBeforeViewChangeListener listener) {
+	public void removeBeforeViewChangeListener(
+			BeforeViewChangeListener listener) {
 		beforeViewChangeListeners.remove(listener);
 	}
 
 	@Override
-	public void addKrailAfterViewChangeListenerListener(
-			KrailAfterViewChangeListener listener) {
+	public void addAfterViewChangeListener(
+			AfterViewChangeListener listener) {
 		afterViewChangeListeners.add(listener);
 	}
 
 	@Override
-	public void removeKrailAfterViewChangeListener(
-			KrailAfterViewChangeListener listener) {
+	public void removeAfterViewChangeListener(
+			AfterViewChangeListener listener) {
 		afterViewChangeListeners.remove(listener);
 	}
 
 	@Override
-	public void addKrailBeforeSecurityCheckListener(
-			KrailBeforeSecurityCheckListener listener) {
+	public void addBeforeSecurityCheckListener(
+			BeforeSecurityCheckListener listener) {
 		beforeSecurityCheckListener.add(listener);
 	}
 
 	@Override
-	public void removeKrailBeforeSecurityCheckListener(
-			KrailBeforeSecurityCheckListener listener) {
+	public void removeBeforeSecurityCheckListener(
+			BeforeSecurityCheckListener listener) {
 		beforeSecurityCheckListener.remove(listener);
 	}
 }

@@ -10,7 +10,7 @@
 
 package uk.q3c.krail.core.view;
 
-public interface KrailAfterViewChangeListener {
+public interface AfterViewChangeListener {
 
 	/**
 	 * Invoked after the view is changed. If a <code>beforeViewChange</code>
