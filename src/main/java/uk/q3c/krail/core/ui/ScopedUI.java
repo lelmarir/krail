@@ -57,6 +57,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 		BroadcastListener, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
 	protected final CurrentLocale currentLocale;
+	private final Panel headerDisplayPanel;
 	private final Panel viewDisplayPanel;
 	private final ErrorHandler errorHandler;
 	private final ConverterFactory converterFactory;
@@ -86,6 +87,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 		this.translator = translator;
 		this.currentLocale = currentLocale;
 
+		headerDisplayPanel = new Panel();
 		viewDisplayPanel = new Panel();
 		registerWithBroadcaster(broadcaster);
 		currentLocale.addListener(this);
@@ -140,9 +142,11 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 			log.debug("changing view to {}", to);
 		}
 
+		Component header = toView.getHeaderComponent();
 		Component content = toView.getRootComponent();
 		translator.translate(toView);
 		content.setSizeFull();
+		headerDisplayPanel.setContent(header);
 		viewDisplayPanel.setContent(content);
 		this.view = toView;
 	}
@@ -235,6 +239,10 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 	 */
 	protected abstract AbstractOrderedLayout screenLayout();
 
+	public Panel getHeaderDisplayPanel() {
+		return headerDisplayPanel;
+	}
+	
 	public Panel getViewDisplayPanel() {
 		return viewDisplayPanel;
 	}

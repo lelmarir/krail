@@ -40,6 +40,12 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
  */
 public interface KrailView {
 
+	/**
+	 * @return the componet to be displayed in the header (if the
+	 *         headerDisplayPanel has been attached to the page)
+	 */
+	public Component getHeaderComponent();
+	
     /**
 	 * To enable implementations to implement this interface without descending
 	 * from Component. If the implementation does descend from Component, just
@@ -57,4 +63,5 @@ public interface KrailView {
      * @return
      */
     public String getViewName();
+
 }

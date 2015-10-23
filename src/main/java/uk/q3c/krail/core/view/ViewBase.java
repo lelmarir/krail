@@ -14,6 +14,7 @@ package uk.q3c.krail.core.view;
 
 import com.google.inject.Inject;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,11 @@ public abstract class ViewBase<R extends Component> implements KrailView {
     @Override
     public String getViewName() {
         return getClass().getSimpleName();
+    }
+    
+    @Override
+    public Component getHeaderComponent() {
+    	return new Label(getViewName());
     }
 
 }
