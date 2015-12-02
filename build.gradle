@@ -15,11 +15,11 @@ apply plugin: 'project-report'
 sourceCompatibility = '1.8'
 
 group = "uk.q3c"
-version = '0.7.11-SNAPSHOT'
+version = '0.8.0-SNAPSHOT'
 
-project.ext.vaadinVersion = '7.3.7'
+project.ext.vaadinVersion = '7.5.9'
 project.ext.guiceVersion = '3.0'
-project.ext.shiroVersion = '1.2.1'
+project.ext.shiroVersion = '1.2.4'
 
 
 repositories {
