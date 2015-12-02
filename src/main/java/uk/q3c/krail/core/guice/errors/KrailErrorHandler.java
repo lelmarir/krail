@@ -12,6 +12,7 @@
  */
 package uk.q3c.krail.core.guice.errors;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,7 +74,11 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 				break;
 			}
 
-			throwable = throwable.getCause();
+			Throwable cause = throwable.getCause();
+			if(cause == null && throwable instanceof InvocationTargetException){
+				cause = ((InvocationTargetException)throwable).getTargetException();
+			}
+			throwable = cause;
 		}
 
 		if (handled == false) {
