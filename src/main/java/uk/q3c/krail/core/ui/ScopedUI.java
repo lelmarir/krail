@@ -173,6 +173,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 		page.addUriFragmentChangedListener(navigator);
 
 		setErrorHandler(errorHandler);
+		session.setErrorHandler(errorHandler);
 		page.setTitle(pageTitle());
 
 		// now that browser is active, and user sitemap loaded, set up
