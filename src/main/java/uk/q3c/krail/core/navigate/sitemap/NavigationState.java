@@ -18,6 +18,8 @@ public interface NavigationState extends Serializable {
 
 		Object get(String id);
 		
+		Object get(String id, boolean excludeCalculated);
+		
 		Object put(String id, Object value);
 
 		String getAsString(String id);

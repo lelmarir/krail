@@ -74,6 +74,15 @@ public class DefaultNavigationCallbackHandler implements
 			KrailView view, KrailViewChangeEvent event, Parameters parameters,
 			LinkedList<Method> alternateMethods) throws IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException {
+		callMatchingMethodForAvailibleParameters(view, event, parameters,
+				alternateMethods, null);
+	}
+
+	private static void callMatchingMethodForAvailibleParameters(
+			KrailView view, KrailViewChangeEvent event, Parameters parameters,
+			LinkedList<Method> alternateMethods, Boolean useCalculatedParameters)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
 
 		Map<Method, Object[]> matchingMethods = new HashMap<Method, Object[]>();
 
@@ -95,8 +104,12 @@ public class DefaultNavigationCallbackHandler implements
 						parametersAnnotations[i], Parameter.class)) != null) {
 
 					String parameterKey = parameterAnnotation.value();
-					if (parameters.contains(parameterKey)) {
-						Object parameterValue = parameters.get(parameterKey);
+					boolean excludeCalculatedParameters = useCalculatedParameters == null
+							|| useCalculatedParameters == false;
+					Object parameterValue = parameters.get(parameterKey,
+							excludeCalculatedParameters);
+					
+					if (parameterValue != null) {
 						if (parametersTypes[i].isAssignableFrom(parameterValue
 								.getClass())) {
 							args[i] = parameterValue;
@@ -145,10 +158,16 @@ public class DefaultNavigationCallbackHandler implements
 		}// methods foor loop
 
 		if (matchingMethods.isEmpty()) {
-			throw new IllegalStateException(
-					"Unable to find the method to be call for the provided parameters:\n"
-							+ "   parameters: " + parameters + "\n"
-							+ "   methods:    " + alternateMethods + "\n\n");
+			if (useCalculatedParameters == null) {
+				// try with calculated parameters
+				callMatchingMethodForAvailibleParameters(view, event,
+						parameters, alternateMethods, true);
+			} else {
+				throw new IllegalStateException(
+						"Unable to find the method to call for the provided parameters:\n"
+								+ "   parameters: " + parameters + "\n"
+								+ "   methods:    " + alternateMethods + "\n\n");
+			}
 		} else if (matchingMethods.size() > 1) {
 			throw new IllegalStateException(
 					"Unable to tell wich method to call within the matching ones:\n"
