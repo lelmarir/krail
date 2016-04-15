@@ -17,6 +17,7 @@ public class ErrorModule extends AbstractModule {
 
 	private void bindVaadinErrorHandler() {
 		bind(ErrorHandler.class).to(KrailErrorHandler.class);
+		requestStaticInjection(KrailErrorHandler.class);
 	}
 	
 	/**

@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Provider;
-import com.vaadin.server.VaadinSession;
 
 /**
  * A DI wrapper for {@link SecurityUtils#getSubject()}
@@ -31,32 +30,17 @@ import com.vaadin.server.VaadinSession;
  */
 @Singleton
 public class SubjectProvider implements Provider<Subject> {
-	private static Logger log = LoggerFactory.getLogger(SubjectProvider.class);
-	private final VaadinSessionProvider sessionProvider;
+	private final KrailSecurityManager securityManager;
 
 	@Inject
-	protected SubjectProvider(VaadinSessionProvider sessionProvider) {
+	protected SubjectProvider(KrailSecurityManager securityManager) {
 		super();
-		this.sessionProvider = sessionProvider;
+		this.securityManager = securityManager;
 	}
 
 	@Override
 	public Subject get() {
-		Subject subject = null;
-		try {
-			VaadinSession session = sessionProvider.get();
-			subject = session.getAttribute(Subject.class);
-			if (subject == null) {
-				log.debug("VaadinSession is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
-				subject = new Subject.Builder().buildSubject();
-				session.setAttribute(Subject.class, subject);
-			}
-			return subject;
-
-		} catch (IllegalStateException ise) {
-			// this may happen in background threads which are not using a session, or during testing
-			throw new IllegalStateException("There is no VaadinSession, no user can be logged in", ise);
-		}
-
+		return securityManager.getSubject();
 	}
+	
 }

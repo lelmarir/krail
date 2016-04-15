@@ -12,6 +12,11 @@
  */
 package uk.q3c.krail.core.ui;
 
+import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.annotations.Push;
 import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
@@ -23,9 +28,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.q3c.krail.core.config.ConfigurationException;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
@@ -36,9 +38,11 @@ import uk.q3c.krail.core.push.Broadcaster.BroadcastListener;
 import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
-import uk.q3c.krail.i18n.*;
-
-import java.util.Locale;
+import uk.q3c.krail.i18n.CurrentLocale;
+import uk.q3c.krail.i18n.I18NKey;
+import uk.q3c.krail.i18n.I18NProcessor;
+import uk.q3c.krail.i18n.LocaleChangeListener;
+import uk.q3c.krail.i18n.Translate;
 
 /**
  * The base class for all Krail UIs, it provides an essential part of the

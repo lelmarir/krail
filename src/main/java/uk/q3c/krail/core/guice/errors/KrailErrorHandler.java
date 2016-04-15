@@ -12,12 +12,16 @@
  */
 package uk.q3c.krail.core.guice.errors;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+
+import javax.inject.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -39,13 +43,17 @@ import com.vaadin.server.DefaultErrorHandler;
  * @author David Sowerby 4 Jan 2013
  * 
  */
-public class KrailErrorHandler extends DefaultErrorHandler {
+public class KrailErrorHandler extends DefaultErrorHandler implements Serializable {
 
 	private static final long serialVersionUID = -8722893607740326862L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(KrailErrorHandler.class);
 
-	private LinkedList<ErrorHandler> errorHandlers;
-	private final Navigator navigator;
+	//used after the serialization
+	@Inject
+	private static Provider<KrailErrorHandler> instanceProvider;
+	
+	transient private LinkedList<ErrorHandler> errorHandlers;
+	transient private final Navigator navigator;
 
 	@Inject
 	protected KrailErrorHandler(Set<ErrorHandler> errorHandlers,
@@ -100,4 +108,15 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 		return false;
 	}
+	
+	/**
+	 * When deserializing this object, use Guice to create an instance rather than
+	 * using the default behaviour of invoking Class.newInstance() which in turn
+	 * invokes the no-args constructor. This ensures that any Guice configuration
+	 * occurs, including both constructor and member injection.
+	 */
+	private Object readResolve() throws ObjectStreamException {
+	  return instanceProvider.get();
+	}	
+	
 }
