@@ -28,7 +28,9 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.Parameter;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.i18n.MessageKey;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.util.StackTraceUtil;
@@ -41,10 +43,13 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 
 	private Throwable error;
 	private TextArea textArea;
+	
+	private final Navigator navigator;
 
 	@Inject
-	protected DefaultErrorView(Translate translate) {
+	protected DefaultErrorView(Navigator navigator, Translate translate) {
 		super();
+		this.navigator = navigator;
 		CssLayout outerLayout = new CssLayout();
 		{
 			VerticalLayout mainLayout = new VerticalLayout();
@@ -101,7 +106,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	public Throwable getError() {
 		return error;
 	}
-
+	
 	@BeforeInboundNavigation
 	protected void beforeInboundNavigation(@Parameter("error") Throwable error) {
 		for (Window w : UI.getCurrent().getWindows()) {

@@ -14,6 +14,7 @@ package uk.q3c.krail.core.shiro;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,7 +87,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	private void fireSuccessfulLoginEvent(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
 		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(subject, token, info);
-		for (AuthenticationListener l : loginEventListeners) {
+		ArrayList<AuthenticationListener> list = new ArrayList<>(loginEventListeners);
+		for (AuthenticationListener l : list) {
 			l.onSuccess(event);
 		}
 	}
