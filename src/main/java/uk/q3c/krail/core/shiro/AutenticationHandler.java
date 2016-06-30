@@ -13,8 +13,6 @@
 
 package uk.q3c.krail.core.shiro;
 
-import java.io.Serializable;
-
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +33,10 @@ import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
 
-public class AutenticationHandler implements UnauthenticatedExceptionHandler,
-		Serializable, AuthenticationListener {
+public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigator.class);
-
-	private static final long serialVersionUID = 7883073068352609958L;
 
 	private final UserNotifier notifier;
 	private final Navigator navigator;

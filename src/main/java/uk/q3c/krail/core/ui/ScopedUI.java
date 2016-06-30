@@ -140,6 +140,9 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 
 	@Override
 	public void changeView(KrailView toView) {
+		if(toView == null){
+			throw new IllegalArgumentException("toView should not be null");
+		}
 		if (log.isDebugEnabled()) {
 			String to = (toView == null) ? "null" : toView.getClass()
 					.getSimpleName();

@@ -108,11 +108,18 @@ public interface AccesControl {
 
 	static class Roles implements AccesControl {
 
-		private String[] roles;
-		private Logical logical;
+		private final String[] roles;
+		private final Logical logical;
 
 		public Roles(String[] roles, Logical logical) {
+			if(roles == null) {
+				throw new IllegalArgumentException("roles should not be null");
+			}
+			if(logical == null) {
+				throw new IllegalArgumentException("logical should not be null");
+			}
 			this.roles = roles;
+			this.logical = logical;
 		}
 
 		@Override

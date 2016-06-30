@@ -46,7 +46,7 @@ public class Broadcaster {
 	 */
 	public synchronized void register(String group, BroadcastListener listener) {
 		log.debug("adding listener: {}", listener.getClass().getName());
-		if (group == ALL_MESSAGES) {
+		if (ALL_MESSAGES.equals(group)) {
 			allGroup.add(listener);
 		} else {
 			List<BroadcastListener> listenerGroup = groups.get(group);
@@ -63,7 +63,7 @@ public class Broadcaster {
 	 * Unregister a listener to receive messages for {@code group}.
 	 */
 	public synchronized void unregister(String group, BroadcastListener listener) {
-		if (group == ALL_MESSAGES) {
+		if (ALL_MESSAGES.equals(group)) {
 			allGroup.remove(listener);
 		} else {
 			List<BroadcastListener> listenerGroup = groups.get(group);

@@ -54,7 +54,7 @@ public class PushMessageRouter {
 	 * @param listener
 	 */
 	public void register(String group, PushMessageListener listener) {
-		if (group == ALL_MESSAGES) {
+		if (ALL_MESSAGES.equals(group)) {
 			allGroup.add(listener);
 		} else {
 			List<PushMessageListener> listenerGroup = groups.get(group);
@@ -71,7 +71,7 @@ public class PushMessageRouter {
 	 * Unregister a listener to receive messages for {@code group}.
 	 */
 	public void unregister(String group, PushMessageListener listener) {
-		if (group == ALL_MESSAGES) {
+		if (ALL_MESSAGES.equals(group)) {
 			allGroup.remove(listener);
 		} else {
 			List<PushMessageListener> listenerGroup = groups.get(group);
