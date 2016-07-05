@@ -17,8 +17,8 @@ sourceCompatibility = '1.8'
 group = "uk.q3c"
 version = '0.8.2-SNAPSHOT'
 
-project.ext.vaadinVersion = '7.6.4'
-project.ext.guiceVersion = '3.0'
+project.ext.vaadinVersion = '7.6.7'
+project.ext.guiceVersion = '4.1.0'
 project.ext.shiroVersion = '1.2.4'
 
 
@@ -100,18 +100,15 @@ dependencies {
     compile 'com.google.inject.extensions:guice-multibindings:' + guiceVersion
 
     //Date Time
-    compile 'joda-time:joda-time:2.1'
+    compile 'joda-time:joda-time:2.9.4'
 
     //Logging
-        compile 'org.slf4j:slf4j-api:1.7.7'
-        //compile 'org.slf4j:slf4j-log4j12:1.7.7'
+    compile 'org.slf4j:slf4j-api:1.7.21'
 
     //servlet
     compile "javax.servlet:javax.servlet-api:3.+"
 
     //testing
-    //testCompile 'uk.q3c.util:util-testUtil:0.7.1'
-    //testCompile 'uk.q3c.krail:krail-testUtil:1.0.3'
     testCompile 'com.mycila:mycila-guice:2.10.ga'
     testCompile 'com.mycila.testing.plugins:mycila-testing-guice:2.8'
     testCompile 'com.mycila.testing.plugins:mycila-testing-mockito:2.8'
@@ -121,7 +118,7 @@ dependencies {
     testCompile 'org.assertj:assertj-guava:1.0.0'
 
     //Utility
-    compile 'com.google.guava:guava:13.0.1'
+    //compile 'com.google.guava:guava:13.0.1'
     //the easiest way to all the Jung parts
     compile 'net.sf.jung:jung-samples:2.0.1'
     compile 'org.apache.commons:commons-lang3:3.1'
@@ -140,11 +137,8 @@ dependencies {
     compile 'org.apache.shiro:shiro-guice:' + shiroVersion
 
     //Vaadin
-
-    //The core server part of Vaadin -->
     compile 'com.vaadin:vaadin-server:' + vaadinVersion
     // needed for Vaadin javadoc only
     compile "javax.portlet:portlet-api:2.0"
-    //compile "org.atmosphere:atmosphere-runtime:2.1.6"
 
 }
