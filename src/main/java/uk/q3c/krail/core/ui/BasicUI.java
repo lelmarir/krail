@@ -1,8 +1,6 @@
 package uk.q3c.krail.core.ui;
 
 import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.core.push.Broadcaster;
-import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.I18NProcessor;
 import uk.q3c.krail.i18n.Translate;
@@ -20,10 +18,10 @@ public class BasicUI extends ScopedUI {
 
 	@Inject
 	protected BasicUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
-			Broadcaster broadcaster, PushMessageRouter pushMessageRouter, ApplicationTitle applicationTitle,
-			Translate translate, CurrentLocale currentLocale, I18NProcessor translator) {
-		super(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate,
-				currentLocale, translator);
+			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
+			I18NProcessor translator) {
+		super(navigator, errorHandler, converterFactory, applicationTitle, translate, currentLocale,
+				translator);
 
 	}
 
@@ -35,12 +33,6 @@ public class BasicUI extends ScopedUI {
 	@Override
 	protected String pageTitle() {
 		return "Krail base";
-	}
-
-	@Override
-	protected void processBroadcastMessage(String group, String message) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

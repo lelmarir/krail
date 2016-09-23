@@ -33,9 +33,6 @@ import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.core.push.Broadcaster;
-import uk.q3c.krail.core.push.Broadcaster.BroadcastListener;
-import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
 import uk.q3c.krail.i18n.CurrentLocale;
@@ -57,15 +54,13 @@ import uk.q3c.krail.i18n.Translate;
  * @date modified 31 Mar 2014
  */
 
-public abstract class ScopedUI extends UI implements KrailViewHolder,
-		BroadcastListener, LocaleChangeListener {
+public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
 	protected final CurrentLocale currentLocale;
 	private final Panel headerDisplayPanel;
 	private final Panel viewDisplayPanel;
 	private final ErrorHandler errorHandler;
 	private final ConverterFactory converterFactory;
-	private final PushMessageRouter pushMessageRouter;
 	private final Navigator navigator;
 	private final ApplicationTitle applicationTitle;
 	private final Translate translate;
@@ -76,16 +71,13 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 	private KrailView view;
 
 	// FIXME: too many parameters
-	protected ScopedUI(Navigator navigator, ErrorHandler errorHandler,
-			ConverterFactory converterFactory, Broadcaster broadcaster,
-			PushMessageRouter pushMessageRouter,
-			ApplicationTitle applicationTitle, Translate translate,
-			CurrentLocale currentLocale, I18NProcessor translator) {
+	protected ScopedUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
+			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
+			I18NProcessor translator) {
 		super();
 		this.errorHandler = errorHandler;
 		this.navigator = navigator;
 		this.converterFactory = converterFactory;
-		this.pushMessageRouter = pushMessageRouter;
 		this.applicationTitle = applicationTitle;
 		this.translate = translate;
 		this.translator = translator;
@@ -93,12 +85,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 
 		headerDisplayPanel = new Panel();
 		viewDisplayPanel = new Panel();
-		registerWithBroadcaster(broadcaster);
 		currentLocale.addListener(this);
-	}
-
-	protected void registerWithBroadcaster(Broadcaster broadcaster) {
-		broadcaster.register(Broadcaster.ALL_MESSAGES, this);
 	}
 
 	public UIKey getInstanceKey() {
@@ -134,18 +121,16 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 
 	@Override
 	public void setNavigator(com.vaadin.navigator.Navigator navigator) {
-		throw new MethodReconfigured(
-				"UI.setNavigator() not available, use injection instead");
+		throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
 	}
 
 	@Override
 	public void changeView(KrailView toView) {
-		if(toView == null){
+		if (toView == null) {
 			throw new IllegalArgumentException("toView should not be null");
 		}
 		if (log.isDebugEnabled()) {
-			String to = (toView == null) ? "null" : toView.getClass()
-					.getSimpleName();
+			String to = (toView == null) ? "null" : toView.getClass().getSimpleName();
 			log.debug("changing view to {}", to);
 		}
 
@@ -192,7 +177,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 		// Navigate to the correct start point
 
 		String fragment = getPage().getUriFragment();
-		
+
 		// during the init method exception are handled by a different
 		// errorHandler (not the one registered before)
 		try {
@@ -250,28 +235,9 @@ public abstract class ScopedUI extends UI implements KrailViewHolder,
 	public Panel getHeaderDisplayPanel() {
 		return headerDisplayPanel;
 	}
-	
+
 	public Panel getViewDisplayPanel() {
 		return viewDisplayPanel;
-	}
-
-	@Override
-	public void receiveBroadcast(final String group, final String message) {
-		access(new Runnable() {
-			@Override
-			public void run() {
-				log.debug("receiving message: {}", message);
-				processBroadcastMessage(group, message);
-
-			}
-		});
-	}
-
-	/**
-	 * Distribute the message to listeners within this UIScope
-	 */
-	protected void processBroadcastMessage(String group, String message) {
-		pushMessageRouter.messageIn(group, message);
 	}
 
 	/**

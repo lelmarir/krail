@@ -16,8 +16,6 @@ import com.vaadin.server.ErrorHandler;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.VerticalLayout;
 import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.core.push.Broadcaster;
-import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.I18NProcessor;
@@ -35,15 +33,10 @@ public class DefaultApplicationUI extends ScopedUI {
 	private VerticalLayout baseLayout;
 
 	@Inject
-	protected DefaultApplicationUI(Navigator navigator,
-			ErrorHandler errorHandler, ConverterFactory converterFactory,
-			Broadcaster broadcaster, PushMessageRouter pushMessageRouter,
-			ApplicationTitle applicationTitle, Translate translate,
-			CurrentLocale currentLocale, I18NProcessor translator,
-			UserNotifier userNotifier) {
-		super(navigator, errorHandler, converterFactory, broadcaster,
-				pushMessageRouter, applicationTitle, translate, currentLocale,
-				translator);
+	protected DefaultApplicationUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
+			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
+			I18NProcessor translator, UserNotifier userNotifier) {
+		super(navigator, errorHandler, converterFactory, applicationTitle, translate, currentLocale, translator);
 	}
 
 	@Override
