@@ -16,8 +16,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.google.inject.Inject;
 
@@ -71,11 +74,12 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Inject
 	private VaadinSessionProvider sessionProvider;
-	private List<AuthenticationListener> loginEventListeners;
+	private Set<AuthenticationListener> loginEventListeners;
 
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
-		this.loginEventListeners = new LinkedList<>();
+		this.loginEventListeners = Collections.newSetFromMap(
+		        new WeakHashMap<AuthenticationListener, Boolean>());;
 	}
 
 	@Override

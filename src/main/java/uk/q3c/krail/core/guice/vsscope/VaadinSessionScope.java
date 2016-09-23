@@ -14,6 +14,7 @@ package uk.q3c.krail.core.guice.vsscope;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class VaadinSessionScope implements Scope {
 
 	private static volatile VaadinSessionScope current;
 
-	private final Map<VaadinSession, Map<Key<?>, Object>> cache = new HashMap<>();
+	private final Map<VaadinSession, Map<Key<?>, Object>> cache = new WeakHashMap<>();
 
 	public VaadinSessionScope() {
 		super();

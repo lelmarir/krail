@@ -32,9 +32,11 @@ import uk.q3c.krail.core.user.opt.UserOption;
 import uk.q3c.krail.core.user.opt.UserOptionContext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * When a CurrentLocale is instantiated, or its {@link #readFromEnvironment()} method is called,it sets the current
@@ -66,7 +68,7 @@ public class DefaultCurrentLocale implements CurrentLocale, AuthenticationListen
 	public enum UserOptionProperty {PREFERRED_LOCALE}
 
     private static Logger log = LoggerFactory.getLogger(DefaultCurrentLocale.class);
-    private final List<LocaleChangeListener> listeners = new ArrayList<>();
+    private final Set<LocaleChangeListener> listeners = Collections.newSetFromMap(new WeakHashMap<>());
     private BrowserProvider browserProvider;
     private Locale defaultLocale;
     private Locale locale;
