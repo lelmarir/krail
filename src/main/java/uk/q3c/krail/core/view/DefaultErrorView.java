@@ -43,7 +43,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 
 	private Throwable error;
 	private TextArea textArea;
-	
+
 	private final Navigator navigator;
 
 	@Inject
@@ -57,14 +57,14 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 				mainLayout.setSizeFull();
 
 				VerticalLayout desriptionLayout = new VerticalLayout();
-				{					
+				{
 					desriptionLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-					
+
 					Label description = new Label(translate.from(MessageKey.Something_went_wrong));
 					{
 						description.setSizeUndefined();
 						description.addStyleName(ValoTheme.LABEL_H1);
-					}					
+					}
 					desriptionLayout.addComponent(description);
 
 					Button more = new Button(translate.from(MessageKey.show_more));
@@ -106,11 +106,18 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	public Throwable getError() {
 		return error;
 	}
-	
+
 	@BeforeInboundNavigation
 	protected void beforeInboundNavigation(@Parameter("error") Throwable error) {
-		for (Window w : UI.getCurrent().getWindows()) {
-			w.close();
+		//try to close any opened windows
+		int loopCount = 10;
+		while(loopCount > 0 && UI.getCurrent().getWindows().iterator().hasNext()) {
+			try{
+			UI.getCurrent().getWindows().iterator().next().close();
+			}catch(Exception e){
+				;
+			}
+			loopCount--;
 		}
 		this.error = error;
 		textArea.setReadOnly(false);

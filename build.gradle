@@ -15,7 +15,7 @@ apply plugin: 'project-report'
 sourceCompatibility = '1.8'
 
 group = "uk.q3c"
-version = '0.8.7-SNAPSHOT'
+version = '0.8.8-SNAPSHOT'
 
 project.ext.vaadinVersion = '7.6.7'
 project.ext.guiceVersion = '4.1.0'
