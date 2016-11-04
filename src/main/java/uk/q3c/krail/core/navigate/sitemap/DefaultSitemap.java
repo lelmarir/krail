@@ -47,8 +47,7 @@ public class DefaultSitemap implements Sitemap {
 
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + "@" + "{pattern="
-					+ getUriPattern() + ", class=" + viewClass + "}";
+			return this.getClass().getSimpleName() + "@" + "{pattern=" + getUriPattern() + ", class=" + viewClass + "}";
 		}
 	}
 
@@ -68,7 +67,7 @@ public class DefaultSitemap implements Sitemap {
 		public SitemapNode getTargetNode() {
 			return target;
 		}
-		
+
 		@Override
 		public Class<? extends KrailView> getViewClass() {
 			return target.getViewClass();
@@ -83,16 +82,14 @@ public class DefaultSitemap implements Sitemap {
 		public String buildFragment(Parameters parameters) {
 			return target.buildFragment(parameters);
 		}
-		
+
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + "@" + "{pattern="
-					+ getUriPattern() + ", target=" + target + "}";
+			return this.getClass().getSimpleName() + "@" + "{pattern=" + getUriPattern() + ", target=" + target + "}";
 		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DefaultSitemap.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSitemap.class);
 
 	private LinkedList<AbstractNode> nodes = new LinkedList<>();
 	private HashMap<StandardPageKey, AbstractNode> standardViews = new HashMap<>();
@@ -124,15 +121,16 @@ public class DefaultSitemap implements Sitemap {
 		nodes.add(node);
 		nodesByClass.put(node.getViewClass(), node);
 	}
-	
+
 	/**
 	 * Return all the nodes in the sitemap (views and redirects)
+	 * 
 	 * @return
 	 */
 	public Collection<AbstractNode> getNodes() {
 		return Collections.unmodifiableCollection(nodes);
 	}
-	
+
 	public Map<StandardPageKey, AbstractNode> getStandardViews() {
 		return Collections.unmodifiableMap(standardViews);
 	}
@@ -141,19 +139,15 @@ public class DefaultSitemap implements Sitemap {
 		AbstractNode n = get(node.getUriPattern());
 		if (n != null) {
 			throw new IllegalStateException(
-					"Unable to register again this uri (" + node
-							+ ") for "+node+". It is already mapped for "+n);
+					"Unable to register again this uri (" + node + ") for " + node + ". It is already mapped for " + n);
 		}
 	}
 
 	private void checkUniqueClass(Class<? extends KrailView> view) {
 		AbstractNode n = get(view);
 		if (n != null) {
-			throw new IllegalStateException(
-					"Unable to register the same ViewClass ("
-							+ view
-							+ ") to multiple ViewNodes, use Redirects Instead: \n "
-							+ "\t " + n);
+			throw new IllegalStateException("Unable to register the same ViewClass (" + view
+					+ ") to multiple ViewNodes, use Redirects Instead: \n " + "\t " + n);
 		}
 	}
 
@@ -183,19 +177,16 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
-	public NavigationState buildNavigationState(
-			Class<? extends KrailView> viewClass) throws PageNotFoundException {
+	public NavigationState buildNavigationState(Class<? extends KrailView> viewClass) throws PageNotFoundException {
 		AbstractNode node = nodesByClass.get(viewClass);
 		if (node == null) {
-			throw new PageNotFoundException(
-					"Unable to find the node for the class " + viewClass);
+			throw new PageNotFoundException("Unable to find the node for the class " + viewClass);
 		}
 		return buildNavigationStateFor(node, null);
 	}
 
 	@Override
-	public NavigationState buildNavigationStateFor(String fragment)
-			throws PageNotFoundException {
+	public NavigationState buildNavigationStateFor(String fragment) throws PageNotFoundException {
 		LinkedList<NavigationState> matches = new LinkedList<>();
 		for (AbstractNode n : nodes) {
 			NavigationState state = n.match(fragment);
@@ -209,31 +200,27 @@ public class DefaultSitemap implements Sitemap {
 				}
 			}
 		}
-		assert LOGGER.isDebugEnabled();
-		if (matches.size() > 1) {
+
+		if (!matches.isEmpty()) {
+			assert LOGGER.isDebugEnabled();
 			StringBuilder sb = new StringBuilder(
 					"Multiple URI match the current fragment, this implementation can't tell wich one is the right one, it will use the first one:\n");
 			for (NavigationState n : matches) {
 				sb.append("\t " + n.toString() + " \n");
 			}
 			LOGGER.warn(sb.toString());
-		}
-		if (matches.isEmpty()) {
+		} else {
 			throw new InvalidURIException(
-					"Unable to find the node for the fragment '" + fragment
-							+ "'\n " + nodes.toString());
+					"Unable to find the node for the fragment '" + fragment + "'\n " + nodes.toString());
 		}
 		return matches.getFirst();
 	}
 
 	@Override
-	public NavigationState buildNavigationStateFor(StandardPageKey pageKey)
-			throws PageNotFoundException {
+	public NavigationState buildNavigationStateFor(StandardPageKey pageKey) throws PageNotFoundException {
 		AbstractNode node = standardViews.get(pageKey);
 		if (node == null) {
-			throw new PageNotFoundException(
-					"Unable to find the node for the standard view '" + pageKey
-							+ "'");
+			throw new PageNotFoundException("Unable to find the node for the standard view '" + pageKey + "'");
 		}
 		return buildNavigationStateFor(node);
 	}
@@ -245,17 +232,14 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
-	public NavigationState buildNavigationState(
-			Class<? extends KrailView> viewClass, Parameters parameters)
+	public NavigationState buildNavigationState(Class<? extends KrailView> viewClass, Parameters parameters)
 			throws PageNotFoundException {
 		return buildNavigationStateFor(get(viewClass), parameters);
 	}
-	
+
 	@Override
-	public NavigationState buildNavigationStateFor(SitemapNode node,
-			Parameters parameters) {
-		return new NavigationStateImpl(node, parameters != null ? parameters
-				: new ParametersImpl());
+	public NavigationState buildNavigationStateFor(SitemapNode node, Parameters parameters) {
+		return new NavigationStateImpl(node, parameters != null ? parameters : new ParametersImpl());
 	}
 
 }
