@@ -40,18 +40,15 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 
 	private final UserNotifier notifier;
 	private final Navigator navigator;
-	private SubjectProvider subjectProvider;
 
 	private NavigationState targetNavigationState = null;
 
 	@Inject
 	protected AutenticationHandler(UserNotifier notifier, Navigator navigator,
-			AuthenticationNotifier authenticationNotifier,
-			SubjectProvider subjectProvider) {
+			AuthenticationNotifier authenticationNotifier) {
 		super();
 		this.notifier = notifier;
 		this.navigator = navigator;
-		this.subjectProvider = subjectProvider;
 		authenticationNotifier.addListener(this);
 	}
 
@@ -113,7 +110,6 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	@Override
 	public void onLogout(LogoutEvent event) {
 		LOGGER.info("onLogout() logging out");
-		subjectProvider.get().logout();
 		navigator.navigateTo(StandardPageKey.Log_Out);
 	}
 }

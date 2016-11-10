@@ -347,14 +347,6 @@ public class DefaultNavigator implements Navigator {
 		NavigationTarget navigationTarget = new NavigationTarget(ErrorView.class);
 		navigationTarget.putParameter("error", error);
 		navigateTo(navigationTarget);
-//		navigateTo(ErrorView.class,
-//				new DefaultNavigationCallbackHandler<ErrorView>() {
-//					@Override
-//					public void beforeInboundNavigationEvent(ErrorView view,
-//							CancellableKrailViewChangeEvent cancellable) {
-//						view.beforeInboundNavigation(error);
-//					}
-//				});
 	}
 
 	@Override
