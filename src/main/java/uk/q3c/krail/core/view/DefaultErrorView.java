@@ -31,6 +31,7 @@ import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.Parameter;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
+import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.krail.i18n.MessageKey;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.util.StackTraceUtil;
@@ -107,6 +108,12 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		return error;
 	}
 
+	@BeforeInboundNavigation
+	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event) {
+		event.cancel();
+		event.getNavigator().navigateTo(StandardPageKey.Public_Home);
+	}
+	
 	@BeforeInboundNavigation
 	protected void beforeInboundNavigation(@Parameter("error") Throwable error) {
 		//try to close any opened windows
