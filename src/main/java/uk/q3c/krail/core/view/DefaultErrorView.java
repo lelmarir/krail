@@ -30,6 +30,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.Parameter;
+import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.krail.i18n.MessageKey;
@@ -46,6 +47,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	private TextArea textArea;
 
 	private final Navigator navigator;
+	private SitemapNode previousSitemapNode;
 
 	@Inject
 	protected DefaultErrorView(Navigator navigator, Translate translate) {
@@ -68,10 +70,23 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 					}
 					desriptionLayout.addComponent(description);
 
-					Button more = new Button(translate.from(MessageKey.show_more));
+					Button backButton = new Button("Back", new ClickListener() {
+						@Override
+						public void buttonClick(ClickEvent event) {
+							if(previousSitemapNode != null) {
+								navigator.navigateTo(previousSitemapNode.getViewClass());
+							}else{
+								navigator.navigateTo(StandardPageKey.Public_Home);
+							}
+						}
+					});
+					backButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+					desriptionLayout.addComponent(backButton);
+					
+					Button moreButton = new Button(translate.from(MessageKey.show_more));
 					{
-						more.addStyleName(ValoTheme.BUTTON_LINK);
-						more.addClickListener(new ClickListener() {
+						moreButton.addStyleName(ValoTheme.BUTTON_LINK);
+						moreButton.addClickListener(new ClickListener() {
 							@Override
 							public void buttonClick(ClickEvent event) {
 								textArea.setVisible(true);
@@ -79,7 +94,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 							}
 						});
 					}
-					desriptionLayout.addComponent(more);
+					desriptionLayout.addComponent(moreButton);
 				}
 				mainLayout.addComponent(desriptionLayout);
 				mainLayout.setComponentAlignment(desriptionLayout, Alignment.MIDDLE_CENTER);
@@ -113,15 +128,16 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		event.cancel();
 		event.getNavigator().navigateTo(StandardPageKey.Public_Home);
 	}
-	
+
 	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(@Parameter("error") Throwable error) {
-		//try to close any opened windows
+	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event,
+			@Parameter(value = "error", optional = true) Throwable error) {
+		// try to close any opened windows
 		int loopCount = 10;
-		while(loopCount > 0 && UI.getCurrent().getWindows().iterator().hasNext()) {
-			try{
-			UI.getCurrent().getWindows().iterator().next().close();
-			}catch(Exception e){
+		while (loopCount > 0 && UI.getCurrent().getWindows().iterator().hasNext()) {
+			try {
+				UI.getCurrent().getWindows().iterator().next().close();
+			} catch (Exception e) {
 				;
 			}
 			loopCount--;
@@ -130,5 +146,9 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		textArea.setReadOnly(false);
 		textArea.setValue(StackTraceUtil.getStackTrace(error));
 		textArea.setReadOnly(true);
+
+		if (event.getSourceNavigationState() != null) {
+			previousSitemapNode = event.getSourceNavigationState().getSitemapNode();
+		}
 	}
 }

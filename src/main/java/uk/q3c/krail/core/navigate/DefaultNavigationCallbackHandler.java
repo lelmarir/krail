@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -104,6 +105,7 @@ public class DefaultNavigationCallbackHandler implements
 						parametersAnnotations[i], Parameter.class)) != null) {
 
 					String parameterKey = parameterAnnotation.value();
+					boolean parameterOptional = parameterAnnotation.optional();
 					boolean excludeCalculatedParameters = useCalculatedParameters == null
 							|| useCalculatedParameters == false;
 					Object parameterValue = parameters.get(parameterKey,
@@ -138,8 +140,14 @@ public class DefaultNavigationCallbackHandler implements
 						}
 
 					} else {
-						// the required parameter is not present, this method is
-						// not the correct one
+						// the required parameter is not present...
+						if(parameterOptional) {
+							//...but is optional, so the value can be null
+							args[i] = null;
+						}else{
+							//...and is not optional, this method is not the correct one
+							;
+						}
 						continue methodsLoop;
 					}
 
@@ -154,6 +162,28 @@ public class DefaultNavigationCallbackHandler implements
 			// all parameters found
 			// TODO: optional parameters
 			matchingMethods.put(method, args);
+			
+			//remove methods with the same parameters but some more
+			Iterator<Method> it = matchingMethods.keySet().iterator();
+			while(it.hasNext()) {
+				boolean toBeRemover = false;
+				Method m = it.next();
+				for(Method m2 : matchingMethods.keySet()) {
+					if(m2 == m) {
+						continue;
+					}
+					Class<?>[] m2Parameters = m2.getParameterTypes();
+					Class<?>[] mParameters = m.getParameterTypes();
+					if(m2Parameters.length > mParameters.length && Arrays.asList(m2Parameters).containsAll(Arrays.asList(mParameters))) {
+						//il metodo m2 contiene tutti i parametri di m, e altri, quindi m va scartato
+						toBeRemover = true;
+						break;
+					}
+				}
+				if(toBeRemover) {
+					it.remove();
+				}
+			}
 
 		}// methods foor loop
 
