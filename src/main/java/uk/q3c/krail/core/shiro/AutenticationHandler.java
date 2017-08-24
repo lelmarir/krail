@@ -32,6 +32,7 @@ import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
 import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 

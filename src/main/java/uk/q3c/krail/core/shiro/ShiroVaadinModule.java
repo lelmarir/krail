@@ -4,6 +4,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.ShiroException;
 
 import uk.q3c.krail.core.guice.errors.ErrorHandler;
+import uk.q3c.krail.core.guice.uiscope.UIScoped;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
@@ -50,7 +52,7 @@ public class ShiroVaadinModule extends AbstractModule {
 	 */
 	protected void bindUnauthenticatedHandler() {
 		bind(UnauthenticatedExceptionHandler.class).to(
-				AutenticationHandler.class);
+				AutenticationHandler.class).in(UIScoped.class);
 	}
 
 	/**
