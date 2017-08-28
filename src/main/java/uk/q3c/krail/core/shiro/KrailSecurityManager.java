@@ -19,7 +19,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ExecutionException;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 
 import org.apache.shiro.authc.AuthenticationException;
@@ -77,12 +81,27 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Inject
 	private VaadinSessionProvider sessionProvider;
-	private Set<AuthenticationListener> loginEventListeners;
+	private LoadingCache<VaadinSession, Set<AuthenticationListener>> loginEventListeners;
 
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
-		this.loginEventListeners = Collections.newSetFromMap(
-		        new WeakHashMap<AuthenticationListener, Boolean>());;
+		this.loginEventListeners = CacheBuilder.newBuilder().weakKeys()
+				.build(new CacheLoader<VaadinSession, Set<AuthenticationListener>>() {
+
+					@Override
+					public Set<AuthenticationListener> load(VaadinSession key) throws Exception {
+						return Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
+					}
+
+				});
+	}
+	
+	private Set<AuthenticationListener> getCurrentSessionAuthenticationListeners() {
+		try {
+			return loginEventListeners.get(sessionProvider.get());
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -94,7 +113,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	private void fireSuccessfulLoginEvent(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
 		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(subject, token, info);
-		ArrayList<AuthenticationListener> list = new ArrayList<>(loginEventListeners);
+		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onSuccess(event);
 		}
@@ -108,14 +127,16 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	private void fireFailedLoginEvent(AuthenticationToken token, AuthenticationException ae, Subject subject) {
 		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(subject, token, ae);
-		for (AuthenticationListener l : loginEventListeners) {
+		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
+		for (AuthenticationListener l : list) {
 			l.onFailure(event);
 		}
 	}
 
 	private void fireLogoutEvent(Subject subject) {
 		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(subject);
-		for (AuthenticationListener l : loginEventListeners) {
+		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
+		for (AuthenticationListener l : list) {
 			l.onLogout(event);
 		}
 	}
@@ -129,7 +150,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 		boolean authenticated = context.resolveAuthenticated();
 		String host = context.resolveHost();
 
-		return new DelegatingSubject(principals, authenticated, host, session, sessionCreationEnabled, securityManager){
+		return new DelegatingSubject(principals, authenticated, host, session, sessionCreationEnabled,
+				securityManager) {
 			@Override
 			public void logout() {
 				super.logout();
@@ -152,7 +174,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			return subjectWrapper.get();
 
 		} catch (IllegalStateException ise) {
-			// this may happen in background threads which are not using a session, or during testing
+			// this may happen in background threads which are not using a
+			// session, or during testing
 			throw new IllegalStateException("There is no VaadinSession, no user can be logged in", ise);
 		}
 
@@ -181,11 +204,11 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Override
 	public void addListener(AuthenticationListener listener) {
-		loginEventListeners.add(listener);
+		getCurrentSessionAuthenticationListeners().add(listener);
 	}
 
 	@Override
 	public void removeListener(AuthenticationListener listener) {
-		loginEventListeners.remove(listener);
+		getCurrentSessionAuthenticationListeners().remove(listener);
 	}
 }
