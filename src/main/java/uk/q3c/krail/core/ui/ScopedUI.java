@@ -17,6 +17,8 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.vaadin.annotations.Push;
 import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
@@ -56,36 +58,29 @@ import uk.q3c.krail.i18n.Translate;
 
 public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
-	protected final CurrentLocale currentLocale;
+	
+	@Inject
+	private Provider<ErrorHandler> errorHandlerProvider;
+	@Inject
+	private Provider<ConverterFactory> converterFactoryProvider;
+	@Inject
+	private Provider<Navigator> navigatorProvider;
+	@Inject
+	private Provider<I18NProcessor> translatorProvider;
+	@Inject
+	private Provider<CurrentLocale> currentLocaleProvider;
+	
 	private final Panel headerDisplayPanel;
 	private final Panel viewDisplayPanel;
-	private final ErrorHandler errorHandler;
-	private final ConverterFactory converterFactory;
-	private final Navigator navigator;
-	private final ApplicationTitle applicationTitle;
-	private final Translate translate;
-	private final I18NProcessor translator;
 	private UIKey instanceKey;
 	private AbstractOrderedLayout screenLayout;
 	private UIScope uiScope;
 	private KrailView view;
 
-	// FIXME: too many parameters
-	protected ScopedUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
-			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
-			I18NProcessor translator) {
+	protected ScopedUI() {
 		super();
-		this.errorHandler = errorHandler;
-		this.navigator = navigator;
-		this.converterFactory = converterFactory;
-		this.applicationTitle = applicationTitle;
-		this.translate = translate;
-		this.translator = translator;
-		this.currentLocale = currentLocale;
-
 		headerDisplayPanel = new Panel();
 		viewDisplayPanel = new Panel();
-		currentLocale.addListener(this);
 	}
 
 	public UIKey getInstanceKey() {
@@ -136,7 +131,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 		Component header = toView.getHeaderComponent();
 		Component content = toView.getRootComponent();
-		translator.translate(toView);
+		translatorProvider.get().translate(toView);
 		content.setSizeFull();
 		headerDisplayPanel.setContent(header);
 		viewDisplayPanel.setContent(content);
@@ -156,24 +151,30 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	@Override
 	protected void init(VaadinRequest request) {
 
+		
+		
 		VaadinSession session = getSession();
-		session.setConverterFactory(converterFactory);
+		session.setConverterFactory(converterFactoryProvider.get());
 
+		Navigator navigator = navigatorProvider.get();
 		// page isn't available during injected construction, so we have to do
 		// this here
 		Page page = getPage();
 		page.addUriFragmentChangedListener(navigator);
 
+		ErrorHandler errorHandler = errorHandlerProvider.get();
 		setErrorHandler(errorHandler);
 		session.setErrorHandler(errorHandler);
 		page.setTitle(pageTitle());
 
+		CurrentLocale currentLocale = this.currentLocaleProvider.get();
 		// now that browser is active, and user sitemap loaded, set up
 		// currentLocale
 		currentLocale.readFromEnvironment();
+		currentLocale.addListener(this);
 
 		doLayout();
-		translator.translate(this);
+		translatorProvider.get().translate(this);
 		// Navigate to the correct start point
 
 		String fragment = getPage().getUriFragment();
@@ -196,8 +197,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 * @return
 	 */
 	protected String pageTitle() {
-		I18NKey key = applicationTitle.getTitleKey();
-		return translate.from(key);
+		return "";
 	}
 
 	/**
@@ -246,6 +246,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 */
 	@Override
 	public void localeChanged(Locale toLocale) {
+		I18NProcessor translator = translatorProvider.get();
 		translator.translate(this);
 		// during initial set up view has not been created but locale change
 		// gets called for other components

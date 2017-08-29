@@ -33,10 +33,8 @@ public class DefaultApplicationUI extends ScopedUI {
 	private VerticalLayout baseLayout;
 
 	@Inject
-	protected DefaultApplicationUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
-			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
-			I18NProcessor translator, UserNotifier userNotifier) {
-		super(navigator, errorHandler, converterFactory, applicationTitle, translate, currentLocale, translator);
+	protected DefaultApplicationUI() {
+		super();
 	}
 
 	@Override

@@ -77,16 +77,17 @@ public class DefaultNavigator implements Navigator {
 	private final List<AfterViewChangeListener> afterViewChangeListeners = new LinkedList<AfterViewChangeListener>();
 	private final Provider<Subject> subjectProvider;
 	private final Sitemap sitemap;
-	private final ScopedUIProvider uiProvider;
+	private final ScopedUI ui;
 	private final DefaultViewFactory viewFactory;
 	private NavigationState currentNavigationState;
 	private NavigationState previousNavigationState;
 
 	@Inject
-	public DefaultNavigator(SubjectProvider subjectProvider, Sitemap sitemap,
+	public DefaultNavigator(Provider<Subject> subjectProvider, Sitemap sitemap,
 			ScopedUIProvider uiProvider, DefaultViewFactory viewFactory) {
 		super();
-		this.uiProvider = uiProvider;
+		this.ui = uiProvider.get();
+		assert this.ui != null;
 		this.subjectProvider = subjectProvider;
 		this.sitemap = sitemap;
 		this.viewFactory = viewFactory;
@@ -307,7 +308,6 @@ public class DefaultNavigator implements Navigator {
 	private void updateUriFragment(NavigationState navigationState,
 			boolean fireEvents) {
 		assert navigationState != null;
-		ScopedUI ui = uiProvider.get();
 		Page page = ui.getPage();
 		if (!navigationState.getFragment().equals(page.getUriFragment())) {
 			page.setUriFragment(navigationState.getFragment(), fireEvents);
@@ -315,7 +315,6 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	protected void changeView(KrailView view) {
-		ScopedUI ui = uiProvider.get();
 		ui.changeView(view);
 	}
 
@@ -330,7 +329,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	private KrailView getCurrentView() {
-		return uiProvider.get().getView();
+		return ui.getView();
 	}
 
 	@Override

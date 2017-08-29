@@ -23,7 +23,6 @@ public abstract class KrailUIModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bindApplicationTitle();
 		MapBinder<String, UI> uiBinder = MapBinder.newMapBinder(binder(),
 				String.class, UI.class);
 
@@ -36,19 +35,6 @@ public abstract class KrailUIModule extends AbstractModule {
 		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder
 				.newSetBinder(binder(), ErrorHandler.class);
 		bindNavigationErrorHandlers(errorHandlersBinder);
-	}
-
-	private void bindApplicationTitle() {
-		ApplicationTitle title = new ApplicationTitle(applicationTitleKey());
-		bind(ApplicationTitle.class).toInstance(title);
-	}
-
-	/**
-	 * override this method to provide the I18Nkey which defines your
-	 * application title (which appears in your browser tab)
-	 */
-	protected I18NKey applicationTitleKey() {
-		return LabelKey.Krail;
 	}
 
 	private void bindConverterFactory() {

@@ -63,7 +63,7 @@ public class DefaultApplicationConfigurationService extends AbstractService impl
 	private final Map<Integer, IniFileConfig> iniFiles;
 
 	@Inject
-	protected DefaultApplicationConfigurationService(Translate translate, ApplicationConfiguration configuration,
+	protected DefaultApplicationConfigurationService(ApplicationConfiguration configuration,
 			Map<Integer, IniFileConfig> iniFiles) {
 		super("ApplicationConfigurationService", "This service loads the application configuration from krail.ini");
 		this.configuration = configuration;

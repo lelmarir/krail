@@ -1,14 +1,7 @@
 package uk.q3c.krail.core.ui;
 
-import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.i18n.CurrentLocale;
-import uk.q3c.krail.i18n.I18NProcessor;
-import uk.q3c.krail.i18n.Translate;
-
 import com.google.inject.Inject;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.util.converter.ConverterFactory;
-import com.vaadin.server.ErrorHandler;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.VerticalLayout;
 
@@ -17,11 +10,8 @@ import com.vaadin.ui.VerticalLayout;
 public class BasicUI extends ScopedUI {
 
 	@Inject
-	protected BasicUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
-			ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale,
-			I18NProcessor translator) {
-		super(navigator, errorHandler, converterFactory, applicationTitle, translate, currentLocale,
-				translator);
+	protected BasicUI() {
+		super();
 
 	}
 
