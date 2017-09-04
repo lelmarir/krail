@@ -39,16 +39,14 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigator.class);
 
-	private final UserNotifier notifier;
 	private final Navigator navigator;
 
-	private NavigationState targetNavigationState = null;
+	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 
 	@Inject
-	protected AutenticationHandler(UserNotifier notifier, Navigator navigator,
+	protected AutenticationHandler(Navigator navigator,
 			AuthenticationNotifier authenticationNotifier) {
 		super();
-		this.notifier = notifier;
 		this.navigator = navigator;
 		authenticationNotifier.addListener(this);
 	}
@@ -56,8 +54,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	protected void onUnauthenticatedException(
 			NavigationState targetNavigationState,
 			UnauthenticatedException throwable) {
-		LOGGER.info("onUnauthenticatedException()");
-		this.targetNavigationState = targetNavigationState;
+		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
 
 		navigator.navigateTo(StandardPageKey.Log_In);
 
@@ -90,11 +87,11 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
 		assert event.getSubject().isAuthenticated();
-		LOGGER.info("onSuccess() user logged in successfully, navigating to appropriate view");
 
 		// they have logged in
-		if (targetNavigationState != null) {
-			navigator.navigateTo(targetNavigationState);
+		if (targetNavigationStateBeforeUnathenticatedException != null) {
+			navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
+			targetNavigationStateBeforeUnathenticatedException = null;
 		} else {
 			navigator.navigateTo(StandardPageKey.Private_Home);
 		}
@@ -103,14 +100,11 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 
 	@Override
 	public void onFailure(FailedLoginEvent event) {
-		LOGGER.info("onFailure() ");
-		notifier.show(NotificationType.WARNING,
-				DescriptionKey.You_have_not_logged_in);
+		;
 	}
 
 	@Override
 	public void onLogout(LogoutEvent event) {
-		LOGGER.info("onLogout() logging out");
 		navigator.navigateTo(StandardPageKey.Log_Out);
 	}
 }
