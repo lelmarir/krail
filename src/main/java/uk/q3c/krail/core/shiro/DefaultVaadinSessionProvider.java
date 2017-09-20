@@ -21,20 +21,9 @@ import org.slf4j.LoggerFactory;
  * @see VaadinSessionProvider
  */
 public class DefaultVaadinSessionProvider implements VaadinSessionProvider {
-    private static Logger log = LoggerFactory.getLogger(DefaultVaadinSessionProvider.class);
-
     @Override
     public VaadinSession get() {
-        VaadinSession session = VaadinSession.getCurrent();
-
-        // This may happen in background threads, or testing
-        if (session == null) {
-            String msg = "Vaaadin session not present.  If you are testing, use a Mock for this provider";
-            log.warn(msg);
-            throw new IllegalStateException(msg);
-        }
-
-        return session;
+        return VaadinSession.getCurrent();
     }
 
 }

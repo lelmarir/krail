@@ -1,5 +1,6 @@
 package uk.q3c.krail.core.ui;
 
+import uk.q3c.krail.core.data.KrailDefaultConverterFactory;
 import uk.q3c.krail.core.guice.errors.ErrorHandler;
 import uk.q3c.krail.core.guice.errors.KrailErrorHandler;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -7,14 +8,10 @@ import uk.q3c.krail.core.navigate.DefaultInvalidURIExceptionHandler;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
 import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.i18n.I18NKey;
-import uk.q3c.krail.i18n.LabelKey;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.vaadin.data.util.converter.ConverterFactory;
-import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
@@ -30,9 +27,14 @@ public abstract class KrailUIModule extends AbstractModule {
 		bindUIProvider();
 		addUIBindings(uiBinder);
 		bindNavigator();
+		bindConverterFactory();
 		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder
 				.newSetBinder(binder(), ErrorHandler.class);
 		bindNavigationErrorHandlers(errorHandlersBinder);
+	}
+
+	private void bindConverterFactory() {
+		bind(ConverterFactory.class).to(KrailDefaultConverterFactory.class);
 	}
 
 	/**

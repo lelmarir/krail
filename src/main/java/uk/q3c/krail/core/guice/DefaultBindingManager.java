@@ -21,6 +21,7 @@ import javax.servlet.ServletContextEvent;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.apache.shiro.guice.ShiroModule;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
@@ -53,21 +54,22 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 	protected static Injector injector;
 	private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
 
-	private ServiceManagerModule serviceManagerModule;
-	private Module i18NModule;
-	private Module userOptionModule;
-	private Module servletModule;
-	private Module shiroVaadinModule;
-	private Module sitemapModule;
-	private Module viewModule;
-	private Module shiroModule;
-	private Module userModule;
-	private Module errorModule;
+	private ServiceManagerModule servicesModule;
+	private I18NModule i18NModule;
+	private UserOptionModule userOptionModule;
+	private ServletModule servletModule;
+	private ShiroVaadinModule shiroVaadinModule;
+	private SitemapModule sitemapModule;
+	private ViewModule viewModule;
+	private ShiroModule shiroModule;
+	private UserModule userModule;
+	private ErrorModule errorModule;
 
 	private Collection<Module> appModules = new ArrayList<>();
 
 	protected DefaultBindingManager() {
 		super();
+		configure();
 	}
 
 	protected abstract void configure();
@@ -106,8 +108,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		coreModules.add(new UIScopeModule());
 		coreModules.add(new VaadinSessionScopeModule());
 
-		serviceManagerModule = new ServiceManagerModule();
-		coreModules.add(serviceManagerModule);
+		coreModules.add(getServicesModule());
 
 		coreModules.add(getErrorModule());
 
@@ -134,7 +135,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		}
 	}
 
-	protected Module getUserOptionModule() {
+	protected UserOptionModule getUserOptionModule() {
 		if (this.userOptionModule == null) {
 			this.userOptionModule = new UserOptionModule();
 		}
@@ -146,7 +147,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.userOptionModule = userOptionModule;
 	}
 
-	protected Module getI18NModule() {
+	protected I18NModule getI18NModule() {
 		if (this.i18NModule == null) {
 			this.i18NModule = new I18NModule();
 		}
@@ -158,7 +159,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.i18NModule = i18nModule;
 	}
 
-	protected Module getServletModule() {
+	protected ServletModule getServletModule() {
 		if (this.servletModule == null) {
 			this.servletModule = new BaseServletModule();
 		}
@@ -170,7 +171,19 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.servletModule = servletModule;
 	}
 
-	protected Module getShiroVaadinModule() {
+	public ServiceManagerModule getServicesModule() {
+		if (this.servicesModule == null) {
+			this.servicesModule = new ServiceManagerModule();
+		}
+		return this.servicesModule;
+	}
+	
+	public void setServicesModule(ServiceManagerModule servicesModule) {
+		checkIfConfigurationStillPossible();
+		this.servicesModule = servicesModule;
+	}
+
+	protected ShiroVaadinModule getShiroVaadinModule() {
 		if (this.shiroVaadinModule == null) {
 			this.shiroVaadinModule = new ShiroVaadinModule();
 		}
@@ -182,31 +195,31 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.shiroVaadinModule = shiroVaadinModule;
 	}
 
-	public Module getSitemapModule() {
+	public SitemapModule getSitemapModule() {
 		if (this.sitemapModule == null) {
 			this.sitemapModule = new SitemapModule();
 		}
 		return this.sitemapModule;
 	}
 
-	public void setSitemapModule(Module sitemapModule) {
+	public void setSitemapModule(SitemapModule sitemapModule) {
 		checkIfConfigurationStillPossible();
 		this.sitemapModule = sitemapModule;
 	}
 
-	protected Module getViewModule() {
+	protected ViewModule getViewModule() {
 		if (this.viewModule == null) {
 			this.viewModule = new ViewModule();
 		}
 		return this.viewModule;
 	}
 
-	public void setViewModule(Module viewModule) {
+	public void setViewModule(ViewModule viewModule) {
 		checkIfConfigurationStillPossible();
 		this.viewModule = viewModule;
 	}
 
-	protected Module getShiroModule() {
+	protected ShiroModule getShiroModule() {
 		if (this.shiroModule == null) {
 			this.shiroModule = new StandardShiroModule();
 		}
@@ -218,7 +231,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.shiroModule = shiroModule;
 	}
 
-	private Module getUserModule() {
+	private UserModule getUserModule() {
 		if (this.userModule == null) {
 			this.userModule = new UserModule();
 		}
@@ -230,14 +243,14 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.userModule = userModule;
 	}
 
-	protected Module getErrorModule() {
-		if(this.errorModule == null) {
+	protected ErrorModule getErrorModule() {
+		if (this.errorModule == null) {
 			this.errorModule = new ErrorModule();
 		}
 		return this.errorModule;
 	}
-	
-	public void setErrorModule(Module errorModule) {
+
+	public void setErrorModule(ErrorModule errorModule) {
 		checkIfConfigurationStillPossible();
 		this.errorModule = errorModule;
 	}
@@ -246,10 +259,16 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		this.appModules.add(module);
 	}
 
-	public final ScopedBindingBuilder addService(Class<? extends Service> service) {
-		return serviceManagerModule.addService(service);
+	@Override
+	public void contextInitialized(ServletContextEvent servletContextEvent) {
+		super.contextInitialized(servletContextEvent);
+		ServiceManager servicesManager = getInjector().getInstance(ServiceManager.class);
+		if(servicesManager != null) {
+			servicesManager.startAsync();
+			servicesManager.awaitHealthy();
+		}
 	}
-
+	
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
 		log.info("Stopping services");

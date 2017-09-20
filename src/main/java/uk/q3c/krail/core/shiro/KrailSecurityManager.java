@@ -40,6 +40,7 @@ import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.subject.support.DelegatingSubject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import uk.q3c.krail.core.shiro.loginevent.AbstractAuthenticationEvent.SuccesfulLoginEventImpl;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
@@ -82,6 +83,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	@Inject
 	private VaadinSessionProvider sessionProvider;
 	private LoadingCache<VaadinSession, Set<AuthenticationListener>> loginEventListeners;
+	/**
+	 * will be used if no sessions are present (background threads)
+	 */
+	private InheritableThreadLocal<Subject> threadLocalSubject = new InheritableThreadLocal<>();
 
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
@@ -95,7 +100,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 				});
 	}
-	
+
 	private Set<AuthenticationListener> getCurrentSessionAuthenticationListeners() {
 		try {
 			return loginEventListeners.get(sessionProvider.get());
@@ -164,30 +169,56 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	public Subject getSubject() {
-		SubjectSerializableWrapper subjectWrapper = null;
-		try {
-			VaadinSession session = sessionProvider.get();
-			subjectWrapper = session.getAttribute(SubjectSerializableWrapper.class);
+		VaadinSession session = sessionProvider.get();
+		if (session != null) {
+			SubjectSerializableWrapper subjectWrapper = session.getAttribute(SubjectSerializableWrapper.class);
 			if (subjectWrapper == null) {
 				LOGGER.debug(
 						"VaadinSession is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
 				subjectWrapper = new SubjectSerializableWrapper(new Subject.Builder().buildSubject());
 				session.setAttribute(SubjectSerializableWrapper.class, subjectWrapper);
 			}
-			return subjectWrapper.get();
+			Subject subject = subjectWrapper.get();
 
-		} catch (IllegalStateException ise) {
-			// this may happen in background threads which are not using a
-			// session, or during testing
-			throw new IllegalStateException("There is no VaadinSession, no user can be logged in", ise);
+			if (threadLocalSubject.get() != null) {
+				throw new IllegalStateException(
+						"when is present a session, the threadLocalSubject should be null! (thread='"
+								+ Thread.currentThread().getName() + "', session='" + session + "', session.subject='"
+								+ subject + "', threadLocalSubject='" + threadLocalSubject.get() + "')");
+			}
+			return subject;
+		} else {
+			Subject subject = threadLocalSubject.get();
+			if (subject != null) {
+				LOGGER.debug("no session present, returning subject from ThreadLocalVariable: {}", subject);
+				return subject;
+			} else {
+				throw new IllegalStateException("No session and no threadLocal subject!");
+			}
 		}
 
 	}
 
 	protected void setSubject(Subject subject) {
 		VaadinSession session = sessionProvider.get();
-		LOGGER.debug("storing Subject instance in VaadinSession");
-		session.setAttribute(SubjectSerializableWrapper.class, new SubjectSerializableWrapper(subject));
+		if (session != null) {
+			LOGGER.debug("storing Subject instance in VaadinSession");
+			session.setAttribute(SubjectSerializableWrapper.class, new SubjectSerializableWrapper(subject));
+		} else {
+			throw new IllegalStateException("no session present, if you are running a background thread use runForSubject() instead");
+		}
+	}
+
+	//TODO:use @RunAs annotation instead
+	public void runAsSubject(Subject subject, Runnable runnable) {
+		this.threadLocalSubject.set(subject);
+		MDC.put("subject", subject.toString());
+		try {
+			runnable.run();
+		} finally {
+			MDC.remove("subject");
+			this.threadLocalSubject.set(null);
+		}
 	}
 
 	/**
