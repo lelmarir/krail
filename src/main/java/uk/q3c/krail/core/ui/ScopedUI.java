@@ -14,6 +14,7 @@ package uk.q3c.krail.core.ui;
 
 import java.util.Locale;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 
-import uk.q3c.krail.core.config.ConfigurationException;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -214,7 +214,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 			String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
 					+ "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
 			log.error(msg);
-			throw new ConfigurationException(msg);
+			throw new NotImplementedException(msg);
 		}
 		viewDisplayPanel.setSizeFull();
 		setContent(screenLayout);

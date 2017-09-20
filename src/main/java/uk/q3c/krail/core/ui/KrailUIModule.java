@@ -1,6 +1,5 @@
 package uk.q3c.krail.core.ui;
 
-import uk.q3c.krail.core.data.KrailDefaultConverterFactory;
 import uk.q3c.krail.core.guice.errors.ErrorHandler;
 import uk.q3c.krail.core.guice.errors.KrailErrorHandler;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -31,14 +30,9 @@ public abstract class KrailUIModule extends AbstractModule {
 		bindUIProvider();
 		addUIBindings(uiBinder);
 		bindNavigator();
-		bindConverterFactory();
 		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder
 				.newSetBinder(binder(), ErrorHandler.class);
 		bindNavigationErrorHandlers(errorHandlersBinder);
-	}
-
-	private void bindConverterFactory() {
-		bind(ConverterFactory.class).to(KrailDefaultConverterFactory.class);
 	}
 
 	/**

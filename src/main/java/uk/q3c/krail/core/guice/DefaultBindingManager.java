@@ -14,6 +14,7 @@ package uk.q3c.krail.core.guice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContextEvent;
 
@@ -25,14 +26,12 @@ import org.apache.shiro.realm.Realm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.q3c.krail.core.config.ApplicationConfigurationModule;
 import uk.q3c.krail.core.guice.errors.ErrorModule;
 import uk.q3c.krail.core.guice.threadscope.ThreadScopeModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.navigate.sitemap.SitemapModule;
-import uk.q3c.krail.core.services.ServicesMonitor;
-import uk.q3c.krail.core.services.ServicesMonitorModule;
+import uk.q3c.krail.core.services.ServiceManagerModule;
 import uk.q3c.krail.core.shiro.ShiroVaadinModule;
 import uk.q3c.krail.core.shiro.StandardShiroModule;
 import uk.q3c.krail.core.user.UserModule;
@@ -40,6 +39,7 @@ import uk.q3c.krail.core.user.opt.UserOptionModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.i18n.I18NModule;
 
+import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -81,14 +81,13 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
         List<Module> coreModules = new ArrayList<>();
 
         coreModules.add(i18NModule());
-        coreModules.add(applicationConfigurationModule());
 		coreModules.add(sitemapModule());
 
         coreModules.add(new ThreadScopeModule());
         coreModules.add(new UIScopeModule());
         coreModules.add(new VaadinSessionScopeModule());
 
-        coreModules.add(new ServicesMonitorModule());
+        coreModules.add(new ServiceManagerModule());
 
         coreModules.add(ErrorModule());
         
@@ -120,10 +119,6 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 
     protected Module i18NModule() {
         return new I18NModule();
-    }
-
-    protected Module applicationConfigurationModule() {
-        return new ApplicationConfigurationModule();
     }
 
     /**
@@ -202,7 +197,11 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		try {
 			Injector injector = getInjector(false);
 			if(injector != null) {
-				injector.getInstance(ServicesMonitor.class).stopAllServices();
+				ServiceManager serviceManager = injector.getInstance(ServiceManager.class);
+				serviceManager.stopAsync();
+				log.debug("Waiting for services to stop...");
+				serviceManager.awaitStopped(60, TimeUnit.SECONDS);
+				log.debug("all service stopped.");
 			}
 		} catch (Exception e) {
 			log.error("Exception while stopping services", e);
