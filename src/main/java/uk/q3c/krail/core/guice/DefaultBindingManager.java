@@ -13,6 +13,7 @@
 package uk.q3c.krail.core.guice;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,164 +40,222 @@ import uk.q3c.krail.core.user.opt.UserOptionModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.i18n.I18NModule;
 
+import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
 public abstract class DefaultBindingManager extends GuiceServletContextListener {
-    protected static Injector injector;
-    private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
+	protected static Injector injector;
+	private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
 
-    protected DefaultBindingManager() {
-        super();
-    }
+	private ServiceManagerModule serviceManagerModule;
+	private Module i18NModule;
+	private Module userOptionModule;
+	private Module servletModule;
+	private Module shiroVaadinModule;
+	private Module sitemapModule;
+	private Module viewModule;
+	private Module shiroModule;
+	private Module userModule;
+	private Module errorModule;
+
+	private Collection<Module> appModules = new ArrayList<>();
+
+	protected DefaultBindingManager() {
+		super();
+	}
+
+	protected abstract void configure();
 
 	public Injector getInjector(boolean create) {
 		if (injector == null && create) {
 			injector = createInjector();
 			log.debug("injector created");
-        }
+		}
 		return injector;
-    }
-
-    /**
-     * Module instances for the core should be added in {@link #getModules()}. Module instances for the app using Krail
-     * should be added to {@link AppModules#appModules()}
-     *
-     * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
-     */
-    @Override
-	protected Injector getInjector() {
-		return getInjector(true);
-    }
-
-    protected Injector createInjector() {
-        return Guice.createInjector(getModules());
-    }
-
-    protected List<Module> getModules() {
-        List<Module> coreModules = new ArrayList<>();
-
-        coreModules.add(i18NModule());
-		coreModules.add(sitemapModule());
-
-        coreModules.add(new ThreadScopeModule());
-        coreModules.add(new UIScopeModule());
-        coreModules.add(new VaadinSessionScopeModule());
-
-        coreModules.add(new ServiceManagerModule());
-
-        coreModules.add(ErrorModule());
-        
-        coreModules.add(shiroModule());
-        coreModules.add(shiroVaadinModule());
-        coreModules.add(new ShiroAopModule());
-
-        coreModules.add(servletModule());
-
-        coreModules.add(viewModule());
-
-        coreModules.add(userModule());
-
-        coreModules.add(userOptionModule());
-
-        addAppModules(coreModules);
-        addSitemapModules(coreModules);
-        return coreModules;
-    }
+	}
 
 	/**
-     * Override this if you have provided your own {@link UserOptionModule}
-     *
-     * @return
-     */
-    protected Module userOptionModule() {
-        return new UserOptionModule();
-    }
+	 * Module instances for the core should be added in {@link #getModules()}.
+	 * Module instances for the app using Krail should be added to
+	 * {@link AppModules#appModules()}
+	 *
+	 * @see com.google.inject.servlet.GuiceServletContextListener#getInjector()
+	 */
+	@Override
+	protected Injector getInjector() {
+		return getInjector(true);
+	}
 
-    protected Module i18NModule() {
-        return new I18NModule();
-    }
+	protected Injector createInjector() {
+		return Guice.createInjector(getModules());
+	}
 
-    /**
-     * Modules used in the creation of the {@link MasterSitemap} do not actually need to be separated, this just makes
-     * a
-     * convenient way of seeing them as a group
-     *
-     * @param baseModules
-     */
-    protected void addSitemapModules(List<Module> baseModules) {
-    }
+	protected List<Module> getModules() {
+		List<Module> coreModules = new ArrayList<>();
 
-    /**
-     * Override this if you have provided your own {@link ServletModule}
-     *
-     * @return
-     */
-    protected Module servletModule() {
-        return new BaseServletModule();
-    }
+		coreModules.add(getI18NModule());
+		coreModules.add(getSitemapModule());
 
-    /**
-     * Override this method if you have sub-classed {@link ShiroVaadinModule} to provide your own bindings for Shiro
-     * related exceptions.
-     *
-     * @return
-     */
-    protected Module shiroVaadinModule() {
-        return new ShiroVaadinModule();
-    }
+		coreModules.add(new ThreadScopeModule());
+		coreModules.add(new UIScopeModule());
+		coreModules.add(new VaadinSessionScopeModule());
 
-	private Module sitemapModule() {
-		return new SitemapModule();
-    }
+		serviceManagerModule = new ServiceManagerModule();
+		coreModules.add(serviceManagerModule);
 
-    /**
-     * Override this if you have sub-classed {@link ViewModule} to provide bindings to your own standard page views
-     */
-    protected Module viewModule() {
-        return new ViewModule();
-    }
+		coreModules.add(getErrorModule());
 
-    /**
-     * Override this method if you have sub-classed {@link StandardShiroModule} to provide bindings to your Shiro
-     * related implementations (for example, {@link Realm} and {@link CredentialsMatcher}
-     *
-     * @param servletContext
-     * @param ini
-     *
-     * @return
-     */
+		coreModules.add(getShiroModule());
+		coreModules.add(getShiroVaadinModule());
+		coreModules.add(new ShiroAopModule());
 
-    protected Module shiroModule() {
-        return new StandardShiroModule();
-    }
+		coreModules.add(getServletModule());
 
-    /**
-     * Override this if you have sub-classed {@link UserModule} to provide bindings to your user related
-     * implementations
-     */
-    private Module userModule() {
-        return new UserModule();
-    }
+		coreModules.add(getViewModule());
 
-    /**
-     * Add as many application specific Guice modules as you wish by overriding this method.
-     *
-     * @param baseModules
-     * @param ini
-     */
-    protected abstract void addAppModules(List<Module> baseModules);
+		coreModules.add(getUserModule());
+
+		coreModules.add(getUserOptionModule());
+
+		coreModules.addAll(appModules);
+		return coreModules;
+	}
+
+	private void checkIfConfigurationStillPossible() {
+		if (injector != null) {
+			throw new UnsupportedOperationException(
+					"The injector has already been created, it's no more possible to change the configuration");
+		}
+	}
+
+	protected Module getUserOptionModule() {
+		if (this.userOptionModule == null) {
+			this.userOptionModule = new UserOptionModule();
+		}
+		return this.userOptionModule;
+	}
+
+	public void setUserOptionModule(UserOptionModule userOptionModule) {
+		checkIfConfigurationStillPossible();
+		this.userOptionModule = userOptionModule;
+	}
+
+	protected Module getI18NModule() {
+		if (this.i18NModule == null) {
+			this.i18NModule = new I18NModule();
+		}
+		return this.i18NModule;
+	}
+
+	public void setI18NModule(I18NModule i18nModule) {
+		checkIfConfigurationStillPossible();
+		this.i18NModule = i18nModule;
+	}
+
+	protected Module getServletModule() {
+		if (this.servletModule == null) {
+			this.servletModule = new BaseServletModule();
+		}
+		return this.servletModule;
+	}
+
+	public void setServletModule(ServletModule servletModule) {
+		checkIfConfigurationStillPossible();
+		this.servletModule = servletModule;
+	}
+
+	protected Module getShiroVaadinModule() {
+		if (this.shiroVaadinModule == null) {
+			this.shiroVaadinModule = new ShiroVaadinModule();
+		}
+		return this.shiroVaadinModule;
+	}
+
+	public void setShiroVaadinModule(ShiroVaadinModule shiroVaadinModule) {
+		checkIfConfigurationStillPossible();
+		this.shiroVaadinModule = shiroVaadinModule;
+	}
+
+	public Module getSitemapModule() {
+		if (this.sitemapModule == null) {
+			this.sitemapModule = new SitemapModule();
+		}
+		return this.sitemapModule;
+	}
+
+	public void setSitemapModule(Module sitemapModule) {
+		checkIfConfigurationStillPossible();
+		this.sitemapModule = sitemapModule;
+	}
+
+	protected Module getViewModule() {
+		if (this.viewModule == null) {
+			this.viewModule = new ViewModule();
+		}
+		return this.viewModule;
+	}
+
+	public void setViewModule(Module viewModule) {
+		checkIfConfigurationStillPossible();
+		this.viewModule = viewModule;
+	}
+
+	protected Module getShiroModule() {
+		if (this.shiroModule == null) {
+			this.shiroModule = new StandardShiroModule();
+		}
+		return this.shiroModule;
+	}
+
+	public void setShiroModule(StandardShiroModule shiroModule) {
+		checkIfConfigurationStillPossible();
+		this.shiroModule = shiroModule;
+	}
+
+	private Module getUserModule() {
+		if (this.userModule == null) {
+			this.userModule = new UserModule();
+		}
+		return this.userModule;
+	}
+
+	public void setUserModule(UserModule userModule) {
+		checkIfConfigurationStillPossible();
+		this.userModule = userModule;
+	}
+
+	protected Module getErrorModule() {
+		if(this.errorModule == null) {
+			this.errorModule = new ErrorModule();
+		}
+		return this.errorModule;
+	}
+	
+	public void setErrorModule(Module errorModule) {
+		checkIfConfigurationStillPossible();
+		this.errorModule = errorModule;
+	}
+
+	protected void addModule(Module module) {
+		this.appModules.add(module);
+	}
+
+	public final ScopedBindingBuilder addService(Class<? extends Service> service) {
+		return serviceManagerModule.addService(service);
+	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
 		log.info("Stopping services");
 		try {
 			Injector injector = getInjector(false);
-			if(injector != null) {
+			if (injector != null) {
 				ServiceManager serviceManager = injector.getInstance(ServiceManager.class);
 				serviceManager.stopAsync();
 				log.debug("Waiting for services to stop...");
@@ -206,14 +265,10 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		} catch (Exception e) {
 			log.error("Exception while stopping services", e);
 		}
-		
-		//context may not have been crated, and super does not check for it
-        if (servletContextEvent.getServletContext() != null) {
-            super.contextDestroyed(servletContextEvent);
-		}
-	}
 
-    protected Module ErrorModule() {
-		return new ErrorModule();
+		// context may not have been crated, and super does not check for it
+		if (servletContextEvent.getServletContext() != null) {
+			super.contextDestroyed(servletContextEvent);
+		}
 	}
 }
