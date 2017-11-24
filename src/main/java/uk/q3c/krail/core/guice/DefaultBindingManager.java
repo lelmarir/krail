@@ -116,8 +116,6 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		coreModules.add(getShiroVaadinModule());
 		coreModules.add(new ShiroAopModule());
 
-		coreModules.add(getServletModule());
-
 		coreModules.add(getViewModule());
 
 		coreModules.add(getUserModule());
@@ -125,6 +123,9 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		coreModules.add(getUserOptionModule());
 
 		coreModules.addAll(appModules);
+
+		//bind after appModules to allow other servlets
+		coreModules.add(getServletModule());
 		return coreModules;
 	}
 
@@ -177,7 +178,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		}
 		return this.servicesModule;
 	}
-	
+
 	public void setServicesModule(ServiceManagerModule servicesModule) {
 		checkIfConfigurationStillPossible();
 		this.servicesModule = servicesModule;
@@ -263,12 +264,12 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		super.contextInitialized(servletContextEvent);
 		ServiceManager servicesManager = getInjector().getInstance(ServiceManager.class);
-		if(servicesManager != null) {
+		if (servicesManager != null) {
 			servicesManager.startAsync();
 			servicesManager.awaitHealthy();
 		}
 	}
-	
+
 	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
 		log.info("Stopping services");
