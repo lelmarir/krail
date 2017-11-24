@@ -33,6 +33,7 @@ import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.vaadin.server.VaadinSession;
 
 public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
@@ -42,11 +43,14 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 
+	private VaadinSession session;
+
 	@Inject
-	protected AutenticationHandler(Navigator navigator,
-			AuthenticationNotifier authenticationNotifier) {
+	protected AutenticationHandler(Navigator navigator, AuthenticationNotifier authenticationNotifier,
+			VaadinSessionProvider vaadinSessionProvider) {
 		super();
 		this.navigator = navigator;
+		this.session = vaadinSessionProvider.get();
 		authenticationNotifier.addListener(this);
 	}
 
@@ -86,6 +90,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		assert event.getSubject().isAuthenticated();
 
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
+		session.access(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
 				navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
@@ -93,6 +98,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 			} else {
 				navigator.navigateTo(StandardPageKey.Private_Home);
 			}
+		});
 
 	}
 
