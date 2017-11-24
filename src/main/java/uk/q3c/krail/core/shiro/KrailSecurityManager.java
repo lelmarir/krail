@@ -21,10 +21,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 
+import javax.servlet.http.HttpSession;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -48,8 +51,6 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNoti
 import uk.q3c.krail.core.shiro.loginevent.AbstractAuthenticationEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
-
-import com.vaadin.server.VaadinSession;
 
 public class KrailSecurityManager extends DefaultSecurityManager implements AuthenticationNotifier {
 
@@ -81,8 +82,9 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	private static final Logger LOGGER = LoggerFactory.getLogger(KrailSecurityManager.class);
 
 	@Inject
-	private VaadinSessionProvider sessionProvider;
-	private LoadingCache<VaadinSession, Set<AuthenticationListener>> loginEventListeners;
+	private Provider<HttpSession> sessionProvider;
+
+	private LoadingCache<HttpSession, Set<AuthenticationListener>> loginEventListeners;
 	/**
 	 * will be used if no sessions are present (background threads)
 	 */
@@ -91,10 +93,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
 		this.loginEventListeners = CacheBuilder.newBuilder().weakKeys()
-				.build(new CacheLoader<VaadinSession, Set<AuthenticationListener>>() {
+				.build(new CacheLoader<HttpSession, Set<AuthenticationListener>>() {
 
 					@Override
-					public Set<AuthenticationListener> load(VaadinSession key) throws Exception {
+					public Set<AuthenticationListener> load(HttpSession key) throws Exception {
 						return Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
 					}
 
@@ -167,17 +169,17 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	public Subject getSubject() {
-		VaadinSession session = sessionProvider.get();
+		HttpSession session = sessionProvider.get();
 		if (session != null) {
-			SubjectSerializableWrapper subjectWrapper = session.getAttribute(SubjectSerializableWrapper.class);
+			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session.getAttribute(SubjectSerializableWrapper.class.getName());
 			if (subjectWrapper == null) {
 				LOGGER.debug(
 						"VaadinSession is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
 				subjectWrapper = new SubjectSerializableWrapper(new Subject.Builder().buildSubject());
-				session.setAttribute(SubjectSerializableWrapper.class, subjectWrapper);
+				session.setAttribute(SubjectSerializableWrapper.class.getName(), subjectWrapper);
 			}
 			Subject subject = subjectWrapper.get();
-
+			
 			if (threadLocalSubject.get() != null) {
 				throw new IllegalStateException(
 						"when is present a session, the threadLocalSubject should be null! (thread='"
@@ -185,29 +187,30 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 								+ subject + "', threadLocalSubject='" + threadLocalSubject.get() + "')");
 			}
 			return subject;
-		} else {
-			Subject subject = threadLocalSubject.get();
-			if (subject != null) {
-				LOGGER.debug("no session present, returning subject from ThreadLocalVariable: {}", subject);
-				return subject;
-			} else {
-				throw new IllegalStateException("No session and no threadLocal subject!");
-			}
 		}
+		
+		Subject subject = threadLocalSubject.get();
+		if (subject != null) {
+			LOGGER.debug("no session present, returning subject from ThreadLocalVariable: {}", subject);
+			return subject;
+		}
+		
+		throw new IllegalStateException("No session and no threadLocal subject!");
 
 	}
 
 	protected void setSubject(Subject subject) {
-		VaadinSession session = sessionProvider.get();
+		HttpSession session = sessionProvider.get();
 		if (session != null) {
 			LOGGER.debug("storing Subject instance in VaadinSession");
-			session.setAttribute(SubjectSerializableWrapper.class, new SubjectSerializableWrapper(subject));
+			session.setAttribute(SubjectSerializableWrapper.class.getName(), new SubjectSerializableWrapper(subject));
 		} else {
-			throw new IllegalStateException("no session present, if you are running a background thread use runForSubject() instead");
+			throw new IllegalStateException(
+					"no session present, if you are running a background thread use runForSubject() instead");
 		}
 	}
 
-	//TODO:use @RunAs annotation instead
+	// TODO:use @RunAs annotation instead
 	public void runAsSubject(Subject subject, Runnable runnable) {
 		this.threadLocalSubject.set(subject);
 		MDC.put("subject", subject.toString());
@@ -230,7 +233,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 		super.setSessionManager(sessionManager);
 	}
 
-	public void setSessionProvider(VaadinSessionProvider sessionProvider) {
+	public void setSessionProvider(Provider<HttpSession> sessionProvider) {
 		this.sessionProvider = sessionProvider;
 	}
 
