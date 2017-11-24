@@ -1,5 +1,6 @@
 package uk.q3c.krail.core.shiro.loginevent;
 
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
 
 public interface AuthenticationEvent {
@@ -14,6 +15,8 @@ public interface AuthenticationEvent {
 	}
 	
 	public static interface FailedLoginEvent extends AuthenticationEvent {
+
+		AuthenticationException getException();
 		
 	}
 	

@@ -18,9 +18,17 @@ public abstract class AbstractAuthenticationEvent implements
 
 	public static class FailedLoginEventImpl extends
 			AbstractAuthenticationEvent implements FailedLoginEvent {
+		private final AuthenticationException exception;
+
 		public FailedLoginEventImpl(Subject subject, AuthenticationToken token,
 				AuthenticationException ae) {
 			super(subject);
+			this.exception = ae;
+		}
+
+		@Override
+		public AuthenticationException getException() {
+			return exception;
 		}
 	}
 	

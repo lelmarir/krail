@@ -36,8 +36,7 @@ import com.google.inject.Singleton;
 
 public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DefaultNavigator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
 	private final Navigator navigator;
 
@@ -51,8 +50,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		authenticationNotifier.addListener(this);
 	}
 
-	protected void onUnauthenticatedException(
-			NavigationState targetNavigationState,
+	protected void onUnauthenticatedException(NavigationState targetNavigationState,
 			UnauthenticatedException throwable) {
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
 
@@ -69,8 +67,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 			Throwable cause = throwable.getCause();
 			// handle an unauthenticated access attempt
 			if (cause instanceof UnauthenticatedException) {
-				onUnauthenticatedException(targetNavigationState,
-						(UnauthenticatedException) cause);
+				onUnauthenticatedException(targetNavigationState, (UnauthenticatedException) cause);
 				return true;
 			}
 		}
@@ -88,23 +85,25 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	public void onSuccess(SuccesfulLoginEvent event) {
 		assert event.getSubject().isAuthenticated();
 
-		// they have logged in
-		if (targetNavigationStateBeforeUnathenticatedException != null) {
-			navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
-			targetNavigationStateBeforeUnathenticatedException = null;
-		} else {
-			navigator.navigateTo(StandardPageKey.Private_Home);
-		}
+		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
+			// they have logged in
+			if (targetNavigationStateBeforeUnathenticatedException != null) {
+				navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
+				targetNavigationStateBeforeUnathenticatedException = null;
+			} else {
+				navigator.navigateTo(StandardPageKey.Private_Home);
+			}
 
 	}
 
 	@Override
 	public void onFailure(FailedLoginEvent event) {
-		;
+		LOGGER.info("onFailedLogin(user={}, exception={})", event.getSubject(), event.getException().getMessage());
 	}
 
 	@Override
 	public void onLogout(LogoutEvent event) {
+		LOGGER.info("logout(user={})", event.getSubject());
 		navigator.navigateTo(StandardPageKey.Log_Out);
 	}
 }

@@ -111,7 +111,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Override
 	protected void onSuccessfulLogin(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
-		LOGGER.info("onSuccessfulLogin(user={})", token.getPrincipal());
+		
 		super.onSuccessfulLogin(token, info, subject);
 		setSubject(subject);
 		fireSuccessfulLoginEvent(token, info, subject);
@@ -127,7 +127,6 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Override
 	protected void onFailedLogin(AuthenticationToken token, AuthenticationException ae, Subject subject) {
-		LOGGER.info("onFailedLogin(user={}, exception={})", token.getPrincipal(), ae.toString());
 		super.onFailedLogin(token, ae, subject);
 		fireFailedLoginEvent(token, ae, subject);
 	}
@@ -161,7 +160,6 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 				securityManager) {
 			@Override
 			public void logout() {
-				LOGGER.info("logout(user={})", principals.getPrimaryPrincipal());
 				super.logout();
 				fireLogoutEvent(this);
 			}
