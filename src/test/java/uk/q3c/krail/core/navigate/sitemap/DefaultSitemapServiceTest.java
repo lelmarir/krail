@@ -25,11 +25,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.q3c.krail.config.config.ConfigKeys;
 import uk.q3c.krail.core.config.KrailApplicationConfigurationModule;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.i18n.DescriptionKey;
 import uk.q3c.krail.core.i18n.LabelKey;
+import uk.q3c.krail.core.i18n.TestKrailI18NModule;
 import uk.q3c.krail.core.navigate.NavigationModule;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemapServiceTest.TestDirectSitemapModule;
 import uk.q3c.krail.core.navigate.sitemap.set.MasterSitemapQueue;
@@ -41,13 +42,13 @@ import uk.q3c.krail.core.user.UserModule;
 import uk.q3c.krail.core.view.PublicHomeView;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.core.view.component.DefaultComponentModule;
-import uk.q3c.krail.i18n.test.TestI18NModule;
-import uk.q3c.krail.option.test.TestOptionModule;
+import uk.q3c.krail.eventbus.mbassador.EventBusModule;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.service.Service;
 import uk.q3c.krail.service.ServiceModel;
 import uk.q3c.krail.service.ServiceStatus;
 import uk.q3c.krail.service.bind.ServicesModule;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
 import uk.q3c.krail.util.DefaultResourceUtils;
 import uk.q3c.krail.util.ResourceUtils;
 import uk.q3c.krail.util.UtilsModule;
@@ -57,8 +58,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * This test uses all standard implementations to inject into {@link DefaultSitemapService}.
@@ -67,10 +69,10 @@ import static org.mockito.Mockito.*;
  */
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({TestDirectSitemapModule.class, UIScopeModule.class, ViewModule.class, EventBusModule.class, ServicesModule.class,
-        ShiroVaadinModule.class, TestI18NModule.class, SitemapModule.class, UserModule.class, KrailApplicationConfigurationModule.class, DefaultShiroModule.class,
-        DefaultComponentModule.class, TestPersistenceModuleVaadin.class, StandardPagesModule.class, VaadinSessionScopeModule.class,
-        NavigationModule.class, UtilsModule.class, UtilModule.class, DefaultUIModule.class, TestOptionModule.class})
+@GuiceContext({TestDirectSitemapModule.class, UIScopeModule.class, ViewModule.class, VaadinEventBusModule.class, ServicesModule.class,
+        ShiroVaadinModule.class, TestKrailI18NModule.class, SitemapModule.class, UserModule.class, KrailApplicationConfigurationModule.class, DefaultShiroModule.class,
+        DefaultComponentModule.class, InMemoryModule.class, StandardPagesModule.class, VaadinSessionScopeModule.class,
+        NavigationModule.class, EventBusModule.class, UtilsModule.class, UtilModule.class, DefaultUIModule.class, TestOptionModule.class})
 public class DefaultSitemapServiceTest {
 
     static VaadinService vaadinService;
@@ -222,7 +224,6 @@ public class DefaultSitemapServiceTest {
         assertThat(status.getCause()).isEqualTo(Service.Cause.FAILED_TO_START);
 
     }
-
 
 
     public static class TestDirectSitemapModule extends DirectSitemapModule {

@@ -19,6 +19,7 @@ import com.mycila.testing.plugin.guice.GuiceContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -274,7 +275,7 @@ public class StrictURIFragmentHandlerTest {
 
         // given
         // when
-        NavigationState navigationState = uriHandler.navigationState(null);
+        NavigationState navigationState = uriHandler.navigationState((String) null);
         List<String> result = navigationState.getPathSegments();
         // then
         assertThat(result).containsOnly("");
@@ -286,13 +287,23 @@ public class StrictURIFragmentHandlerTest {
 
         // given
         NavigationState navigationState = uriHandler.navigationState("home/perfect/wiggly");
-        navigationState.addParameter("age", "15");
-        navigationState.setVirtualPage("home/only");
+        navigationState.parameter("age", "15");
+        navigationState.virtualPage("home/only");
         // when
         uriHandler.updateFragment(navigationState);
         // then
 
         assertThat(navigationState.getFragment()).isEqualTo("home/only/age=15");
+    }
+
+    @Test
+    public void fromURI() {
+
+        // given
+        NavigationState navigationState = uriHandler.navigationState(URI.create("http://localhost:8080/krail-testapp/#jpa"));
+
+        // expect
+        assertThat(navigationState.getFragment()).isEqualTo("jpa");
     }
 
 }

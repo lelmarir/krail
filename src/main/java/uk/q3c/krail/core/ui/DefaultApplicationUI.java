@@ -14,11 +14,16 @@
 package uk.q3c.krail.core.ui;
 
 import com.google.inject.Inject;
-import com.vaadin.data.Property;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
-import com.vaadin.ui.*;
+import com.vaadin.ui.AbstractOrderedLayout;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalLayout;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Listener;
 import uk.q3c.krail.core.i18n.DescriptionKey;
 import uk.q3c.krail.core.i18n.I18NProcessor;
 import uk.q3c.krail.core.i18n.LabelKey;
@@ -27,18 +32,32 @@ import uk.q3c.krail.core.option.VaadinOptionContext;
 import uk.q3c.krail.core.push.Broadcaster;
 import uk.q3c.krail.core.push.PushMessageRouter;
 import uk.q3c.krail.core.user.notify.VaadinNotification;
-import uk.q3c.krail.core.view.component.*;
+import uk.q3c.krail.core.view.component.ApplicationHeader;
+import uk.q3c.krail.core.view.component.ApplicationLogo;
+import uk.q3c.krail.core.view.component.Breadcrumb;
+import uk.q3c.krail.core.view.component.LocaleSelector;
+import uk.q3c.krail.core.view.component.MessageBar;
+import uk.q3c.krail.core.view.component.SubPagePanel;
+import uk.q3c.krail.core.view.component.UserNavigationMenu;
+import uk.q3c.krail.core.view.component.UserNavigationTree;
+import uk.q3c.krail.core.view.component.UserStatusPanel;
+import uk.q3c.krail.eventbus.GlobalMessageBus;
+import uk.q3c.krail.eventbus.SubscribeTo;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.krail.option.Option;
+import uk.q3c.krail.option.OptionChangeMessage;
 import uk.q3c.krail.option.OptionKey;
+
+import java.util.Locale;
 
 /**
  * A common layout for a business-type application. This is a good place to start even if you replace it eventually.
  *
  * @author David Sowerby
  */
-
+@Listener
+@SubscribeTo(GlobalMessageBus.class)
 public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContext {
 
     protected static final OptionKey<Boolean> optionBreadcrumbVisible = new OptionKey<>(Boolean.TRUE, DefaultApplicationUI.class, LabelKey
@@ -74,11 +93,17 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
     private Option option;
     private HorizontalSplitPanel splitPanel;
 
+    public ComboBox<Locale> getLocaleCombo() {
+        return localeCombo;
+    }
+
+    private ComboBox<Locale> localeCombo;
+
     @SuppressFBWarnings("FCBL_FIELD_COULD_BE_LOCAL")
     @Inject
-    protected DefaultApplicationUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory, ApplicationLogo logo, ApplicationHeader
+    protected DefaultApplicationUI(Navigator navigator, ErrorHandler errorHandler, ApplicationLogo logo, ApplicationHeader
             header, UserStatusPanel userStatusPanel, UserNavigationMenu menu, UserNavigationTree navTree, Breadcrumb breadcrumb, SubPagePanel subpage, MessageBar messageBar, Broadcaster broadcaster, PushMessageRouter pushMessageRouter, ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale, I18NProcessor translator, LocaleSelector localeSelector, VaadinNotification vaadinNotification, Option option) {
-        super(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
+        super(navigator, errorHandler, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
         this.navTree = navTree;
         this.breadcrumb = breadcrumb;
         this.userStatus = userStatusPanel;
@@ -93,12 +118,16 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
     }
 
     @Override
-    protected AbstractOrderedLayout screenLayout() {
+    public AbstractOrderedLayout screenLayout() {
         buildPage();
         return baseLayout;
     }
 
     protected void buildPage() {
+        localeCombo = new ComboBox<>();
+        localeCombo.setEmptySelectionAllowed(false);
+        localeCombo.setWidth(250 + "px");
+        localeSelector.setCombo(localeCombo);
         headerRow();
         messageBar();
         subPagePanel();
@@ -127,7 +156,7 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
     }
 
     protected void headerRow() {
-        headerRow = new HorizontalLayout(header, localeSelector.getComponent(), userStatus);
+        headerRow = new HorizontalLayout(header, localeCombo, userStatus);
         headerRow.setWidth("100%");
         headerRow.setExpandRatio(header, 1f);
 
@@ -168,8 +197,6 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
         if (option.get(optionNavTreeVisible)) {
             navTree.build();
             navTree.setVisible(true);
-            navTree.getTree()
-                   .setImmediate(true);
         } else {
             navTree.setVisible(false);
         }
@@ -179,8 +206,7 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
         if (option.get(optionMenuVisible)) {
             menu.build();
             menu.setVisible(true);
-            menu.getMenuBar()
-                .setImmediate(true);
+            menu.getMenuBar();
         } else {
             menu.setVisible(false);
         }
@@ -275,15 +301,14 @@ public class DefaultApplicationUI extends ScopedUI implements VaadinOptionContex
         return option;
     }
 
-    @Override
-    public void optionValueChanged(Property.ValueChangeEvent event) {
-        //this causes random elements to disappear - better to need manual browser refresh for now
-        //        super.doLayout();
-        this.markAsDirtyRecursive();
-
+    @Handler
+    public void optionValueChanged(OptionChangeMessage<?> msg) {
+        if (msg.getOptionKey().getContext().equals(this.getClass())) {
+            //this causes random elements to disappear - better to need manual browser refresh for now
+            //        super.doLayout();
+            this.markAsDirtyRecursive();
+        }
     }
-
-
 
 
 }

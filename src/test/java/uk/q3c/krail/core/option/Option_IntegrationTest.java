@@ -31,19 +31,27 @@ import uk.q3c.krail.core.option.hierarchy.SimpleUserHierarchy;
 import uk.q3c.krail.core.shiro.SubjectIdentifier;
 import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.core.view.component.LocaleContainer;
+import uk.q3c.krail.core.view.component.LocaleContainerKt;
+import uk.q3c.krail.core.view.component.LocaleIconGenerator;
+import uk.q3c.krail.eventbus.MessageBus;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.krail.i18n.persist.I18NPersistenceHelper;
 import uk.q3c.krail.option.OptionKey;
 import uk.q3c.krail.option.OptionPermissionVerifier;
 import uk.q3c.krail.option.RankOption;
 import uk.q3c.krail.option.UserHierarchy;
+import uk.q3c.krail.option.mock.TestOptionModule;
 import uk.q3c.krail.option.option.DefaultOption;
-import uk.q3c.krail.option.persist.*;
+import uk.q3c.krail.option.persist.ActiveOptionSourceDefault;
+import uk.q3c.krail.option.persist.OptionCacheKey;
+import uk.q3c.krail.option.persist.OptionDao;
+import uk.q3c.krail.option.persist.OptionDaoDelegate;
+import uk.q3c.krail.option.persist.OptionDaoProviders;
+import uk.q3c.krail.option.persist.OptionSource;
 import uk.q3c.krail.option.persist.cache.DefaultOptionCache;
 import uk.q3c.krail.option.persist.cache.DefaultOptionCacheLoader;
 import uk.q3c.krail.option.persist.cache.DefaultOptionCacheProvider;
 import uk.q3c.krail.option.persist.source.DefaultOptionSource;
-import uk.q3c.krail.option.test.TestOptionModule;
 import uk.q3c.krail.persist.InMemory;
 import uk.q3c.krail.persist.PersistenceInfo;
 import uk.q3c.krail.persist.inmemory.InMemoryOptionStore;
@@ -57,9 +65,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Running this test through the debugger sometimes causes random failures - running normally doesn't
@@ -93,8 +101,8 @@ public class Option_IntegrationTest {
     Subject subject2;
     @Mock
     Translate translate;
-    OptionKey<Integer> key1 = LocaleContainer.optionKeyFlagSize;
-    OptionKey<Integer> key3 = new OptionKey<>(133, LocaleContainer.class, LabelKey.Alphabetic_Ascending);
+    OptionKey<Integer> key1 = LocaleContainerKt.getOptionKeyFlagSize();
+    OptionKey<Integer> key3 = new OptionKey<>(133, LocaleIconGenerator.class, LabelKey.Alphabetic_Ascending);
     @Mock
     PersistenceInfo persistenceInfo;
     OptionPermissionVerifier permissionVerifier;
@@ -104,6 +112,9 @@ public class Option_IntegrationTest {
 
     @Mock
     private SubjectIdentifier subjectIdentifier;
+
+    @Mock
+    MessageBus globalBus;
 
     @Before
     public void setup() {
@@ -117,7 +128,7 @@ public class Option_IntegrationTest {
 
         cacheLoader = new DefaultOptionCacheLoader(optionDao);
         optionCache = new DefaultOptionCache(optionDao, cacheProvider);
-        option = new DefaultOption(optionCache, hierarchy, permissionVerifier);
+        option = new DefaultOption(optionCache, hierarchy, permissionVerifier, globalBus);
     }
 
 
@@ -193,7 +204,7 @@ public class Option_IntegrationTest {
         when(subjectProvider.get()).thenReturn(subject1);
         when(subject1.isAuthenticated()).thenReturn(true);
         when(subjectIdentifier.userId()).thenReturn("fbaton");
-        DefaultOption option2 = new DefaultOption(optionCache, hierarchy, permissionVerifier);
+        DefaultOption option2 = new DefaultOption(optionCache, hierarchy, permissionVerifier, globalBus);
         //when
         option2.set(key1, 3);
         Integer actual = option2.get(key1);
@@ -216,7 +227,7 @@ public class Option_IntegrationTest {
      */
     @SuppressWarnings("unchecked")
     @Test
-    public void write_to_Cache_invalidate() {
+    public void write_to_Cache_invalidate() throws InterruptedException {
         //given
         when(subjectProvider.get()).thenReturn(subject1);
         when(subject1.isAuthenticated()).thenReturn(true);
@@ -233,6 +244,7 @@ public class Option_IntegrationTest {
         Optional<Integer> actualHigh = (Optional<Integer>) optionCache.getIfPresent(highestKey);
         Optional<Integer> actualLow = (Optional<Integer>) optionCache.getIfPresent(lowestKey);
         //then
+        Thread.sleep(500);
         assertThat(actualHigh).isNotEqualTo(Optional.empty());
         assertThat(actualLow).isNotEqualTo(Optional.empty());
         assertThat(actualHigh.get()).isEqualTo(236);
@@ -246,8 +258,8 @@ public class Option_IntegrationTest {
         Optional<Integer> actualSpecific = (Optional<Integer>) optionCache.getIfPresent(specificKey);
         //then highest and lowest invalidated
         assertThat(actualSpecific).isEqualTo(Optional.of(44));
-        assertThat(actualHigh).isNull();
-        assertThat(actualLow).isNull();
+        assertThat(actualHigh).isNotPresent();
+        assertThat(actualLow).isNotPresent();
 
     }
 

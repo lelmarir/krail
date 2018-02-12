@@ -15,7 +15,7 @@ package uk.q3c.krail.core.i18n;
 import com.vaadin.ui.Label;
 
 public class TestCompositeNonComponent {
-    @Value(value = LabelKey.Cancel)
+    @Caption(caption = LabelKey.Cancel, description = DescriptionKey.Confirm_Ok)
     private final Label label = new Label();
 
     public Label getLabel() {

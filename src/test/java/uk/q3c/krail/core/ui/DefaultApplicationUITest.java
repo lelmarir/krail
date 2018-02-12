@@ -16,9 +16,7 @@ package uk.q3c.krail.core.ui;
 import com.google.inject.Inject;
 import com.mycila.testing.junit.MycilaJunitRunner;
 import com.mycila.testing.plugin.guice.GuiceContext;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Tree;
 import org.junit.Before;
@@ -30,20 +28,30 @@ import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.push.DefaultBroadcaster;
 import uk.q3c.krail.core.push.DefaultPushMessageRouter;
 import uk.q3c.krail.core.user.notify.VaadinNotification;
-import uk.q3c.krail.core.view.component.*;
+import uk.q3c.krail.core.view.component.ApplicationHeader;
+import uk.q3c.krail.core.view.component.ApplicationLogo;
+import uk.q3c.krail.core.view.component.Breadcrumb;
+import uk.q3c.krail.core.view.component.LocaleSelector;
+import uk.q3c.krail.core.view.component.MessageBar;
+import uk.q3c.krail.core.view.component.SubPagePanel;
+import uk.q3c.krail.core.view.component.UserNavigationMenu;
+import uk.q3c.krail.core.view.component.UserNavigationTree;
+import uk.q3c.krail.core.view.component.UserStatusPanel;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.Translate;
 import uk.q3c.krail.option.Option;
-import uk.q3c.krail.option.test.TestOptionModule;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.testutil.guice.vsscope.TestVaadinSessionScopeModule;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
 import uk.q3c.util.UtilModule;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({TestOptionModule.class, TestPersistenceModuleVaadin.class, TestVaadinSessionScopeModule.class, UtilModule.class})
+@GuiceContext({TestOptionModule.class, InMemoryModule.class, TestVaadinSessionScopeModule.class, UtilModule.class})
 public class DefaultApplicationUITest {
 
 
@@ -58,8 +66,7 @@ public class DefaultApplicationUITest {
     private Breadcrumb breadcrumb;
     @Mock
     private DefaultBroadcaster broadcaster;
-    @Mock
-    private ConverterFactory converterFactory;
+
     @Mock
     private CurrentLocale currentLocale;
     @Mock
@@ -95,10 +102,9 @@ public class DefaultApplicationUITest {
 
     @Before
     public void setup() {
-        when(localeSelector.getComponent()).thenReturn(new Label());
         when(navTree.getTree()).thenReturn(tree);
         when(menu.getMenuBar()).thenReturn(menuBar);
-        ui = new DefaultApplicationUI(navigator, errorHandler, converterFactory, logo, header, userStatusPanel, menu, navTree, breadcrumb, subpage, messageBar, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator, localeSelector, vaadinNotification, option);
+        ui = new DefaultApplicationUI(navigator, errorHandler, logo, header, userStatusPanel, menu, navTree, breadcrumb, subpage, messageBar, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator, localeSelector, vaadinNotification, option);
     }
 
     @Test
@@ -132,10 +138,11 @@ public class DefaultApplicationUITest {
         verify(breadcrumb).setVisible(false);
         verify(messageBar).setVisible(false);
         verify(subpage).setVisible(false);
+        verify(localeSelector).setCombo(anyObject());
     }
 
     @Test
-    public void getters() throws Exception {
+    public void getters() {
         //given
 
         //when

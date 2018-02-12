@@ -20,13 +20,14 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.themes.ChameleonTheme;
+import com.vaadin.ui.themes.ValoTheme;
 import net.engio.mbassy.bus.common.PubSubSupport;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Listener;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.q3c.krail.core.eventbus.SessionBus;
 import uk.q3c.krail.core.eventbus.SessionBusProvider;
 import uk.q3c.krail.core.i18n.LabelKey;
 import uk.q3c.krail.core.navigate.Navigator;
@@ -35,13 +36,11 @@ import uk.q3c.krail.core.shiro.SubjectIdentifier;
 import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.core.user.status.UserStatusBusMessage;
 import uk.q3c.krail.core.user.status.UserStatusChangeSource;
-import uk.q3c.krail.core.vaadin.ID;
 import uk.q3c.krail.eventbus.BusMessage;
+import uk.q3c.krail.eventbus.SubscribeTo;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.LocaleChangeBusMessage;
 import uk.q3c.krail.i18n.Translate;
-
-import java.util.Optional;
 
 /**
  * Represents the "logged in" status of the current {@link Subject}.
@@ -51,6 +50,8 @@ import java.util.Optional;
  */
 // TODO I18N
 @Listener
+@SubscribeTo(SessionBus.class)
+@AssignComponentId()
 public class DefaultUserStatusPanel extends Panel implements UserStatusPanel, ClickListener, UserStatusChangeSource {
     private static Logger log = LoggerFactory.getLogger(DefaultUserStatusPanel.class);
     private final Label usernameLabel;
@@ -74,17 +75,15 @@ public class DefaultUserStatusPanel extends Panel implements UserStatusPanel, Cl
         this.currentLocale = currentLocale;
         //        eventBus.subscribe(this);
         setSizeFull();
-        addStyleName(ChameleonTheme.PANEL_BORDERLESS);
+        addStyleName(ValoTheme.PANEL_BORDERLESS);
         usernameLabel = new Label();
         login_logout_Button = new Button();
         login_logout_Button.addClickListener(this);
-        login_logout_Button.setImmediate(true);
         HorizontalLayout hl = new HorizontalLayout();
         hl.setSpacing(true);
         hl.addComponent(usernameLabel);
         hl.addComponent(login_logout_Button);
         this.setContent(hl);
-        setIds();
         build();
 
     }
@@ -99,11 +98,6 @@ public class DefaultUserStatusPanel extends Panel implements UserStatusPanel, Cl
         usernameLabel.setValue(subjectIdentifier.subjectName());
     }
 
-    private void setIds() {
-        setId(ID.getId(Optional.empty(), this));
-        login_logout_Button.setId(ID.getId(Optional.empty(), this, login_logout_Button));
-        usernameLabel.setId(ID.getId(Optional.empty(), this, usernameLabel));
-    }
 
     /**
      * Responds to the {@code busMessage} by rebuilding the panel to reflect a change in user status.

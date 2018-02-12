@@ -13,6 +13,8 @@
 package uk.q3c.krail.core.view;
 
 import com.vaadin.ui.Button;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
 import uk.q3c.krail.core.user.status.UserStatusChangeSource;
 import uk.q3c.krail.i18n.I18NKey;
 
@@ -23,11 +25,26 @@ import uk.q3c.krail.i18n.I18NKey;
  */
 public interface LoginView extends KrailView, UserStatusChangeSource {
 
+    @Deprecated
+        // use username(username)
     void setUsername(String username);
 
+    @Deprecated
+        // use password(password)
     void setPassword(String password);
 
-    Button getSubmitButton();
+    default LoginView password(String password) {
+        getPassword().setValue(password);
+        return this;
+    }
+
+    default LoginView username(String username) {
+        getUsername().setValue(username);
+        return this;
+    }
+
+
+    Button getSubmit();
 
     /**
      * The message indicating login attempt pass or fail
@@ -40,4 +57,7 @@ public interface LoginView extends KrailView, UserStatusChangeSource {
 
     void setStatusMessage(String invalidLogin);
 
+    TextField getUsername();
+
+    PasswordField getPassword();
 }

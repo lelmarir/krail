@@ -23,8 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
+import uk.q3c.krail.core.i18n.TestKrailI18NModule2;
 import uk.q3c.krail.core.navigate.NavigationState;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.StrictURIFragmentHandler;
@@ -37,23 +38,23 @@ import uk.q3c.krail.core.shiro.DefaultShiroModule;
 import uk.q3c.krail.eventbus.BusMessage;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.LocaleChangeBusMessage;
-import uk.q3c.krail.i18n.util.TestKrailI18NModule2;
 import uk.q3c.krail.option.Option;
-import uk.q3c.krail.option.test.TestOptionModule;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.testutil.guice.uiscope.TestUIScopeModule;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
+import uk.q3c.krail.util.UtilsModule;
 import uk.q3c.util.UtilModule;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({TestKrailI18NModule2.class, DefaultShiroModule.class, TestOptionModule.class, TestPersistenceModuleVaadin.class, VaadinSessionScopeModule.class, EventBusModule.class,
-        TestUIScopeModule.class, UtilModule.class})
+@GuiceContext({TestKrailI18NModule2.class, DefaultShiroModule.class, TestOptionModule.class, InMemoryModule.class, VaadinSessionScopeModule.class, VaadinEventBusModule.class,
+        TestUIScopeModule.class, UtilModule.class, UtilsModule.class})
 public class DefaultSubPagePanelTest {
 
     DefaultSubPagePanel panel;
@@ -284,16 +285,6 @@ public class DefaultSubPagePanelTest {
         panel.afterViewChange(event);
         // then
         assertThat(panel.rebuildRequired).isFalse();
-    }
-
-    @Test
-    public void id() {
-        //given
-
-        //when
-
-        //then
-        assertThat(panel.getId()).isEqualTo("DefaultSubPagePanel");
     }
 
     @Test

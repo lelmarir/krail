@@ -15,15 +15,13 @@ package uk.q3c.krail.core.i18n;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 
 public class I18NTestClass {
     @Caption(caption = LabelKey.Ok, description = DescriptionKey.Confirm_Ok)
     private final Button buttonWithAnnotation;
     @Caption(caption = LabelKey.Ok, description = DescriptionKey.Confirm_Ok)
     private final Label label;
-    @Caption(caption = LabelKey.Ok, description = DescriptionKey.Confirm_Ok)
-    private final Table table;
     @Caption(caption = LabelKey.Yes, description = DescriptionKey.Please_log_in, locale = "de-DE")
     private final Label demoLabel;
     @Caption(caption = LabelKey.Field, description = DescriptionKey.Field)
@@ -38,10 +36,10 @@ public class I18NTestClass {
     @Caption(caption = LabelKey.Yes, locale = "de-DE", description = DescriptionKey.Field)
     private final Button specificLocale;
     @Value(value = LabelKey.Guest)
-    private final Label value;
+    private final TextField value;
     @Value(value = LabelKey.Yes, locale = "de-DE")
     @Description(description = DescriptionKey.Account_Already_In_Use)
-    private final Label valueLocale;
+    private final TextField valueLocale;
     private final Button buttonWithoutAnnotation;
     private final Integer integer;
     private double dubble;
@@ -59,24 +57,17 @@ public class I18NTestClass {
         label = new Label();
         demoLabel = new Label();
         integer = new Integer(5);
-        table = new Table();
-        setupTableColumns();
 
         cnc = new TestCompositeNonComponent();
         ccn = new TestCompositeComponentNested();
         ccs = new TestCompositeComponent();
         ccc = new TestCompositeComponent();
         specificLocale = new Button();
-        value = new Label();
-        valueLocale = new Label();
+        value = new TextField();
+        valueLocale = new TextField();
         grid = new Grid();
     }
 
-    private void setupTableColumns() {
-        table.addContainerProperty(LabelKey.Small, String.class, "numpty");
-        table.addContainerProperty(LabelKey.Cancel, String.class, "numpty");
-        table.addContainerProperty("not i18N", String.class, "numpty");
-    }
 
     public Button getButtonWithAnnotation() {
         return buttonWithAnnotation;
@@ -96,10 +87,6 @@ public class I18NTestClass {
 
     public Label getLabel() {
         return label;
-    }
-
-    public Table getTable() {
-        return table;
     }
 
     public TestCompositeNonComponent getCnc() {
@@ -127,12 +114,12 @@ public class I18NTestClass {
     }
 
 
-    public Label getValue() {
+    public TextField getValue() {
         return value;
     }
 
 
-    public Label getValueLocale() {
+    public TextField getValueLocale() {
         return valueLocale;
     }
 

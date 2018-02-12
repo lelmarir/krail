@@ -13,20 +13,23 @@
 
 package uk.q3c.krail.core.option
 
-import com.vaadin.data.Property
+import com.google.common.collect.ImmutableSet
 import com.vaadin.ui.*
 import spock.lang.Specification
 import uk.q3c.krail.core.i18n.LabelKey
 import uk.q3c.krail.core.ui.DataTypeToUI
 import uk.q3c.krail.core.ui.DefaultDataTypeToUI
+import uk.q3c.krail.core.vaadin.BaseConverterSet
+import uk.q3c.krail.core.vaadin.ConverterFactory
+import uk.q3c.krail.core.vaadin.DefaultConverterFactory
+import uk.q3c.krail.core.vaadin.DefaultOptionBinder
 import uk.q3c.krail.i18n.Translate
 import uk.q3c.krail.i18n.test.TestLabelKey
 import uk.q3c.krail.option.Option
 import uk.q3c.krail.option.OptionContext
 import uk.q3c.krail.option.OptionKey
+import uk.q3c.krail.option.mock.MockOption
 import uk.q3c.krail.option.option.OptionKeyLocator
-import uk.q3c.krail.option.test.MockOption
-
 /**
  * Created by David Sowerby on 07 Feb 2016
  */
@@ -36,7 +39,9 @@ class DefaultOptionPopupTest extends Specification {
     MockContext context1
     MockContext2 context2
     DataTypeToUI dataTypetoUi = new DefaultDataTypeToUI() {}
+    ConverterFactory converterFactory = new DefaultConverterFactory(ImmutableSet.of(new BaseConverterSet()))
     UI ui = Mock()
+    Option option = new MockOption()
 
     Translate translate = Mock()
     OptionContext context0
@@ -48,10 +53,13 @@ class DefaultOptionPopupTest extends Specification {
         translate.from(TestLabelKey.key2) >> 'key2'
         translate.from(TestLabelKey.Private_Static) >> 'Private Static'
         translate.from(TestLabelKey.Static) >> 'Static'
-        popup = new DefaultOptionPopup(dataTypetoUi, translate, new OptionKeyLocator())
+        popup = new DefaultOptionPopup(translate, new OptionKeyLocator(), new DefaultOptionBinder(option, converterFactory), dataTypetoUi)
         context0 = new MockContext0()
+        context0.setOption(option)
         context1 = new MockContext()
+        context1.setOption(option)
         context2 = new MockContext2()
+        context2.setOption(option)
         UI.setCurrent(ui)
 
     }
@@ -79,7 +87,6 @@ class DefaultOptionPopupTest extends Specification {
 
         then:
         popup.getWindow().getCaption().equals("Authorisation")
-        popup.getWindow().getId() != null
         popup.getWindow().isClosable()
         popup.getWindow().getContent() instanceof Panel
         Panel windowContent = (Panel) popup.getWindow().getContent()
@@ -113,9 +120,8 @@ class DefaultOptionPopupTest extends Specification {
         ((FormLayout) layout0).getComponent(0) instanceof TextField
         ((FormLayout) layout1).getComponent(0) instanceof Button
         TextField field = (TextField) ((FormLayout) layout0).getComponent(0)
-        field.getValue().equals("126")
         field.getCaption().equals("Private Static")
-        field.getId().equals("DefaultOptionPopup-TextField-Private_Static")
+        field.getValue().equals("126")
     }
 
     def "user changes value in UI component, option is updated"() {
@@ -125,7 +131,7 @@ class DefaultOptionPopupTest extends Specification {
         then:
         AbstractField field = getField(popup, 0)
         field.setValue("333")
-        context2.getOption().get(MockContext2.key4).equals('333') //MockOption does not convert data type correctly
+        context2.getOption().get(MockContext2.key4).equals(333)
     }
 
     def "reset to default button resets the option value"() {
@@ -136,7 +142,7 @@ class DefaultOptionPopupTest extends Specification {
         AbstractField field = getField(popup, 0)
         field.setValue("333")
         getResetButton(popup, 0).click()
-        context2.getOption().get(MockContext2.key4).equals('126') //MockOption does not convert data type correctly
+        context2.getOption().get(MockContext2.key4).equals(126)
     }
 
     def "reset to default button resets the option value, using a converted value"() {
@@ -192,10 +198,7 @@ class DefaultOptionPopupTest extends Specification {
             return option
         }
 
-        @Override
-        void optionValueChanged(Property.ValueChangeEvent event) {
 
-        }
     }
 
     static class MockContext2 implements VaadinOptionContext {
@@ -214,10 +217,7 @@ class DefaultOptionPopupTest extends Specification {
             return option
         }
 
-        @Override
-        void optionValueChanged(Property.ValueChangeEvent event) {
 
-        }
     }
 
     static class MockContext0 implements VaadinOptionContext {
@@ -230,9 +230,6 @@ class DefaultOptionPopupTest extends Specification {
             return option
         }
 
-        @Override
-        void optionValueChanged(Property.ValueChangeEvent event) {
 
-        }
     }
 }

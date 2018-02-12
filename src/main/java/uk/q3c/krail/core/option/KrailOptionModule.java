@@ -15,6 +15,8 @@ package uk.q3c.krail.core.option;
 
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScoped;
 import uk.q3c.krail.core.option.hierarchy.SimpleUserHierarchy;
+import uk.q3c.krail.core.vaadin.DefaultOptionBinder;
+import uk.q3c.krail.core.vaadin.OptionBinder;
 import uk.q3c.krail.option.Option;
 import uk.q3c.krail.option.OptionPermissionVerifier;
 import uk.q3c.krail.option.UserHierarchy;
@@ -33,18 +35,18 @@ public class KrailOptionModule extends OptionModule {
     @Override
     protected void configure() {
         super.configure();
-        bindVaadinOptionSource();
         bindOptionPopup();
+        bindOptionBinder();
+    }
+
+    protected void bindOptionBinder() {
+        bind(OptionBinder.class).to(DefaultOptionBinder.class);
     }
 
     @Override
     protected void bindPermissionVerifier() {
         bind(OptionPermissionVerifier.class).to(KrailOptionPermissionVerifier.class);
 
-    }
-
-    protected void bindVaadinOptionSource() {
-        bind(VaadinOptionSource.class).to(DefaultVaadinOptionSource.class);
     }
 
 

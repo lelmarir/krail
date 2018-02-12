@@ -14,7 +14,6 @@ package uk.q3c.krail.core.ui;
 
 import com.mycila.testing.junit.MycilaJunitRunner;
 import com.mycila.testing.plugin.guice.GuiceContext;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ClientConnector;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.VaadinRequest;
@@ -52,8 +51,10 @@ import uk.q3c.util.testutil.LogMonitor;
 
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MycilaJunitRunner.class)
 @GuiceContext({})
@@ -66,8 +67,7 @@ public class ScopedUITest {
     Navigator navigator;
     @Mock
     ErrorHandler errorHandler;
-    @Mock
-    ConverterFactory converterFactory;
+
     @Mock
     Broadcaster broadcaster;
     PushMessageRouter pushMessageRouter;
@@ -109,7 +109,7 @@ public class ScopedUITest {
         logMonitor = new LogMonitor();
         logMonitor.addClassFilter(ScopedUI.class);
         uiKey = new UIKey(33);
-        ui = new BasicUI(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator,
+        ui = new BasicUI(navigator, errorHandler, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator,
                 option);
         ui.setInstanceKey(uiKey);
     }
@@ -176,7 +176,7 @@ public class ScopedUITest {
     }
 
     @Test
-    public void pageTitle() throws Exception {
+    public void pageTitle() {
         //given
         when(applicationTitle.getTitleKey()).thenReturn(LabelKey.Yes);
         when(translate.from(LabelKey.Yes)).thenReturn("Title");
@@ -192,7 +192,6 @@ public class ScopedUITest {
         // when
         ui.init(request);
         // then
-        verify(session).setConverterFactory(converterFactory);
         InOrder inOrder = inOrder(currentLocale, navigator, translator, navigator);
         //        inOrder.verify(currentLocale)
         //               .setLocale(Locale.FRANCE, false);
@@ -207,7 +206,7 @@ public class ScopedUITest {
     @Test(expected = ConfigurationException.class)
     public void init_with_viewDisplayPanel_parent_null() {
         // given
-        ui = new DuffUI(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
+        ui = new DuffUI(navigator, errorHandler, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
         prepAttach();
         // when
         ui.init(request);
@@ -244,7 +243,7 @@ public class ScopedUITest {
      * There is a much better functional test
      */
     @Test
-    public void receiveBroadcastMessage() throws Exception {
+    public void receiveBroadcastMessage() {
         //given
         prepAttach();
         ui.attach();
@@ -259,13 +258,13 @@ public class ScopedUITest {
 
 
     class DuffUI extends ScopedUI {
-        protected DuffUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory, Broadcaster broadcaster, PushMessageRouter
+        protected DuffUI(Navigator navigator, ErrorHandler errorHandler, Broadcaster broadcaster, PushMessageRouter
                 pushMessageRouter, ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale, I18NProcessor translator) {
-            super(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
+            super(navigator, errorHandler, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
         }
 
         @Override
-        protected AbstractOrderedLayout screenLayout() {
+        public AbstractOrderedLayout screenLayout() {
             return new VerticalLayout();
         }
 
@@ -274,7 +273,7 @@ public class ScopedUITest {
     public class ConnectorIdAnswer implements Answer<String> {
 
         @Override
-        public String answer(InvocationOnMock invocation) throws Throwable {
+        public String answer(InvocationOnMock invocation) {
             connectCount++;
             return Integer.toString(connectCount);
         }

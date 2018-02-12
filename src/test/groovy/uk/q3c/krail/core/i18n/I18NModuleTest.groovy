@@ -16,12 +16,11 @@ package uk.q3c.krail.core.i18n
 import com.google.inject.Module
 import com.google.inject.Provider
 import com.google.inject.TypeLiteral
-import uk.q3c.krail.core.eventbus.EventBusModule
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule
 import uk.q3c.krail.core.guice.GuiceModuleTestBase
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule
 import uk.q3c.krail.core.i18n.i18nModule.TestPatternSource
-import uk.q3c.krail.core.persist.inmemory.VaadinInMemoryModule
 import uk.q3c.krail.core.shiro.DefaultShiroModule
 import uk.q3c.krail.core.vaadin.DataModule
 import uk.q3c.krail.i18n.I18NKey
@@ -31,13 +30,13 @@ import uk.q3c.krail.i18n.bind.I18NModule
 import uk.q3c.krail.i18n.persist.*
 import uk.q3c.krail.i18n.persist.clazz.ClassPatternDao
 import uk.q3c.krail.i18n.persist.clazz.ClassPatternSource
-import uk.q3c.krail.option.test.TestOptionModule
+import uk.q3c.krail.option.mock.TestOptionModule
 import uk.q3c.krail.persist.InMemory
+import uk.q3c.krail.persist.inmemory.InMemoryModule
 import uk.q3c.krail.persist.inmemory.InMemoryPatternDao
 import uk.q3c.util.UtilModule
 
 import java.lang.annotation.Annotation
-
 /**
  * Unit tests for {@link KrailI18NModule}, and also its ancestor {@link I18NModule}
  *
@@ -221,8 +220,8 @@ class KrailI18NModuleTest extends GuiceModuleTestBase {
         modules.add(new UIScopeModule())
         modules.add(new DataModule())
         modules.add(new DefaultShiroModule())
-        modules.add(new VaadinInMemoryModule().providePatternDao())
-        modules.add(new EventBusModule())
+        modules.add(new InMemoryModule().providePatternDao())
+        modules.add(new VaadinEventBusModule())
         modules.add(new UtilModule())
 
         return modules

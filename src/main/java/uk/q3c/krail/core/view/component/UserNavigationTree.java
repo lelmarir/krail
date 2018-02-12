@@ -35,7 +35,7 @@ public interface UserNavigationTree extends Component, UserSitemapSorters {
      * Set the maximum level or depth of the tree you want to be visible. A value of <=0 is ignored. This value is
      * stored in {@link Option}, and the tree is rebuilt.
      *
-     * @param level
+     * @param maxDepth
      */
     void setOptionMaxDepth(int maxDepth);
 

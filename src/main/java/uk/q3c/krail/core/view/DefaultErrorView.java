@@ -60,7 +60,7 @@ public class DefaultErrorView extends ViewBase implements ErrorView {
         textArea = new TextArea();
         textArea.setSizeFull();
         textArea.setReadOnly(false);
-        textArea.setWordwrap(false);
+        textArea.setWordWrap(false);
         if (error != null) {
             String s = ExceptionUtils.getStackTrace(error) + ("\n\n");
             //add a couple of blank lines at the bottom to ensure visibility of the last line

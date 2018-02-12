@@ -13,7 +13,6 @@
 package uk.q3c.krail.core.ui;
 
 import com.vaadin.annotations.Push;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
@@ -41,12 +40,12 @@ import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.LocaleChangeBusMessage;
 import uk.q3c.krail.i18n.Translate;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The base class for all Krail UIs, it provides an essential part of the {@link UIScoped} mechanism. It also provides
  * support for Vaadin Server Push (but only if you annotate your sub-class with {@link Push}), by capturing broadcast
- * messages in {@link #processBroadcastMessage(String, String)} and passing them to the {@link PushMessageRouter}. For
+ * messages in {@link #processBroadcastMessage(String, String, UIKey, int)} and passing them to the {@link PushMessageRouter}. For
  * a
  * full description of the Krail server push implementation see: https://sites.google.com/site/q3cjava/server-push
  *
@@ -57,7 +56,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
     protected final CurrentLocale currentLocale;
     private final ErrorHandler errorHandler;
-    private final ConverterFactory converterFactory;
+    //    private final ConverterFactory converterFactory;
     private final PushMessageRouter pushMessageRouter;
     private final Navigator navigator;
     private final ApplicationTitle applicationTitle;
@@ -70,12 +69,12 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     private KrailView view;
     private Panel viewDisplayPanel;
 
-    protected ScopedUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory, Broadcaster broadcaster, PushMessageRouter
+    protected ScopedUI(Navigator navigator, ErrorHandler errorHandler, Broadcaster broadcaster, PushMessageRouter
             pushMessageRouter, ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale, I18NProcessor translator) {
         super();
         this.errorHandler = errorHandler;
         this.navigator = navigator;
-        this.converterFactory = converterFactory;
+//        this.converterFactory = converterFactory;
         this.broadcaster = broadcaster;
         this.pushMessageRouter = pushMessageRouter;
         this.applicationTitle = applicationTitle;
@@ -167,11 +166,11 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
     protected void init(VaadinRequest request) {
 
         VaadinSession session = getSession();
-        session.setConverterFactory(converterFactory);
+//        session.setConverterFactory(converterFactory);
 
         // page isn't available during injected construction, so we have to do this here
         Page page = getPage();
-        page.addUriFragmentChangedListener(navigator);
+        page.addPopStateListener(navigator);
 
 
         setErrorHandler(errorHandler);
@@ -234,7 +233,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, BroadcastL
      *
      * @return the layout in which views are placed
      */
-    protected abstract AbstractOrderedLayout screenLayout();
+    public abstract AbstractOrderedLayout screenLayout();
 
     @Override
     public void receiveBroadcast(final String group, final String message, UIKey sender, int messageId) {

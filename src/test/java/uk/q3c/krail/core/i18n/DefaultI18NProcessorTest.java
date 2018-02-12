@@ -19,27 +19,29 @@ import com.mycila.testing.plugin.guice.GuiceContext;
 import com.mycila.testing.plugin.guice.ModuleProvider;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.TextField;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
+import uk.q3c.krail.eventbus.mbassador.EventBusModule;
 import uk.q3c.krail.i18n.CurrentLocale;
-import uk.q3c.krail.i18n.util.TestKrailI18NModule;
-import uk.q3c.krail.option.test.MockOption;
-import uk.q3c.krail.option.test.TestOptionModule;
+import uk.q3c.krail.option.mock.MockOption;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.persist.inmemory.InMemoryOptionStore;
 import uk.q3c.krail.persist.inmemory.store.DefaultInMemoryOptionStore;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
+import uk.q3c.krail.util.UtilsModule;
 import uk.q3c.util.UtilModule;
 
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({TestKrailI18NModule.class, UtilModule.class, TestOptionModule.class, TestPersistenceModuleVaadin.class, EventBusModule.class, UIScopeModule.class, VaadinSessionScopeModule.class,})
+@GuiceContext({TestKrailI18NModule.class, EventBusModule.class, UtilModule.class, UtilsModule.class, TestOptionModule.class, InMemoryModule.class, VaadinEventBusModule.class, UIScopeModule.class, VaadinSessionScopeModule.class,})
 public class DefaultI18NProcessorTest {
 
     I18NTestClass testObject;
@@ -73,45 +75,32 @@ public class DefaultI18NProcessorTest {
         processor.translate(testObject);
         // then
         assertThat(testObject.getNewButton()
-                             .getCaption()).isEqualTo("Authentication");
+                .getCaption()).isEqualTo("Authentication");
 
         // no guarantee is made to which is returned when there are multiple overlapping annotations
         assertThat(testObject.getNewButton()
-                             .getDescription()).isIn("Please log in", "This account is already in use.  You must log out of that session before you can log " +
+                .getDescription()).isIn("Please log in", "This account is already in use.  You must log out of that session before you can log " +
                 "in again.");
         assertThat(testObject.getNewButton()
-                             .getLocale()).isEqualTo(Locale.UK);
+                .getLocale()).isEqualTo(Locale.UK);
 
 
         assertThat(testObject.getButtonWithAnnotation()
-                             .getCaption()).isEqualTo("Ok");
+                .getCaption()).isEqualTo("Ok");
         assertThat(testObject.getButtonWithAnnotation()
-                             .getDescription()).isEqualTo("Confirm this Value is Ok");
+                .getDescription()).isEqualTo("Confirm this Value is Ok");
         assertThat(testObject.getButtonWithAnnotation()
-                             .getLocale()).isEqualTo(Locale.UK);
+                .getLocale()).isEqualTo(Locale.UK);
 
         assertThat(testObject.getLabel()
-                             .getCaption()).isEqualTo("Ok");
+                .getCaption()).isEqualTo("Ok");
         assertThat(testObject.getLabel()
-                             .getDescription()).isEqualTo("Confirm this Value is Ok");
+                .getDescription()).isEqualTo("Confirm this Value is Ok");
         // assertThat(testObject.getLabel().getValue()).isEqualTo("Ok");
         assertThat(testObject.getLabel()
-                             .getLocale()).isEqualTo(Locale.UK);
+                .getLocale()).isEqualTo(Locale.UK);
 
-        assertThat(testObject.getTable()
-                             .getCaption()).isEqualTo("Ok");
-        assertThat(testObject.getTable()
-                             .getDescription()).isEqualTo("Confirm this Value is Ok");
-        assertThat(testObject.getTable()
-                             .getLocale()).isEqualTo(Locale.UK);
 
-        Object[] columns = testObject.getTable()
-                                     .getVisibleColumns();
-        assertThat(columns.length).isEqualTo(3);
-
-        String[] headers = testObject.getTable()
-                                     .getColumnHeaders();
-        assertThat(headers).isEqualTo(new String[]{"Small", "Cancel", "not i18N"});
 
         // class annotation overruled by field annotation
         TestCompositeComponent ccs = testObject.getCcs();
@@ -143,13 +132,21 @@ public class DefaultI18NProcessorTest {
         Button specificLocale = testObject.getSpecificLocale();
         assertThat(specificLocale.getCaption()).isEqualTo("Ja");
 
+    }
+
+    @Test
+    public void interpret_Value() {
+        // when
+        processor.translate(testObject);
+        // then
+
 
         // value
-        Label value = testObject.getValue();
+        TextField value = testObject.getValue();
         assertThat(value.getValue()).isEqualTo("Guest");
 
         // valueLocale
-        Label valueLocale = testObject.getValueLocale();
+        TextField valueLocale = testObject.getValueLocale();
         assertThat(valueLocale.getValue()).isEqualTo("Ja");
 
     }
@@ -181,20 +178,6 @@ public class DefaultI18NProcessorTest {
         assertThat(testObject.getButtonWithAnnotation()
                              .getLocale()).isEqualTo(Locale.GERMANY);
 
-        assertThat(testObject.getTable()
-                             .getCaption()).isEqualTo("OK");
-        assertThat(testObject.getTable()
-                             .getDescription()).isEqualTo(confirmValueOk);
-        assertThat(testObject.getButtonWithAnnotation()
-                             .getLocale()).isEqualTo(Locale.GERMANY);
-
-        Object[] columns = testObject.getTable()
-                                     .getVisibleColumns();
-        assertThat(columns.length).isEqualTo(3);
-
-        String[] headers = testObject.getTable()
-                                     .getColumnHeaders();
-        assertThat(headers).isEqualTo(new String[]{"Klein", "Stornieren", "not i18N"});
 
     }
 

@@ -15,7 +15,7 @@ package uk.q3c.krail.core.navigate;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.server.Page;
-import com.vaadin.server.Page.UriFragmentChangedEvent;
+import com.vaadin.ui.HasComponents;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.engio.mbassy.bus.common.PubSubSupport;
 import net.engio.mbassy.listener.Handler;
@@ -25,9 +25,17 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.q3c.krail.core.eventbus.SessionBus;
 import uk.q3c.krail.core.eventbus.UIBusProvider;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
-import uk.q3c.krail.core.navigate.sitemap.*;
+import uk.q3c.krail.core.navigate.sitemap.MasterSitemap;
+import uk.q3c.krail.core.navigate.sitemap.Sitemap;
+import uk.q3c.krail.core.navigate.sitemap.SitemapException;
+import uk.q3c.krail.core.navigate.sitemap.SitemapService;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
+import uk.q3c.krail.core.navigate.sitemap.UserSitemap;
+import uk.q3c.krail.core.navigate.sitemap.UserSitemapBuilder;
+import uk.q3c.krail.core.navigate.sitemap.UserSitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.set.MasterSitemapQueue;
 import uk.q3c.krail.core.shiro.PageAccessController;
 import uk.q3c.krail.core.shiro.SubjectProvider;
@@ -36,17 +44,20 @@ import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 import uk.q3c.krail.core.user.status.UserStatusBusMessage;
 import uk.q3c.krail.core.view.BeforeViewChangeBusMessage;
-import uk.q3c.krail.core.view.DefaultViewFactory;
 import uk.q3c.krail.core.view.ErrorView;
 import uk.q3c.krail.core.view.KrailView;
+import uk.q3c.krail.core.view.ViewFactory;
 import uk.q3c.krail.core.view.component.AfterViewChangeBusMessage;
+import uk.q3c.krail.core.view.component.ComponentIdGenerator;
 import uk.q3c.krail.core.view.component.ViewChangeBusMessage;
 import uk.q3c.krail.eventbus.BusMessage;
+import uk.q3c.krail.eventbus.SubscribeTo;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The navigator is at the heart of navigation process, and provides navigation for a number of data types (for
@@ -66,6 +77,7 @@ import static com.google.common.base.Preconditions.*;
  */
 @UIScoped
 @Listener
+@SubscribeTo(SessionBus.class)
 public class DefaultNavigator implements Navigator {
     private static Logger log = LoggerFactory.getLogger(DefaultNavigator.class);
 
@@ -73,7 +85,7 @@ public class DefaultNavigator implements Navigator {
     private final Provider<Subject> subjectProvider;
     private final PageAccessController pageAccessController;
     private final ScopedUIProvider uiProvider;
-    private final DefaultViewFactory viewFactory;
+    private final ViewFactory viewFactory;
     private final SitemapService sitemapService;
     private final UserSitemapBuilder userSitemapBuilder;
     private final LoginNavigationRule loginNavigationRule;
@@ -87,12 +99,13 @@ public class DefaultNavigator implements Navigator {
     private NavigationState previousNavigationState;
     private UserSitemap userSitemap;
     private ViewChangeRule viewChangeRule;
+    private ComponentIdGenerator idGenerator;
 
     @Inject
     public DefaultNavigator(URIFragmentHandler uriHandler, SitemapService sitemapService, SubjectProvider subjectProvider, PageAccessController
-            pageAccessController, ScopedUIProvider uiProvider, DefaultViewFactory viewFactory, UserSitemapBuilder userSitemapBuilder, LoginNavigationRule
+            pageAccessController, ScopedUIProvider uiProvider, ViewFactory viewFactory, UserSitemapBuilder userSitemapBuilder, LoginNavigationRule
                                     loginNavigationRule, LogoutNavigationRule logoutNavigationRule, UIBusProvider eventBusProvider, ViewChangeRule
-                                    viewChangeRule, InvalidURIHandler invalidURIHandler, MasterSitemapQueue masterSitemapQueue) {
+                                    viewChangeRule, InvalidURIHandler invalidURIHandler, MasterSitemapQueue masterSitemapQueue, ComponentIdGenerator idGenerator) {
         super();
         this.uriHandler = uriHandler;
         this.uiProvider = uiProvider;
@@ -111,6 +124,7 @@ public class DefaultNavigator implements Navigator {
         this.viewChangeRule = viewChangeRule;
 
 
+        this.idGenerator = idGenerator;
     }
 
     @SuppressFBWarnings("EXS_EXCEPTION_SOFTENING_NO_CHECKED")
@@ -131,10 +145,17 @@ public class DefaultNavigator implements Navigator {
         }
     }
 
-
+    /**
+     * Replaces uriFragmentChanged. This was required by Vaadin 8, as the {@link Page.PopStateEvent} returns the full uri as a String, whereas its predecessor returned only the fragment
+     *
+     * @param event
+     */
     @Override
-    public void uriFragmentChanged(UriFragmentChangedEvent event) {
-        navigateTo(event.getUriFragment());
+    public void uriChanged(Page.PopStateEvent event) {
+        log.debug("URI change received from Vaadin Page, with event.uri = {}", event.getUri());
+        URI uri = URI.create(event.getUri());
+        NavigationState navigationState = uriHandler.navigationState(uri);
+        navigateTo(navigationState);
     }
 
     /**
@@ -176,6 +197,7 @@ public class DefaultNavigator implements Navigator {
         }
         //makes sure the navigation state is up to date, removes the need to do this externally
         uriHandler.updateFragment(navigationState);
+        log.debug("Navigating to navigation state: {}", navigationState.getFragment());
 
         redirectIfNeeded(navigationState);
 
@@ -189,7 +211,7 @@ public class DefaultNavigator implements Navigator {
 
         // https://sites.google.com/site/q3cjava/sitemap#emptyURI
         if (navigationState.getVirtualPage()
-                           .isEmpty()) {
+                .isEmpty()) {
             navigationState.virtualPage(userSitemap.standardPageURI(StandardPageKey.Public_Home));
             uriHandler.updateFragment(navigationState);
         }
@@ -226,13 +248,14 @@ public class DefaultNavigator implements Navigator {
             Page page = ui.getPage();
             String fragment = navigationState.getFragment();
             if (!fragment
-                                .equals(page.getUriFragment())) {
+                    .equals(page.getUriFragment())) {
                 page.setUriFragment(fragment, false);
             }
             // now change the view
             KrailView view = viewFactory.get(node.getViewClass());
             AfterViewChangeBusMessage afterMessage = new AfterViewChangeBusMessage(beforeMessage);
             changeView(view, afterMessage);
+
             // and tell listeners its changed
             publishAfterViewChange(afterMessage);
         } else {
@@ -255,23 +278,32 @@ public class DefaultNavigator implements Navigator {
         // if no redirect found, do nothing
         if (!redirection.equals(page)) {
             navigationState.virtualPage(redirection)
-                           .update(uriHandler);
+                    .update(uriHandler);
         }
     }
 
     protected void changeView(KrailView view, ViewChangeBusMessage busMessage) {
         ScopedUI ui = uiProvider.get();
         log.debug("calling view.beforeBuild(event) for {}", view.getClass()
-                                                                .getName());
+                .getName());
         view.beforeBuild(busMessage);
         log.debug("calling view.buildView(event) {}", view.getClass()
-                                                          .getName());
+                .getName());
         view.buildView(busMessage);
         ui.changeView(view);
         log.debug("calling view.afterBuild(event) {}", view.getClass()
-                                                           .getName());
+                .getName());
+
+        generateAndApplyComponentIds(view);
+        generateAndApplyComponentIds(ui);
         view.afterBuild(new AfterViewChangeBusMessage(busMessage));
         currentView = view;
+        HasComponents g;
+    }
+
+    private void generateAndApplyComponentIds(Object containingObject) {
+        // TODO configuration should allow Ids to be switched off see https://github.com/davidsowerby/krail/issues/662
+        idGenerator.generateAndApply(containingObject);
     }
 
     /**
@@ -337,7 +369,7 @@ public class DefaultNavigator implements Navigator {
     @Override
     public void error(Throwable error) {
         log.debug("A {} Error has been thrown, reporting via the Error View", error.getClass()
-                                                                                   .getName());
+                .getName());
         NavigationState navigationState = uriHandler.navigationState("error");
         ViewChangeBusMessage viewChangeBusMessage = new ViewChangeBusMessage(previousNavigationState, navigationState);
         ErrorView view = viewFactory.get(ErrorView.class);

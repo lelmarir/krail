@@ -16,13 +16,16 @@ package uk.q3c.krail.core.validation
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.util.Modules
+import com.oracle.jrockit.jfr.InvalidValueException
 import org.apache.bval.guice.ValidationModule
+import spock.lang.Ignore
 import spock.lang.Specification
 import uk.q3c.krail.core.data.TestEntity2
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule
-import uk.q3c.krail.core.persist.inmemory.VaadinInMemoryModule
+import uk.q3c.krail.eventbus.mbassador.EventBusModule
 import uk.q3c.krail.i18n.test.TestI18NModule
-import uk.q3c.krail.option.test.TestOptionModule
+import uk.q3c.krail.option.mock.TestOptionModule
+import uk.q3c.krail.persist.inmemory.InMemoryModule
 import uk.q3c.krail.testutil.eventbus.TestEventBusModule
 import uk.q3c.krail.testutil.guice.uiscope.TestUIScopeModule
 import uk.q3c.util.UtilModule
@@ -32,14 +35,12 @@ import javax.validation.ConstraintViolationException
 import javax.validation.MessageInterpolator
 import javax.validation.ValidationException
 
-import static com.vaadin.data.Validator.*
-
 /**
  * Integration test for Apache BVal validation
  *
  * Created by David Sowerby on 19/07/15.
  */
-
+@Ignore("Reinstate when validation is re-introduced")
 class Validation_IntegrationTest extends Specification {
 
     Injector injector
@@ -48,13 +49,13 @@ class Validation_IntegrationTest extends Specification {
 
     TestEntity2 te1
 
-    BeanValidator beanValidator
+//    BeanValidator beanValidator
 
     def setup() {
-        injector = Guice.createInjector(new VaadinSessionScopeModule(), new UtilModule(), new TestUIScopeModule(), new TestOptionModule(), new TestEventBusModule(), new VaadinInMemoryModule(), new TestI18NModule(), Modules.override(new ValidationModule()).with(new KrailValidationModule()))
+        injector = Guice.createInjector(new VaadinSessionScopeModule(), new UtilModule(), new EventBusModule(), new TestUIScopeModule(), new TestOptionModule(), new TestEventBusModule(), new InMemoryModule(), new TestI18NModule(), Modules.override(new ValidationModule()).with(new KrailValidationModule()))
         interpolator = injector.getInstance(MessageInterpolator.class)
         te1 = new TestEntity2()
-        beanValidator = injector.getInstance(BeanValidator.class)
+//        beanValidator = injector.getInstance(BeanValidator.class)
     }
 
     def "validation fails, javax annotation with no custom message"() {

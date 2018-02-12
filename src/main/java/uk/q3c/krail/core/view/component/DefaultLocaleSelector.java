@@ -13,38 +13,50 @@
 package uk.q3c.krail.core.view.component;
 
 import com.google.inject.Inject;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.data.HasValue;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.q3c.krail.core.eventbus.SessionBus;
+import uk.q3c.krail.core.eventbus.UIBus;
 import uk.q3c.krail.core.i18n.Description;
 import uk.q3c.krail.core.i18n.DescriptionKey;
 import uk.q3c.krail.core.i18n.I18N;
 import uk.q3c.krail.core.i18n.MessageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
-import uk.q3c.krail.core.vaadin.ID;
+import uk.q3c.krail.eventbus.GlobalMessageBus;
+import uk.q3c.krail.eventbus.SubscribeTo;
 import uk.q3c.krail.i18n.CurrentLocale;
 import uk.q3c.krail.i18n.LocaleChangeBusMessage;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @I18N
 @Listener
-public class DefaultLocaleSelector implements LocaleSelector, ValueChangeListener {
+@SubscribeTo({UIBus.class, SessionBus.class, GlobalMessageBus.class})
+public class DefaultLocaleSelector implements LocaleSelector, HasValue.ValueChangeListener<Locale> {
     private static Logger log = LoggerFactory.getLogger(DefaultLocaleSelector.class);
     private final LocaleContainer container;
     private final CurrentLocale currentLocale;
     private final UserNotifier userNotifier;
+
+    public void setCombo(ComboBox<Locale> combo) {
+        this.combo = combo;
+    }
+
     @Description(description = DescriptionKey.Select_from_available_languages)
-    private ComboBox combo;
+    private ComboBox<Locale> combo;
+    private boolean loaded = false;
+
     private boolean fireListeners;
     private boolean inhibitMessage;
+
+
+    public boolean isLoaded() {
+        return loaded;
+    }
 
     @Inject
     protected DefaultLocaleSelector(CurrentLocale currentLocale, LocaleContainer container, UserNotifier userNotifier) {
@@ -52,29 +64,25 @@ public class DefaultLocaleSelector implements LocaleSelector, ValueChangeListene
         this.container = container;
         this.currentLocale = currentLocale;
         this.userNotifier = userNotifier;
-        buildUI();
     }
 
-    private void buildUI() {
-        combo = new ComboBox(null, container);
-        combo.setImmediate(true);
-        combo.setNullSelectionAllowed(false);
 
-        combo.setWidth(200 + "px");
-
-        combo.setId(ID.getId(Optional.empty(), this, combo));
-        combo.setContainerDataSource(container);
-
-        // Sets the combobox to show a certain property as the item caption
-        combo.setItemCaptionPropertyId(LocaleContainer.PropertyName.NAME);
-        combo.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-
-        // Sets the icon to use with the items
-        combo.setItemIconPropertyId(LocaleContainer.PropertyName.FLAG);
-        combo.setValue(currentLocale.getLocale()
-                                    .toLanguageTag());
+    /**
+     * We cannot set up the combo with data until the UI has finished building
+     *
+     * @param message not used
+     */
+    @Handler
+    public void afterViewChange(AfterViewChangeBusMessage message) {
+        log.debug("Received AfterViewChangeBusMessage, completing set up for Combo");
+        combo.setItemCaptionGenerator(container);
+        combo.setItemIconGenerator(container.getIconGenerator());
+        combo.setDataProvider(container.getDataProvider());
+        log.debug("Setting Locale selector to {}", currentLocale.getLocale());
+        combo.setValue(currentLocale.getLocale());
         combo.addValueChangeListener(this);
-
+        loaded = true;
+        log.debug("Combo set up complete");
     }
 
     @Handler
@@ -82,26 +90,36 @@ public class DefaultLocaleSelector implements LocaleSelector, ValueChangeListene
         if (busMessage.getChangeSource() == this) {
             log.debug("response to locale change is disabled");
         } else {
-            log.debug("responding in change to new locale of {}", busMessage.getNewLocale()
-                                                                            .getDisplayName());
+            log.debug("responding in change to new locale of {}", busMessage.getNewLocale().getDisplayName());
             inhibitMessage = true;
-            combo.setValue(busMessage.getNewLocale()
-                                     .toLanguageTag());
+            if (combo != null) {
+                combo.setValue(busMessage.getNewLocale());
+            } else {
+                log.warn("No combo has been set for this Locale selector");
+            }
+
             inhibitMessage = false;
 
         }
     }
 
-    @Override
-    public Component getComponent() {
-        return combo;
-    }
+
+
 
     /**
      * Sets {@link CurrentLocale#setLocale(Locale)} to new value.
      */
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public Locale selectedLocale() {
+        if (combo == null) {
+            return null;
+        }
+        return combo.getValue();
+    }
+
+
+    @Override
+    public void valueChange(HasValue.ValueChangeEvent<Locale> event) {
         if (!fireListeners) {
             Locale newLocale = selectedLocale();
             // only process change if locale has really changed
@@ -116,12 +134,4 @@ public class DefaultLocaleSelector implements LocaleSelector, ValueChangeListene
             log.debug("Initialising, combo value change ignored");
         }
     }
-
-    @Override
-    public Locale selectedLocale() {
-        String selectedId = (String) combo.getValue();
-        return Locale.forLanguageTag(selectedId);
-    }
-
-
 }

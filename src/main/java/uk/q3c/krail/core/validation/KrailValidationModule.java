@@ -15,15 +15,31 @@ package uk.q3c.krail.core.validation;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import org.apache.bval.constraints.Email;
 import org.apache.bval.constraints.NotEmpty;
 import org.apache.bval.guice.ValidationModule;
+import org.apache.bval.jsr303.ApacheValidatorFactory;
 import uk.q3c.krail.i18n.I18NKey;
 
 import javax.validation.MessageInterpolator;
-import javax.validation.constraints.*;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.lang.annotation.Annotation;
 
 /**
@@ -53,7 +69,7 @@ public class KrailValidationModule extends AbstractModule {
 
 
         bindMessageInterpolator();
-        bindBeanValidator();
+//        bindBeanValidator();
         substituteJavaxMessagesWithKrailKeys();
         define();
     }
@@ -99,12 +115,19 @@ public class KrailValidationModule extends AbstractModule {
 
     }
 
-    private void bindBeanValidator() {
-        bind(BeanValidator.class).to(DefaultBeanValidator.class);
+//    private void bindBeanValidator() {
+//        bind(BeanValidator.class).to(DefaultBeanValidator.class);
+//    }
+
+    protected void bindMessageInterpolator() {
+        bind(MessageInterpolator.class).to(KrailInterpolator.class);
     }
 
-    private void bindMessageInterpolator() {
-        bind(MessageInterpolator.class).to(KrailInterpolator.class);
+    @Provides
+    protected Validator validatorProvider(KrailInterpolator interpolator) {
+        ApacheValidatorFactory validatorFactory = (ApacheValidatorFactory) Validation.buildDefaultValidatorFactory();
+        validatorFactory.setMessageInterpolator(interpolator);
+        return validatorFactory.getValidator();
     }
 
 

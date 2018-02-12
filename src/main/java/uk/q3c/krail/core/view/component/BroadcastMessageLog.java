@@ -38,7 +38,6 @@ public class BroadcastMessageLog extends TextArea {
     protected BroadcastMessageLog(Translate translate) {
         super();
         setCaption(translate.from(LabelKey.Broadcast_Messages));
-        setImmediate(true);
     }
 
     @Handler

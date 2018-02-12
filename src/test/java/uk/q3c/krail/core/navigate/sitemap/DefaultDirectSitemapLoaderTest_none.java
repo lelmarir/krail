@@ -19,17 +19,18 @@ import com.mycila.testing.plugin.guice.GuiceContext;
 import com.mycila.testing.plugin.guice.ModuleProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.navigate.StrictURIFragmentHandler;
 import uk.q3c.krail.core.navigate.URIFragmentHandler;
+import uk.q3c.krail.eventbus.mbassador.EventBusModule;
 import uk.q3c.krail.i18n.test.TestI18NModule;
-import uk.q3c.krail.option.test.TestOptionModule;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.util.UtilModule;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * No pages to load but should not fail
@@ -38,8 +39,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({TestI18NModule.class, VaadinSessionScopeModule.class, TestOptionModule.class, TestPersistenceModuleVaadin.class, EventBusModule
-        .class, UIScopeModule.class, UtilModule.class})
+@GuiceContext({TestI18NModule.class, VaadinSessionScopeModule.class, TestOptionModule.class, InMemoryModule.class, VaadinEventBusModule
+        .class, EventBusModule.class, UIScopeModule.class, UtilModule.class})
 public class DefaultDirectSitemapLoaderTest_none {
 
     @Inject

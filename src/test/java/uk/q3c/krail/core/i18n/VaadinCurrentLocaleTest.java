@@ -14,6 +14,7 @@ package uk.q3c.krail.core.i18n;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.mycila.testing.junit.MycilaJunitRunner;
 import com.mycila.testing.plugin.guice.GuiceContext;
 import com.mycila.testing.plugin.guice.ModuleProvider;
@@ -25,8 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import uk.q3c.krail.core.eventbus.EventBusModule;
 import uk.q3c.krail.core.eventbus.SessionBusProvider;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.core.ui.BrowserProvider;
@@ -44,11 +45,11 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({EventBusModule.class, TestUIScopeModule.class, VaadinSessionScopeModule.class})
+@GuiceContext({VaadinEventBusModule.class, TestUIScopeModule.class, VaadinSessionScopeModule.class})
 @Listener
 public class VaadinCurrentLocaleTest {
 
@@ -79,6 +80,8 @@ public class VaadinCurrentLocaleTest {
     @Mock
     private BrowserProvider browserProvider;
     private Set<Locale> supportedLocales;
+    @Mock
+    Provider<Set<Locale>> supportedLocalesProvider;
 
 
     @Before
@@ -88,6 +91,7 @@ public class VaadinCurrentLocaleTest {
 
         when(browserProvider.get()).thenReturn(browser);
         when(subjectProvider.get()).thenReturn(subject);
+        when(supportedLocalesProvider.get()).thenReturn(supportedLocales);
         listenerFired = false;
         supportedLocales = new HashSet<>();
         supportedLocales.add(Locale.UK);

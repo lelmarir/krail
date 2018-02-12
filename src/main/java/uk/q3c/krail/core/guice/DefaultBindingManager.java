@@ -12,6 +12,7 @@
  */
 package uk.q3c.krail.core.guice;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -29,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.q3c.krail.config.bind.ApplicationConfigurationModule;
 import uk.q3c.krail.core.config.KrailApplicationConfigurationModule;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.threadscope.ThreadScopeModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
@@ -39,7 +40,6 @@ import uk.q3c.krail.core.navigate.sitemap.MasterSitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapModule;
 import uk.q3c.krail.core.navigate.sitemap.StandardPagesModule;
 import uk.q3c.krail.core.option.KrailOptionModule;
-import uk.q3c.krail.core.persist.inmemory.VaadinInMemoryModule;
 import uk.q3c.krail.core.push.PushModule;
 import uk.q3c.krail.core.shiro.DefaultShiroModule;
 import uk.q3c.krail.core.shiro.ShiroVaadinModule;
@@ -51,9 +51,11 @@ import uk.q3c.krail.core.vaadin.DataModule;
 import uk.q3c.krail.core.validation.KrailValidationModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.core.view.component.DefaultComponentModule;
+import uk.q3c.krail.eventbus.mbassador.EventBusModule;
 import uk.q3c.krail.i18n.bind.I18NModule;
 import uk.q3c.krail.option.bind.OptionModule;
 import uk.q3c.krail.persist.InMemory;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.service.ServiceModel;
 import uk.q3c.krail.service.bind.ServicesModule;
 import uk.q3c.krail.util.UtilsModule;
@@ -132,13 +134,13 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
         coreModules.add(uiModule());
         coreModules.add(i18NModule());
         coreModules.add(applicationConfigurationModule());
-        coreModules.add(new SitemapModule());
+        coreModules.add(sitemapModule());
 
         coreModules.add(new ThreadScopeModule());
         coreModules.add(new UIScopeModule());
         coreModules.add(new VaadinSessionScopeModule());
 
-        coreModules.add(new ServicesModule());
+        coreModules.add(servicesModule());
 
         coreModules.add(shiroModule());
         coreModules.add(shiroVaadinModule());
@@ -156,7 +158,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 
         coreModules.add(optionModule());
 
-        coreModules.add(eventBusModule());
+        coreModules.addAll(eventBusModules());
 
         coreModules.add(navigationModule());
 
@@ -173,9 +175,17 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
         return coreModules;
     }
 
+    protected Module servicesModule() {
+        return new ServicesModule();
+    }
+
+    protected Module sitemapModule() {
+        return new SitemapModule();
+    }
+
     protected void addUtilModules(List<Module> coreModules){
-        coreModules.add(new UtilsModule());
         coreModules.add(new UtilModule());
+        coreModules.add(new UtilsModule());
     }
 
     protected Module shiroAopModule() {
@@ -216,12 +226,12 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
     }
 
     /**
-     * Override this if you have provided your own {@link EventBusModule} implementation
+     * Override this if you have provided your own {@link VaadinEventBusModule} implementation
      *
-     * @return a new {@link EventBusModule} instance
+     * @return a new {@link VaadinEventBusModule} instance
      */
-    protected Module eventBusModule() {
-        return new EventBusModule();
+    protected List<Module> eventBusModules() {
+        return ImmutableList.of(new VaadinEventBusModule(), new EventBusModule());
     }
 
     /**
@@ -359,13 +369,13 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
     protected abstract void addAppModules(List<Module> modules);
 
     /**
-     * Add as many persistence related modules as needed.  These modules do not need to be separated, this just forms a convneient grouping for clarity
+     * Add as many persistence related modules as needed.  These modules do not need to be separated, this just forms a convenient grouping for clarity
      *
      * @param modules
      *         the list used to collect modules for injector creation
      */
     protected void addPersistenceModules(List<Module> modules) {
-        modules.add(new VaadinInMemoryModule().provideOptionDao()
+        modules.add(new InMemoryModule().provideOptionDao()
                                         .providePatternDao());
     }
 }

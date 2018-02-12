@@ -15,7 +15,6 @@ package uk.q3c.krail.core.ui;
 
 import com.google.inject.Inject;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.VerticalLayout;
@@ -32,14 +31,14 @@ import uk.q3c.krail.option.Option;
 public class BasicUI extends ScopedUI {
 
     @Inject
-    protected BasicUI(Navigator navigator, ErrorHandler errorHandler, ConverterFactory converterFactory,
+    protected BasicUI(Navigator navigator, ErrorHandler errorHandler,
                       Broadcaster broadcaster, PushMessageRouter pushMessageRouter, ApplicationTitle applicationTitle, Translate translate, CurrentLocale currentLocale, I18NProcessor translator, Option option) {
-        super(navigator, errorHandler, converterFactory, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
+        super(navigator, errorHandler, broadcaster, pushMessageRouter, applicationTitle, translate, currentLocale, translator);
 
     }
 
     @Override
-    protected AbstractOrderedLayout screenLayout() {
+    public AbstractOrderedLayout screenLayout() {
         return new VerticalLayout(getViewDisplayPanel());
     }
 

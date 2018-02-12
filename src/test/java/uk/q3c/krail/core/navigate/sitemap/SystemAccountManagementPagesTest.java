@@ -18,10 +18,11 @@ import com.mycila.testing.plugin.guice.GuiceContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.q3c.krail.core.config.KrailApplicationConfigurationModule;
-import uk.q3c.krail.core.eventbus.EventBusModule;
+import uk.q3c.krail.core.eventbus.VaadinEventBusModule;
 import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.i18n.LabelKey;
+import uk.q3c.krail.core.i18n.TestKrailI18NModule;
 import uk.q3c.krail.core.navigate.NavigationModule;
 import uk.q3c.krail.core.shiro.DefaultShiroModule;
 import uk.q3c.krail.core.shiro.ShiroVaadinModule;
@@ -30,22 +31,22 @@ import uk.q3c.krail.core.ui.DefaultUIModule;
 import uk.q3c.krail.core.user.UserModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.core.view.component.DefaultComponentModule;
-import uk.q3c.krail.i18n.bind.I18NModule;
-import uk.q3c.krail.option.test.TestOptionModule;
+import uk.q3c.krail.eventbus.mbassador.EventBusModule;
+import uk.q3c.krail.option.mock.TestOptionModule;
+import uk.q3c.krail.persist.inmemory.InMemoryModule;
 import uk.q3c.krail.service.bind.ServicesModule;
-import uk.q3c.krail.testutil.persist.TestPersistenceModuleVaadin;
 import uk.q3c.krail.util.UtilsModule;
 import uk.q3c.util.UtilModule;
 
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MycilaJunitRunner.class)
-@GuiceContext({ServicesModule.class, SystemAccountManagementPages.class, UIScopeModule.class, ViewModule.class, ShiroVaadinModule.class, I18NModule.class,
+@GuiceContext({ServicesModule.class, SystemAccountManagementPages.class, UIScopeModule.class, ViewModule.class, ShiroVaadinModule.class, TestKrailI18NModule.class,
         SitemapModule.class, UserModule.class, DataTypeModule.class, KrailApplicationConfigurationModule.class, DefaultShiroModule.class, DefaultComponentModule
-        .class, VaadinSessionScopeModule.class, NavigationModule.class, TestPersistenceModuleVaadin.class, TestOptionModule.class, EventBusModule.class,
-        DefaultUIModule.class, UtilsModule.class, UtilModule.class})
+        .class, VaadinSessionScopeModule.class, NavigationModule.class, InMemoryModule.class, TestOptionModule.class, VaadinEventBusModule.class,
+        DefaultUIModule.class, EventBusModule.class, UtilsModule.class, UtilModule.class})
 public class SystemAccountManagementPagesTest {
 
     @Inject
