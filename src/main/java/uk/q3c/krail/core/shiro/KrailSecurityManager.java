@@ -38,8 +38,10 @@ import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.subject.support.DelegatingSubject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,6 +171,12 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	public Subject getSubject() {
+		Subject subject = threadLocalSubject.get();
+		if (subject != null) {
+			LOGGER.debug("returning subject from ThreadLocalVariable: {}", subject);
+			return subject;
+		}
+		
 		HttpSession session = sessionProvider.get();
 		if (session != null) {
 			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session.getAttribute(SubjectSerializableWrapper.class.getName());
@@ -178,7 +186,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 				subjectWrapper = new SubjectSerializableWrapper(new Subject.Builder().buildSubject());
 				session.setAttribute(SubjectSerializableWrapper.class.getName(), subjectWrapper);
 			}
-			Subject subject = subjectWrapper.get();
+			subject = subjectWrapper.get();
 			
 			if (threadLocalSubject.get() != null) {
 				throw new IllegalStateException(
@@ -189,14 +197,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			return subject;
 		}
 		
-		Subject subject = threadLocalSubject.get();
-		if (subject != null) {
-			LOGGER.debug("no session present, returning subject from ThreadLocalVariable: {}", subject);
-			return subject;
-		}
-		
-		throw new IllegalStateException("No session and no threadLocal subject!");
-
+		throw new IllegalStateException("No threadLocal subject and no session!");
 	}
 
 	protected void setSubject(Subject subject) {
@@ -212,6 +213,11 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	// TODO:use @RunAs annotation instead
 	public void runAsSubject(Subject subject, Runnable runnable) {
+		if(LOGGER.isDebugEnabled()) {
+			if(this.threadLocalSubject.get() != null) {
+				LOGGER.warn("A use is already set in the thread local: you should not nest runAsSubject calls (or this is a bug)");
+			}
+		}
 		this.threadLocalSubject.set(subject);
 		MDC.put("subject", subject.toString());
 		try {
@@ -220,6 +226,30 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			MDC.remove("subject");
 			this.threadLocalSubject.set(null);
 		}
+	}
+	
+	private Subject systemSubject() {
+		SubjectContext context = new DefaultSubjectContext();
+		context.setAuthenticated(true);
+		context.setAuthenticationToken(null);
+		AuthenticationInfo info = new AuthenticationInfo() {
+
+			@Override
+			public PrincipalCollection getPrincipals() {
+				return new SimplePrincipalCollection("SYSTEM", "SYSTEM");
+			}
+
+			@Override
+			public Object getCredentials() {
+				return null;
+			}
+		};
+		context.setAuthenticationInfo(info);
+		return createSubject(context);
+	}
+	
+	public void runAsSystem(Runnable runnable) {
+		runAsSubject(systemSubject(), runnable);
 	}
 
 	/**
