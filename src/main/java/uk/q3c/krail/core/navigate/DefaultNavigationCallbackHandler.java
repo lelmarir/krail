@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -108,12 +109,13 @@ public class DefaultNavigationCallbackHandler implements
 					boolean parameterOptional = parameterAnnotation.optional();
 					boolean excludeCalculatedParameters = useCalculatedParameters == null
 							|| useCalculatedParameters == false;
-					Object parameterValue = parameters.get(parameterKey,
-							excludeCalculatedParameters);
-					
-					if (parameterValue != null) {
-						if (parametersTypes[i].isAssignableFrom(parameterValue
-								.getClass())) {
+
+					try {
+						Object parameterValue = parameters.get(parameterKey,
+								excludeCalculatedParameters);
+
+						if (parametersTypes[i]
+								.isAssignableFrom(parameterValue.getClass())) {
 							args[i] = parameterValue;
 						} else if (parameterValue.getClass().equals(
 								String.class)) {
@@ -139,7 +141,7 @@ public class DefaultNavigationCallbackHandler implements
 									+ parametersTypes[i] + ").");
 						}
 
-					} else {
+					} catch (NoSuchElementException e) {
 						// the required parameter is not present...
 						if(parameterOptional) {
 							//...but is optional, so the value can be null

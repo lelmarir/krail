@@ -11,6 +11,8 @@
 package uk.q3c.krail.core.navigate.sitemap;
 
 import java.io.Serializable;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public interface NavigationState extends Serializable {
 	
@@ -22,7 +24,7 @@ public interface NavigationState extends Serializable {
 		
 		Object put(String id, Object value);
 
-		String getAsString(String id);
+		String getAsString(String id) throws NoSuchElementException;
 
 		boolean contains(String id);
 		
