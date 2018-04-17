@@ -5,9 +5,6 @@
 /build/tmp
 /logs
 /bin
-/.gradle
-settings.gradle~
-build.gradle~
 .gitignore~
 /build
 /.settings
@@ -21,8 +18,7 @@ README.md~
 
 .idea/libraries/
 
-gradle
-/.idea
 /src/test
 /src/resources/test
 sh.exe.stackdump
+/target/

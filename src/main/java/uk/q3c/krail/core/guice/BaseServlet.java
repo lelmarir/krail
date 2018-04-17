@@ -42,5 +42,4 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 	public void sessionInit(SessionInitEvent event) throws ServiceException {
 		event.getSession().addUIProvider(uiProvider);
 	}
-
 }
