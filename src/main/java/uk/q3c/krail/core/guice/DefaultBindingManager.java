@@ -27,6 +27,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import uk.q3c.krail.core.guice.errors.ErrorModule;
 import uk.q3c.krail.core.guice.threadscope.ThreadScopeModule;
@@ -49,10 +50,14 @@ import com.google.inject.Module;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.netflix.governator.guice.LifecycleInjector;
+import com.netflix.governator.guice.LifecycleInjectorMode;
 
-public abstract class DefaultBindingManager extends GuiceServletContextListener {
+public abstract class DefaultBindingManager
+		extends GuiceServletContextListener {
 	protected static Injector injector;
-	private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
+	private static Logger log = LoggerFactory
+			.getLogger(DefaultBindingManager.class);
 
 	private ServiceManagerModule servicesModule;
 	private I18NModule i18NModule;
@@ -95,7 +100,21 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 	}
 
 	protected Injector createInjector() {
-		return Guice.createInjector(getModules());
+		bridgeJULToSLF4J();
+
+		return LifecycleInjector.builder()
+				.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
+				.withModules(getModules()).build().createInjector();
+	}
+
+	private void bridgeJULToSLF4J() {
+		// Optionally remove existing handlers attached to j.u.l root logger
+		SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
+
+		// add SLF4JBridgeHandler to j.u.l's root logger, should be done once
+		// during
+		// the initialization phase of your application
+		SLF4JBridgeHandler.install();
 	}
 
 	protected List<Module> getModules() {
@@ -124,7 +143,7 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 
 		coreModules.addAll(appModules);
 
-		//bind after appModules to allow other servlets
+		// bind after appModules to allow other servlets
 		coreModules.add(getServletModule());
 		return coreModules;
 	}
@@ -263,7 +282,8 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		super.contextInitialized(servletContextEvent);
-		ServiceManager servicesManager = getInjector().getInstance(ServiceManager.class);
+		ServiceManager servicesManager = getInjector()
+				.getInstance(ServiceManager.class);
 		if (servicesManager != null) {
 			servicesManager.startAsync();
 			servicesManager.awaitHealthy();
@@ -276,7 +296,8 @@ public abstract class DefaultBindingManager extends GuiceServletContextListener 
 		try {
 			Injector injector = getInjector(false);
 			if (injector != null) {
-				ServiceManager serviceManager = injector.getInstance(ServiceManager.class);
+				ServiceManager serviceManager = injector
+						.getInstance(ServiceManager.class);
 				serviceManager.stopAsync();
 				log.debug("Waiting for services to stop...");
 				serviceManager.awaitStopped(60, TimeUnit.SECONDS);

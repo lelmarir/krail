@@ -21,7 +21,6 @@ import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
-import uk.q3c.krail.i18n.DescriptionKey;
 
 import com.google.inject.Inject;
 
@@ -38,7 +37,8 @@ public class DefaultUnauthorizedExceptionHandler implements
 
 	protected void onUnauthorizedException(NavigationState targetNavigationState,
 			UnauthorizedException throwable) {
-		notifier.show(NotificationType.ERROR, DescriptionKey.No_Permission);
+		//FIXME: localizzare
+		notifier.show(NotificationType.ERROR, "No Permission");
 	}
 
 	@Override

@@ -25,64 +25,16 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 public class I18NModule extends AbstractModule {
 
-    private MapBinder<String, BundleReader> bundleReaders;
-    private MapBinder<String, Set<String>> bundleSourceOrder;
-    private Multibinder<String> bundleSourceOrderDefault;
-    private Multibinder<String> registeredAnnotations;
-    private Multibinder<String> registeredValueAnnotations;
     private Multibinder<Locale> supportedLocales;
 
     @Override
     protected void configure() {
-        registeredAnnotations = newSetBinder(binder(), String.class, I18N.class);
-        registeredValueAnnotations = newSetBinder(binder(), String.class, I18NValue.class);
         supportedLocales = newSetBinder(binder(), Locale.class, SupportedLocales.class);
-        bundleSourceOrderDefault = newSetBinder(binder(), String.class, BundleSourceOrderDefault.class);
-        bundleReaders = MapBinder.newMapBinder(binder(), String.class, BundleReader.class);
 
-        TypeLiteral<Set<String>> setString = new TypeLiteral<Set<String>>() {
-        };
-        TypeLiteral<String> keyClass = new TypeLiteral<String>() {
-        };
-
-        bundleSourceOrder = MapBinder.newMapBinder(binder(), keyClass, setString, BundleSourceOrder.class);
-
-        registerAnnotation(I18N.class);
-        registerAnnotation(I18NFlex.class);
-        registerValueAnnotation(I18NValue.class);
-        registerValueAnnotation(I18NValueFlex.class);
-
-        bindProcessor();
         bindCurrentLocale();
         bindDefaultLocale();
-        bindTranslate();
-        bindPatternSource();
-        bindPatternCacheLoader();
-        bindPatternUtility();
-
 
         define();
-    }
-
-    protected void bindPatternUtility() {
-        bind(PatternUtility.class).to(DefaultPatternUtility.class);
-    }
-
-    protected void bindPatternCacheLoader() {
-        bind(PatternCacheLoader.class).to(DefaultPatternCacheLoader.class);
-    }
-
-    /**
-     * It is generally advisable to use the same scope for this as for current locale (see {@link #bindCurrentLocale()}
-     */
-    protected void bindPatternSource() {
-        bind(PatternSource.class).to(DefaultPatternSource.class)
-                                 .in(VaadinSessionScoped.class);
-    }
-
-
-    protected void bindTranslate() {
-        bind(Translate.class).to(DefaultTranslate.class);
     }
 
     /**
@@ -114,46 +66,11 @@ public class I18NModule extends AbstractModule {
      */
     protected void define() {
         addSupportedLocale(Locale.UK);
-        addBundleReader("class", ClassBundleReader.class);
-        addBundleReader("properties", PropertiesFromClasspathBundleReader.class);
     }
-
 
     protected void addSupportedLocale(Locale locale) {
         supportedLocales.addBinding()
                         .toInstance(locale);
-    }
-
-
-    /**
-     * Adds a bundle reader, identified by {@code format}
-     *
-     * @param source
-     *         An arbitrary identifier for a reader implementation- no assumptions are made about the
-     *         meaning of the source identifier.
-     * @param implementationClass
-     *         the class of the BundleReader implementation you want to use for this source
-     */
-    protected void addBundleReader(String source, Class<? extends BundleReader> implementationClass) {
-        bundleReaders.addBinding(source)
-                     .to(implementationClass);
-    }
-
-    /**
-     * Override this method to provide your own implementation of {@link I18NProcessor}
-     */
-    protected void bindProcessor() {
-        bind(I18NProcessor.class).to(DefaultI18NProcessor.class);
-    }
-
-    protected <T extends Annotation> void registerAnnotation(Class<T> i18Nclass) {
-        registeredAnnotations.addBinding()
-                             .toInstance(i18Nclass.getName());
-    }
-
-    protected <T extends Annotation> void registerValueAnnotation(Class<T> i18Nclass) {
-        registeredValueAnnotations.addBinding()
-                                  .toInstance(i18Nclass.getName());
     }
 
     /**
@@ -173,54 +90,5 @@ public class I18NModule extends AbstractModule {
 
     protected void addSupportedLocale(String locale) {
         addSupportedLocale(Locale.forLanguageTag(locale));
-    }
-
-    /**
-     * This method overrides the order of processing sources when looking for a resource bundle.  If this method is not
-     * called, sources will be processed in the order they are added using {@link #addPatternSource(Integer, Class)}.
-     * <p>
-     * If you are using just a single module to define your {{@link BundleReader} implementations, there would normally
-     * be no need to use this method.
-     * <p>
-     * However, Guice does not guarantee order if multiple MapBinders are combined (through the use of multiple
-     * modules) - the order must then be explicitly specified using this method.
-     * <p>
-     * This order is used for ALL key classes, unless overridden by {{@link #setBundleSourceOrder(Class, String...)}},
-     * or by UserOption in {@link DefaultPatternSource}
-     * <p>
-     * See {@link EnumResourceBundleControl#getFormats(String)} for a full description of the logic of selecting the
-     * order.
-     * <p>
-     * If you have only one source - you definitely won't need this method
-     */
-
-    protected void setDefaultBundleSourceOrder(String... sources) {
-        for (String source : sources) {
-            bundleSourceOrderDefault.addBinding()
-                                    .toInstance(source);
-        }
-    }
-
-    /**
-     * {@link #setDefaultBundleSourceOrder(String...)} applies to all key classes, and is usually only needed when
-     * combining sources from different modules.
-     * <p>
-     * See {@link EnumResourceBundleControl#getFormats(String)} for a full description of the logic of selecting the
-     * order.
-     * <p>
-     * If you have only one source - you definitely won't need this method
-     *
-     * @param baseName
-     *         the ResourceBundle 'bundleName', for example "Labels"
-     * @param sources
-     *         a set of sources, (or 'formats' in resourceBundle terms).  These should be all, or a subset, of the
-     *         {@link
-     *         #bundleReaders} key set
-     */
-
-    protected void setBundleSourceOrder(String baseName, String... sources) {
-        Set<String> tagSet = new LinkedHashSet<>(Arrays.asList(sources));
-        bundleSourceOrder.addBinding(baseName)
-                         .toInstance(tagSet);
     }
 }

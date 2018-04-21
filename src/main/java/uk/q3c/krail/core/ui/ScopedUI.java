@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.annotations.Push;
-import com.vaadin.data.util.converter.ConverterFactory;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
@@ -38,10 +37,7 @@ import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
 import uk.q3c.krail.i18n.CurrentLocale;
-import uk.q3c.krail.i18n.I18NKey;
-import uk.q3c.krail.i18n.I18NProcessor;
 import uk.q3c.krail.i18n.LocaleChangeListener;
-import uk.q3c.krail.i18n.Translate;
 
 /**
  * The base class for all Krail UIs, it provides an essential part of the
@@ -62,11 +58,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	@Inject
 	private Provider<ErrorHandler> errorHandlerProvider;
 	@Inject
-	private Provider<ConverterFactory> converterFactoryProvider;
-	@Inject
 	private Provider<Navigator> navigatorProvider;
-	@Inject
-	private Provider<I18NProcessor> translatorProvider;
 	@Inject
 	private Provider<CurrentLocale> currentLocaleProvider;
 	
@@ -131,7 +123,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 		Component header = toView.getHeaderComponent();
 		Component content = toView.getRootComponent();
-		translatorProvider.get().translate(toView);
 		content.setSizeFull();
 		headerDisplayPanel.setContent(header);
 		viewDisplayPanel.setContent(content);
@@ -150,11 +141,8 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 */
 	@Override
 	protected void init(VaadinRequest request) {
-
-		
 		
 		VaadinSession session = getSession();
-		session.setConverterFactory(converterFactoryProvider.get());
 
 		Navigator navigator = navigatorProvider.get();
 		// page isn't available during injected construction, so we have to do
@@ -174,7 +162,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		currentLocale.addListener(this);
 
 		doLayout();
-		translatorProvider.get().translate(this);
 		// Navigate to the correct start point
 
 		String fragment = getPage().getUriFragment();
@@ -246,12 +233,10 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 */
 	@Override
 	public void localeChanged(Locale toLocale) {
-		I18NProcessor translator = translatorProvider.get();
-		translator.translate(this);
 		// during initial set up view has not been created but locale change
 		// gets called for other components
 		if (getView() != null) {
-			translator.translate(getView());
+			
 		}
 	}
 

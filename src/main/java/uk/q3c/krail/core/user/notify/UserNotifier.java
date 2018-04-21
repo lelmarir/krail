@@ -13,8 +13,6 @@
 package uk.q3c.krail.core.user.notify;
 
 import uk.q3c.krail.core.user.UserModule;
-import uk.q3c.krail.i18n.DescriptionKey;
-import uk.q3c.krail.i18n.MessageKey;
 
 /**
  * Provides a common entry point for all notifications to users.
@@ -37,8 +35,6 @@ public interface UserNotifier {
 		INFO
 	}
 
-	void show(NotificationType type, MessageKey description, Object ...arguments);
-
-	void show(NotificationType type, DescriptionKey description);
+	void show(NotificationType type, String description);
 
 }

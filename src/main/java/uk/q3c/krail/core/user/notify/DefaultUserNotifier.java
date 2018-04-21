@@ -14,10 +14,6 @@ package uk.q3c.krail.core.user.notify;
 
 import java.io.Serializable;
 
-import uk.q3c.krail.i18n.DescriptionKey;
-import uk.q3c.krail.i18n.MessageKey;
-import uk.q3c.krail.i18n.Translate;
-
 import com.google.inject.Inject;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
@@ -27,26 +23,14 @@ import com.vaadin.ui.UI;
 public class DefaultUserNotifier implements UserNotifier, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final Translate translate;
-
     @Inject
-	protected DefaultUserNotifier(Translate translate) {
-        this.translate = translate;
-
+	protected DefaultUserNotifier() {
+    	;
     }
 
     @Override
-	public void show(NotificationType type, MessageKey description,
-			Object... arguments) {
-		Notification n = new Notification(translate.from(
-				description, arguments), convertType(type));
-		show(n);
-    }
-
-    @Override
-	public void show(NotificationType type, DescriptionKey description) {
-		Notification n = new Notification(translate.from(
-				description), convertType(type));
+	public void show(NotificationType type, String description) {
+		Notification n = new Notification(description, convertType(type));
 		show(n);
         }
 

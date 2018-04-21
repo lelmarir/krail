@@ -11,15 +11,8 @@
 package uk.q3c.krail.core.ui;
 
 import com.google.inject.Inject;
-import com.vaadin.data.util.converter.ConverterFactory;
-import com.vaadin.server.ErrorHandler;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.VerticalLayout;
-import uk.q3c.krail.core.navigate.Navigator;
-import uk.q3c.krail.core.user.notify.UserNotifier;
-import uk.q3c.krail.i18n.CurrentLocale;
-import uk.q3c.krail.i18n.I18NProcessor;
-import uk.q3c.krail.i18n.Translate;
 
 /**
  * A common layout for a business-type application. This is a good place to

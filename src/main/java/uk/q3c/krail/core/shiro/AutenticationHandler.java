@@ -27,12 +27,7 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNoti
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
-import uk.q3c.krail.core.user.notify.UserNotifier;
-import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
-import uk.q3c.krail.i18n.DescriptionKey;
-
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.vaadin.server.VaadinSession;
 
 public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {

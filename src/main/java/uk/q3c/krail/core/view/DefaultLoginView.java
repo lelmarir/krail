@@ -18,7 +18,8 @@ import com.google.inject.Provider;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.themes.ChameleonTheme;
+import com.vaadin.ui.themes.ValoTheme;
+
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
 import uk.q3c.krail.core.shiro.LoginExceptionHandler;
@@ -30,32 +31,25 @@ import java.util.Optional;
 
 public class DefaultLoginView extends GridViewBase implements  ClickListener {
     private final Provider<Subject> subjectProvider;
-    private final Translate translate;
-    @I18N(caption = LabelKey.Log_In)
     private Panel centrePanel;
     private Label demoInfoLabel;
     private Label demoInfoLabel2;
-    @I18NValue(value = LabelKey.Authentication)
     private Label label;
-    @I18N(caption = LabelKey.Password)
     private PasswordField passwordBox;
     private Label statusMsgLabel;
-    @I18N(caption = LabelKey.Submit)
     private Button submitButton;
-    @I18N(caption = LabelKey.User_Name, description = DescriptionKey.Enter_your_user_name)
     private TextField usernameBox;
 
     @Inject
-	protected DefaultLoginView(SubjectProvider subjectProvider, Translate translate) {
+	protected DefaultLoginView(SubjectProvider subjectProvider) {
         super();
         this.subjectProvider = subjectProvider;
-        this.translate = translate;
 
 		getRootComponent().setColumns(3);
 		getRootComponent().setRows(3);
 		getRootComponent().setSizeFull();
         centrePanel = new Panel();
-        centrePanel.addStyleName(ChameleonTheme.PANEL_BUBBLE);
+        centrePanel.addStyleName(ValoTheme.PANEL_WELL);
         centrePanel.setSizeUndefined();
         VerticalLayout vl = new VerticalLayout();
         centrePanel.setContent(vl);
@@ -107,38 +101,31 @@ public class DefaultLoginView extends GridViewBase implements  ClickListener {
 		UsernamePasswordToken token = new UsernamePasswordToken(
 				usernameBox.getValue(), passwordBox.getValue());
 
+		//FIXME: localizazzione
         try {
 			Subject subject = subjectProvider.get();
 			subject.login(token);
         } catch (UnknownAccountException uae) {
-			setStatusMessage(DescriptionKey.Unknown_Account);
+			setStatusMessage("Unknown Account");
         } catch (IncorrectCredentialsException ice) {
-			setStatusMessage(DescriptionKey.Invalid_Login);
+			setStatusMessage("Invalid_Login");
         } catch (ExpiredCredentialsException ece) {
-			setStatusMessage(DescriptionKey.Account_Expired);
+			setStatusMessage("Account_Expired");
         } catch (LockedAccountException lae) {
-			setStatusMessage(DescriptionKey.Account_Locked);
+			setStatusMessage("Account_Locked");
         } catch (ExcessiveAttemptsException excess) {
-			setStatusMessage(DescriptionKey.Too_Many_Login_Attempts);
+			setStatusMessage("Too_Many_Login_Attempts");
         } catch (DisabledAccountException dae) {
-			setStatusMessage(DescriptionKey.Account_is_Disabled);
+			setStatusMessage("Account_is_Disabled");
         } catch (ConcurrentAccessException cae) {
-			setStatusMessage(DescriptionKey.Account_Already_In_Use);
+			setStatusMessage("Account_Already_In_Use");
         } catch (AuthenticationException ae) {
-			setStatusMessage(DescriptionKey.Generic_Authentication_Exception);
+			setStatusMessage("Generic_Authentication_Exception");
 		} finally {
 			submitButton.setEnabled(true);
         }
         // unexpected condition - error?
         // an exception would be raised if login failed
-    }
-
-	private void setStatusMessage(DescriptionKey messageKey) {
-		setStatusMessage(translate.from(messageKey));
-    }
-
-    public void setStatusMessage(I18NKey messageKey) {
-        setStatusMessage(translate.from(messageKey));
     }
 
     public void setStatusMessage(String msg) {

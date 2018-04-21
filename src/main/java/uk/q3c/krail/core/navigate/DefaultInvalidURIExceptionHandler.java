@@ -15,7 +15,6 @@ package uk.q3c.krail.core.navigate;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
-import uk.q3c.krail.i18n.MessageKey;
 
 import com.google.inject.Inject;
 
@@ -33,8 +32,8 @@ public class DefaultInvalidURIExceptionHandler implements
 	}
 
 	private void onInvalidUri(InvalidURIException error) {
-		notifier.show(NotificationType.ERROR, MessageKey.Invalid_URI,
-				error.getTargetURI());
+		//FIXME: localizzare
+		notifier.show(NotificationType.ERROR, "Invalid URI: '" + error.getTargetURI() + "'");
 		if (navigator.getCurrentNavigationState() != null) {
 			navigator.updateUriFragment();
 		} else {

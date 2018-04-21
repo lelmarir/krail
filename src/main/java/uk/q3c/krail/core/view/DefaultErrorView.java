@@ -33,8 +33,6 @@ import uk.q3c.krail.core.navigate.Parameter;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
-import uk.q3c.krail.i18n.MessageKey;
-import uk.q3c.krail.i18n.Translate;
 import uk.q3c.util.StackTraceUtil;
 
 /**
@@ -50,7 +48,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	private SitemapNode previousSitemapNode;
 
 	@Inject
-	protected DefaultErrorView(Navigator navigator, Translate translate) {
+	protected DefaultErrorView(Navigator navigator) {
 		super();
 		this.navigator = navigator;
 		CssLayout outerLayout = new CssLayout();
@@ -63,7 +61,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 				{
 					desriptionLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
 
-					Label description = new Label(translate.from(MessageKey.Something_went_wrong));
+					Label description = new Label("Something went wrong");
 					{
 						description.setSizeUndefined();
 						description.addStyleName(ValoTheme.LABEL_H1);
@@ -83,7 +81,8 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 					backButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
 					desriptionLayout.addComponent(backButton);
 					
-					Button moreButton = new Button(translate.from(MessageKey.show_more));
+					//FIXME: localizzare
+					Button moreButton = new Button("show more");
 					{
 						moreButton.addStyleName(ValoTheme.BUTTON_LINK);
 						moreButton.addClickListener(new ClickListener() {

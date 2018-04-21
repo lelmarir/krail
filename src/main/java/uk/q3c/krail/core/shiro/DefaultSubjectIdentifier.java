@@ -15,8 +15,6 @@ package uk.q3c.krail.core.shiro;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.apache.shiro.subject.Subject;
-import uk.q3c.krail.i18n.LabelKey;
-import uk.q3c.krail.i18n.Translate;
 
 /**
  * This default implementation assumes that the Subject's primary principal toString() method will return a username.
@@ -28,13 +26,11 @@ import uk.q3c.krail.i18n.Translate;
 public class DefaultSubjectIdentifier implements SubjectIdentifier {
 
     private final Provider<Subject> subjectProvider;
-    private final Translate translate;
 
     @Inject
-    public DefaultSubjectIdentifier(Provider<Subject> subjectProvider, Translate translate) {
+    public DefaultSubjectIdentifier(Provider<Subject> subjectProvider) {
         super();
         this.subjectProvider = subjectProvider;
-        this.translate = translate;
 
     }
 
@@ -54,7 +50,7 @@ public class DefaultSubjectIdentifier implements SubjectIdentifier {
         boolean authenticated = subject.isAuthenticated();
         boolean remembered = subject.isRemembered();
         String name = (authenticated) ? subject.getPrincipal()
-                                               .toString() : translate.from(LabelKey.Guest);
+                                               .toString() : "guest";
         name = (remembered) ? subject.getPrincipal()
                                      .toString() + "?" : name;
         return name;

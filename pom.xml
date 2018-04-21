@@ -19,6 +19,9 @@
 	</licenses>
 
 	<properties>
+		<vaadin.version>8.3.3</vaadin.version>
+		<vaadin.plugin.version>8.3.3</vaadin.plugin.version>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -45,6 +48,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
 			<version>4.1.0</version>
@@ -69,21 +77,15 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.9.4</version>
+			<groupId>com.netflix.governator</groupId>
+			<artifactId>governator</artifactId>
+			<version>1.14.2</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-samples</artifactId>
-			<version>2.0.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -99,33 +101,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
-			<version>1.10</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.10</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.bval</groupId>
-			<artifactId>bval-jsr303</artifactId>
-			<version>0.5</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.bval</groupId>
-			<artifactId>bval-guice</artifactId>
-			<version>0.5</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>1.0.0.GA</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -149,7 +127,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
-			<version>7.7.3</version>
+			<version>${vaadin.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -199,6 +177,16 @@
 			<artifactId>assertj-guava</artifactId>
 			<version>1.0.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.25</version>
 		</dependency>
 	</dependencies>
 

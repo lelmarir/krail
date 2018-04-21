@@ -12,13 +12,11 @@
  */
 package uk.q3c.krail.core.navigate.sitemap;
 
-import uk.q3c.krail.i18n.I18NKey;
-
 /**
  * @author David Sowerby 24 Mar 2013
  * @see StandardPageLabels
  */
-public enum StandardPageKey implements I18NKey {
+public enum StandardPageKey {
 	/**
 	 * The home page for non-authenticated users
 	 */
@@ -35,10 +33,4 @@ public enum StandardPageKey implements I18NKey {
 	 * the page to go to after logging out
 	 */
     Log_Out;
-
-
-    @Override
-    public String bundleName() {
-        return StandardPageLabels.class.getSimpleName();
-    }
 }

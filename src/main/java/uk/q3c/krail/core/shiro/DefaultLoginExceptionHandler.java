@@ -22,9 +22,6 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 
-import uk.q3c.krail.i18n.DescriptionKey;
-import uk.q3c.krail.i18n.Translate;
-
 import com.google.inject.Inject;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -32,73 +29,71 @@ import com.vaadin.ui.UI;
 
 public class DefaultLoginExceptionHandler implements LoginExceptionHandler {
 
-	private final Translate translate;
-
 	@Inject
-	protected DefaultLoginExceptionHandler(Translate translate) {
-		this.translate = translate;
+	protected DefaultLoginExceptionHandler() {
+		;//FIXME: localizzare
 	}
 
 	@Override
 	public void unknownAccount(AuthenticationToken token,
 			UnknownAccountException uae) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Unknown_Account, Type.WARNING_MESSAGE);
+		showNotification("Login Error",
+			"Unknown_Account", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void incorrectCredentials(AuthenticationToken token,
 			IncorrectCredentialsException ice) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Invalid_Login, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Invalid_Login", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void expiredCredentials(AuthenticationToken token,
 			ExpiredCredentialsException ece) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Account_Expired, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Account_Expired", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void accountLocked(AuthenticationToken token,
 			LockedAccountException lae) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Account_Locked, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Account_Locked", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void excessiveAttempts(AuthenticationToken token,
 			ExcessiveAttemptsException excess) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Too_Many_Login_Attempts, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Too_Many_Login_Attempts", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void concurrentAccess(AuthenticationToken token,
 			ConcurrentAccessException cae) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Account_Already_In_Use, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Account_Already_In_Use", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void disabledAccount(AuthenticationToken token,
 			DisabledAccountException dae) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Account_is_Disabled, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Account_is_Disabled", Type.WARNING_MESSAGE);
 	}
 
 	@Override
 	public void genericException(AuthenticationToken token,
 			AuthenticationException ae) {
-		showNotification(DescriptionKey.Login_Error_Caption,
-				DescriptionKey.Generic_Authentication_Exception, Type.WARNING_MESSAGE);
+		showNotification("Login_Error",
+				"Generic_Authentication_Exception", Type.WARNING_MESSAGE);
 	}
 
-	private void showNotification(DescriptionKey caption,
-			DescriptionKey description, Type type) {
-		Notification n = new Notification(translate.from(caption),
-				translate.from(description), type);
+	private void showNotification(String caption,
+			String description, Type type) {
+		Notification n = new Notification(caption,
+				description, type);
 		n.show(UI.getCurrent().getPage());
 	}
 
