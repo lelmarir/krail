@@ -27,6 +27,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 
@@ -65,7 +66,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	private final Panel headerDisplayPanel;
 	private final Panel viewDisplayPanel;
 	private UIKey instanceKey;
-	private AbstractOrderedLayout screenLayout;
+	private Component screenLayout;
 	private UIScope uiScope;
 	private KrailView view;
 
@@ -196,7 +197,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		if (screenLayout == null) {
 			screenLayout = screenLayout();
 		}
-		screenLayout.setSizeFull();
 		if (viewDisplayPanel.getParent() == null) {
 			String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
 					+ "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
@@ -217,7 +217,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 *
 	 * @return
 	 */
-	protected abstract AbstractOrderedLayout screenLayout();
+	protected abstract Layout screenLayout();
 
 	public Panel getHeaderDisplayPanel() {
 		return headerDisplayPanel;

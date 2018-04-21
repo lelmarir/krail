@@ -16,7 +16,7 @@ package uk.q3c.krail.core.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.VerticalLayout;
 
-public abstract class VerticalViewBase extends LayoutViewBase<VerticalLayout> {
+public abstract class VerticalViewBase extends AbstractOrderedView<VerticalLayout> {
     @Inject
     protected VerticalViewBase() {
         super(new VerticalLayout());

@@ -16,11 +16,11 @@ package uk.q3c.krail.core.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.HorizontalLayout;
 
-public abstract class HorizontalViewBase extends LayoutViewBase<HorizontalLayout> {
-    @Inject
-    protected HorizontalViewBase() {
-        super(new HorizontalLayout());
-    }
+public abstract class HorizontalViewBase
+		extends AbstractOrderedView<HorizontalLayout> {
+	@Inject
+	protected HorizontalViewBase() {
+		super(new HorizontalLayout());
+	}
 
 }
-

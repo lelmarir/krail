@@ -15,6 +15,7 @@ package uk.q3c.krail.core.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,13 @@ public abstract class ViewBase<R extends Component> implements KrailView {
     @Override
     public Component getHeaderComponent() {
     	return new Label(getViewName());
+    }
+    
+    public UI getUI() {
+    	if(!getRootComponent().isAttached()) {
+    		throw new IllegalStateException("can't get the UI before the component is attached");
+    	}
+    	return getRootComponent().getUI();
     }
 
 }
