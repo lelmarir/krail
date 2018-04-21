@@ -19,12 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContextEvent;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.guice.ShiroModule;
 import org.apache.shiro.guice.aop.ShiroAopModule;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.realm.Realm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -42,12 +38,9 @@ import uk.q3c.krail.core.user.opt.UserOptionModule;
 import uk.q3c.krail.core.view.ViewModule;
 import uk.q3c.krail.i18n.I18NModule;
 
-import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.netflix.governator.guice.LifecycleInjector;

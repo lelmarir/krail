@@ -4,6 +4,7 @@ import uk.q3c.krail.core.guice.errors.ErrorHandler;
 import uk.q3c.krail.core.guice.errors.KrailErrorHandler;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.DefaultInvalidURIExceptionHandler;
+import uk.q3c.krail.core.navigate.DefaultNavigationCallbackHandler;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
 import uk.q3c.krail.core.navigate.Navigator;
@@ -37,6 +38,8 @@ public abstract class KrailUIModule extends AbstractModule {
 
 	protected void bindNavigator() {
 		bind(Navigator.class).to(DefaultNavigator.class).in(UIScoped.class);
+		//TODO: cercare e iniettare dutti i field statici senza dover richidere esplicitamente
+		requestStaticInjection(DefaultNavigationCallbackHandler.class);
 	}
 
 	/**

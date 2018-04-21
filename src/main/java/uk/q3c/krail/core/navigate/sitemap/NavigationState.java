@@ -14,23 +14,13 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import uk.q3c.krail.core.navigate.parameters.Parameters;
+
 public interface NavigationState extends Serializable {
-	
-	public static interface Parameters {
 
-		Object get(String id);
-		
-		Object get(String id, boolean excludeCalculated);
-		
-		Object put(String id, Object value);
-
-		String getAsString(String id) throws NoSuchElementException;
-
-		boolean contains(String id);
-		
-	}
-	
 	String getFragment();
+
 	Parameters parameters();
+
 	SitemapNode getSitemapNode();
 }

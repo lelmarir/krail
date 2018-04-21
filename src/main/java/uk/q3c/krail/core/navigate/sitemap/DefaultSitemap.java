@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 
 import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.PageNotFoundException;
-import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
+import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
 import uk.q3c.krail.core.navigate.sitemap.impl.NavigationStateImpl;
 import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;

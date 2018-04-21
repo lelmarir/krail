@@ -2,9 +2,9 @@ package uk.q3c.krail.core.navigate.sitemap;
 
 import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.PageNotFoundException;
+import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.RedirectNode;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.ViewNode;
-import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
 import uk.q3c.krail.core.view.KrailView;
 
 public interface Sitemap {

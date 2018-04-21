@@ -1,6 +1,6 @@
 package uk.q3c.krail.core.navigate;
 
-import uk.q3c.krail.core.navigate.sitemap.NavigationState.Parameters;
+import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;
 import uk.q3c.krail.core.view.KrailView;
 
