@@ -14,6 +14,7 @@ package uk.q3c.krail.core.navigate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,7 +28,6 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
-import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 import uk.q3c.krail.core.view.DefaultViewFactory;
@@ -44,8 +44,12 @@ import uk.q3c.krail.core.view.ViewBuildException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.vaadin.navigator.PushStateNavigation;
+import com.vaadin.navigator.View;
 import com.vaadin.server.Page;
-import com.vaadin.server.Page.UriFragmentChangedEvent;
+import com.vaadin.server.Page.PopStateEvent;
+import com.vaadin.shared.Registration;
+import com.vaadin.ui.UI;
 
 /**
  * The navigator is at the heart of navigation process, and provides navigation
@@ -65,22 +69,207 @@ import com.vaadin.server.Page.UriFragmentChangedEvent;
  */
 public class DefaultNavigator implements Navigator {
 
-	private static final long serialVersionUID = -1199874611306964538L;
+	/**
+	 * A {@link NavigationStateManager} using hashbang fragments in the Page
+	 * location URI to track views and enable listening to view changes.
+	 * <p>
+	 * A hashbang URI is one where the optional fragment or "hash" part - the
+	 * part following a # sign - is used to encode navigation state in a web
+	 * application. The advantage of this is that the fragment can be
+	 * dynamically manipulated by javascript without causing page reloads.
+	 * <p>
+	 * This class is mostly for internal use by Navigator, and is only public
+	 * and static to enable testing.
+	 * <p>
+	 * <strong>Note:</strong> Since 8.2 you can use {@link PushStateManager},
+	 * which is based on HTML5 History API. To use it, add
+	 * {@link PushStateNavigation} annotation to the UI.
+	 */
+	public static class UriFragmentManager implements NavigationStateManager {
+		private final Page page;
+		private Navigator navigator;
+		private Registration uriFragmentRegistration;
+
+		/**
+		 * Creates a new URIFragmentManager and attach it to listen to URI
+		 * fragment changes of a {@link Page}.
+		 *
+		 * @param page
+		 *            page whose URI fragment to get and modify
+		 */
+		public UriFragmentManager(Page page) {
+			this.page = page;
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		public void setNavigator(Navigator navigator) {
+			if (this.navigator == null && navigator != null) {
+				uriFragmentRegistration = page.addUriFragmentChangedListener(
+						event -> navigator.navigateTo(getState()));
+			} else if (this.navigator != null && navigator == null) {
+				uriFragmentRegistration.remove();
+			}
+			this.navigator = navigator;
+		}
+
+		@Override
+		public String getState() {
+			String fragment = getFragment();
+			if (fragment == null || !fragment.startsWith("!")) {
+				return "";
+			} else {
+				return fragment.substring(1);
+			}
+		}
+
+		@Override
+		public void setState(String state) {
+			setFragment("!" + state);
+		}
+
+		/**
+		 * Returns the current URI fragment tracked by this UriFragentManager.
+		 *
+		 * @return The URI fragment.
+		 */
+		protected String getFragment() {
+			return page.getUriFragment();
+		}
+
+		/**
+		 * Sets the URI fragment to the given string.
+		 *
+		 * @param fragment
+		 *            The new URI fragment.
+		 */
+		protected void setFragment(String fragment) {
+			page.setUriFragment(fragment, false);
+		}
+	}
+
+	/**
+	 * A {@link NavigationStateManager} using path info, HTML5 push state and
+	 * {@link PopStateEvent}s to track views and enable listening to view
+	 * changes. This manager can be enabled with UI annotation
+	 * {@link PushStateNavigation}.
+	 * <p>
+	 * The part of path after UI's "root path" (UI's path without view
+	 * identifier) is used as {@link View}s identifier. The rest of the path
+	 * after the view name can be used by the developer for extra parameters for
+	 * the View.
+	 * <p>
+	 * This class is mostly for internal use by Navigator, and is only public
+	 * and static to enable testing.
+	 *
+	 * @since 8.2
+	 */
+	public static class PushStateManager implements NavigationStateManager {
+		private Registration popStateListenerRegistration;
+		private UI ui;
+
+		/**
+		 * Creates a new PushStateManager.
+		 *
+		 * @param ui
+		 *            the UI where the Navigator is attached to
+		 */
+		public PushStateManager(UI ui) {
+			this.ui = ui;
+		}
+
+		@Override
+		public void setNavigator(Navigator navigator) {
+			if (popStateListenerRegistration != null) {
+				popStateListenerRegistration.remove();
+				popStateListenerRegistration = null;
+			}
+			if (navigator != null) {
+				popStateListenerRegistration = ui.getPage().addPopStateListener(
+						event -> navigator.navigateTo(getState()));
+			}
+		}
+
+		@Override
+		public String getState() {
+			// Get the current URL
+			URI location = ui.getPage().getLocation();
+			String path = location.getPath();
+			if (ui.getUiPathInfo() != null
+					&& path.contains(ui.getUiPathInfo())) {
+				// Split the path from after the UI PathInfo
+				path = path.substring(path.indexOf(ui.getUiPathInfo())
+						+ ui.getUiPathInfo().length());
+			} else if (path.startsWith(ui.getUiRootPath())) {
+				// Use the whole path after UI RootPath
+				String uiRootPath = ui.getUiRootPath();
+				path = path.substring(uiRootPath.length());
+			} else {
+				throw new IllegalStateException(getClass().getSimpleName()
+						+ " is unable to determine the view path from the URL.");
+			}
+
+			if (path.startsWith("/")) {
+				// Strip leading '/'
+				path = path.substring(1);
+			}
+			return path;
+		}
+
+		@Override
+		public void setState(String state) {
+			StringBuilder sb = new StringBuilder(ui.getUiRootPath());
+			if (!ui.getUiRootPath().endsWith("/")) {
+				// make sure there is a '/' between the root path and the
+				// navigation state.
+				sb.append('/');
+			}
+			sb.append(state);
+			URI location = ui.getPage().getLocation();
+			if (location != null) {
+				ui.getPage().pushState(location.resolve(sb.toString()));
+			} else {
+				throw new IllegalStateException(
+						"The Page of the UI does not have a location.");
+			}
+		}
+	}
+
+	/**
+	 * Creates a navigation state manager for given UI. This method should take
+	 * into account any navigation related annotations.
+	 *
+	 * @param ui
+	 *            the ui
+	 * @return the navigation state manager
+	 *
+	 * @since 8.2
+	 */
+	protected static NavigationStateManager createNavigationStateManager(
+			UI ui) {
+		if (ui.getClass().getAnnotation(PushStateNavigation.class) != null) {
+			return new PushStateManager(ui);
+		}
+		// Fall back to old default
+		return new UriFragmentManager(ui.getPage());
+	}
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigator.class);
 
 	private final NavigationCallbackHandler callbackHandler = new DefaultNavigationCallbackHandler();
 
-	private final List<BeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<BeforeSecurityCheckListener>();
-	private final List<BeforeViewChangeListener> beforeViewChangeListeners = new LinkedList<BeforeViewChangeListener>();
-	private final List<AfterViewChangeListener> afterViewChangeListeners = new LinkedList<AfterViewChangeListener>();
+	private NavigationStateManager stateManager;
+
 	private final Provider<Subject> subjectProvider;
 	private final Sitemap sitemap;
 	private final ScopedUI ui;
 	private final DefaultViewFactory viewFactory;
 	private NavigationState currentNavigationState;
 	private NavigationState previousNavigationState;
+	private final List<BeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<BeforeSecurityCheckListener>();
+	private final List<BeforeViewChangeListener> beforeViewChangeListeners = new LinkedList<BeforeViewChangeListener>();
+	private final List<AfterViewChangeListener> afterViewChangeListeners = new LinkedList<AfterViewChangeListener>();
 
 	@Inject
 	public DefaultNavigator(Provider<Subject> subjectProvider, Sitemap sitemap,
@@ -91,12 +280,23 @@ public class DefaultNavigator implements Navigator {
 		this.subjectProvider = subjectProvider;
 		this.sitemap = sitemap;
 		this.viewFactory = viewFactory;
+
+		setStateManager(createNavigationStateManager(ui));
+		try {
+		navigateTo(stateManager.getState());
+		}catch(InvalidURIException e) {
+			//TODO: gestire le url errate in maniera piu "gentile", con una pagina 404 o simili piuttosto che un generico errore
+			navigateToErrorView(e);
+		}
 	}
 
-	@Override
-	public void uriFragmentChanged(UriFragmentChangedEvent event) {
-		String fragment = event.getUriFragment();
-		navigateTo(fragment != null ? fragment : "");
+	public void setStateManager(NavigationStateManager stateManager) {
+		checkNotNull(stateManager);
+		if (this.stateManager != null && stateManager != this.stateManager) {
+			this.stateManager.setNavigator(null);
+		}
+		this.stateManager = stateManager;
+		this.stateManager.setNavigator(this);
 	}
 
 	@Override
@@ -113,7 +313,7 @@ public class DefaultNavigator implements Navigator {
 	public void navigateTo(StandardPageKey pageKey) {
 		navigateTo(sitemap.buildNavigationStateFor(pageKey));
 	}
-	
+
 	@Override
 	public <T extends KrailView> void navigateTo(Class<T> viewClass) {
 		NavigationState ns = sitemap.buildNavigationState(viewClass);
@@ -121,16 +321,18 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public <T extends KrailView> void navigateTo(Class<T> viewClass, Parameters parameters) {
-		NavigationState ns = sitemap.buildNavigationState(viewClass, parameters);
+	public <T extends KrailView> void navigateTo(Class<T> viewClass,
+			Parameters parameters) {
+		NavigationState ns = sitemap.buildNavigationState(viewClass,
+				parameters);
 		navigateTo(ns);
 	}
-	
+
 	@Override
 	public void navigateTo(NavigationTarget target) {
 		navigateTo(target.getViewClass(), target.getParaeters());
 	}
-	
+
 	public void navigateTo(NavigationState navigationState)
 			throws AuthorizationException {
 		checkNotNull(navigationState);
@@ -154,7 +356,8 @@ public class DefaultNavigator implements Navigator {
 
 		fireBeforeSecurityCheck(cancellable);
 		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
+			LOGGER.debug(
+					"navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
 			return;
 		}
 
@@ -170,14 +373,15 @@ public class DefaultNavigator implements Navigator {
 		// if change is blocked revert to previous state
 		fireBeforeViewChange(cancellable);
 		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeViewChange");
+			LOGGER.debug(
+					"navigation canceled by a KrailViewChangeListener beforeViewChange");
 			return;
 		}
 
 		// notify Outbound navigation to current view
 		if (getCurrentView() != null) {
-			fireViewBeforeOutboundNavigationEvent(getCurrentView(),
-					cancellable, callbackHandler);
+			fireViewBeforeOutboundNavigationEvent(getCurrentView(), cancellable,
+					callbackHandler);
 			if (cancellable.isCancelled()) {
 				LOGGER.debug(
 						"navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation beforeOutboundNavigation",
@@ -191,7 +395,8 @@ public class DefaultNavigator implements Navigator {
 
 		// notify before Inbound navigation to target view
 
-		fireViewBeforeInboundNavigationEvent(view, cancellable, callbackHandler);
+		fireViewBeforeInboundNavigationEvent(view, cancellable,
+				callbackHandler);
 		if (cancellable.isCancelled()) {
 			LOGGER.debug(
 					"navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
@@ -213,7 +418,7 @@ public class DefaultNavigator implements Navigator {
 
 		// make sure the page uri is updated if necessary, but do not fire any
 		// change events as we have already responded to the change
-		updateUriFragment(navigationState, false);
+		updateUriFragment(navigationState);
 
 	}
 
@@ -274,7 +479,7 @@ public class DefaultNavigator implements Navigator {
 	 * 
 	 * @param event
 	 *            view change event (not null)
-	 * */
+	 */
 	private void fireBeforeSecurityCheck(KrailViewChangeEvent event) {
 		for (BeforeSecurityCheckListener l : beforeSecurityCheckListener) {
 			l.beforeSecurityCheck(event);
@@ -302,15 +507,15 @@ public class DefaultNavigator implements Navigator {
 	public void updateUriFragment() {
 		NavigationState navigationState = getCurrentNavigationState();
 		assert navigationState != null;
-		updateUriFragment(navigationState, false);
+		updateUriFragment(navigationState);
 	}
 
-	private void updateUriFragment(NavigationState targetNavigationState,
-			boolean fireEvents) {
+	private void updateUriFragment(NavigationState targetNavigationState) {
 		assert targetNavigationState != null;
 		Page page = ui.getPage();
-		if (!targetNavigationState.getFragment().equals(page.getUriFragment())) {
-			page.setUriFragment(targetNavigationState.getFragment(), fireEvents);
+		if (!targetNavigationState.getFragment()
+				.equals(page.getUriFragment())) {
+			stateManager.setState(targetNavigationState.getFragment());
 		}
 	}
 
@@ -339,18 +544,17 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateToErrorView(final Throwable error) {
-		LOGGER.debug(
-				"A {} Error has been thrown, reporting via the Error View",
+		LOGGER.debug("A {} Error has been thrown, reporting via the Error View",
 				error.getClass().getName(), error);
 
-		NavigationTarget navigationTarget = new NavigationTarget(ErrorView.class);
+		NavigationTarget navigationTarget = new NavigationTarget(
+				ErrorView.class);
 		navigationTarget.putParameter("error", error);
 		navigateTo(navigationTarget);
 	}
 
 	@Override
-	public void addBeforeViewChangeListener(
-			BeforeViewChangeListener listener) {
+	public void addBeforeViewChangeListener(BeforeViewChangeListener listener) {
 		beforeViewChangeListeners.add(listener);
 	}
 
@@ -361,8 +565,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void addAfterViewChangeListener(
-			AfterViewChangeListener listener) {
+	public void addAfterViewChangeListener(AfterViewChangeListener listener) {
 		afterViewChangeListeners.add(listener);
 	}
 

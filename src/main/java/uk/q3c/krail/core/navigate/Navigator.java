@@ -29,8 +29,7 @@ import com.vaadin.server.Page.UriFragmentChangedListener;
  * @author David Sowerby 20 Jan 2013
  * 
  */
-public interface Navigator extends UriFragmentChangedListener,
-		BeforeViewChangeNotifier, AfterViewChangeNotifier, BeforeSecurityCheckNotifier {
+public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNotifier, BeforeSecurityCheckNotifier {
 
 	void navigateTo(String fragment) throws InvalidURIException;
 

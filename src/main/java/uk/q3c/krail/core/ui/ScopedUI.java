@@ -149,7 +149,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		// page isn't available during injected construction, so we have to do
 		// this here
 		Page page = getPage();
-		page.addUriFragmentChangedListener(navigator);
 
 		ErrorHandler errorHandler = errorHandlerProvider.get();
 		setErrorHandler(errorHandler);
@@ -163,18 +162,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		currentLocale.addListener(this);
 
 		doLayout();
-		// Navigate to the correct start point
-
-		String fragment = getPage().getUriFragment();
-
-		// during the init method exception are handled by a different
-		// errorHandler (not the one registered before)
-		try {
-			navigator.navigateTo(fragment != null ? fragment : "");
-		} catch (Throwable e) {
-			errorHandler.error(new com.vaadin.server.ErrorEvent(e));
-		}
-
 	}
 
 	/**

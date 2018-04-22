@@ -42,8 +42,11 @@ public class ParametersImpl implements Parameters {
 
 			CalculatedParameters calculatedParametersAnnotation = viewClass
 					.getAnnotation(CalculatedParameters.class);
-			List<CalculatedParameter> providerClasses = new LinkedList<>(
-					Arrays.asList(calculatedParametersAnnotation.value()));
+			List<CalculatedParameter> providerClasses = new LinkedList<>();
+			if (calculatedParametersAnnotation != null) {
+				providerClasses.addAll(
+						Arrays.asList(calculatedParametersAnnotation.value()));
+			}
 			CalculatedParameter calculatedParameterAnnotation = viewClass
 					.getAnnotation(CalculatedParameter.class);
 			if (calculatedParameterAnnotation != null) {

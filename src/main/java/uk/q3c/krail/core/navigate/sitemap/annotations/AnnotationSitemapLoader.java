@@ -57,9 +57,15 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 
 				View annotation = viewClass.getAnnotation(View.class);
 
+				String uri = annotation.uri();
+				if(uri.startsWith("/")) {
+					uri = uri.substring(1);
+					LOGGER.debug("url trailing slash removed: '{}' -> '{}'", "/"+uri, uri);
+				}
+				
 				LOGGER.debug("Adding {} view to sitemap for {} url", viewClass,
-						annotation.uri());
-				ViewNode node = sitemap.addView(annotation.uri(), viewClass);
+						uri);
+				ViewNode node = sitemap.addView(uri, viewClass);
 
 				configurePageAccesControl(node, viewClass);
 
