@@ -228,7 +228,7 @@ public class DefaultSitemap implements Sitemap {
 	@Override
 	public NavigationState buildNavigationStateFor(SitemapNode node) {
 		assert node != null;
-		return buildNavigationStateFor(node, new ParametersImpl());
+		return buildNavigationStateFor(node, new ParametersImpl(node.getViewClass()));
 	}
 
 	@Override
@@ -239,7 +239,7 @@ public class DefaultSitemap implements Sitemap {
 
 	@Override
 	public NavigationState buildNavigationStateFor(SitemapNode node, Parameters parameters) {
-		return new NavigationStateImpl(node, parameters != null ? parameters : new ParametersImpl());
+		return new NavigationStateImpl(node, parameters != null ? parameters : new ParametersImpl(node.getViewClass()));
 	}
 
 }

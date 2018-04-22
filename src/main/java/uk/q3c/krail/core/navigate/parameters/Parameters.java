@@ -6,6 +6,9 @@ public interface Parameters {
 
 	Object get(String id) throws NoSuchElementException;
 
+	Object get(String id, boolean useCalculatedParameters)
+			throws NoSuchElementException;
+
 	Object put(String id, Object value);
 
 	String getAsString(String id) throws NoSuchElementException;

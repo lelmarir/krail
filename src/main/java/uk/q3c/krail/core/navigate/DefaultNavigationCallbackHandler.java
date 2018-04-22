@@ -38,8 +38,7 @@ import uk.q3c.util.ReversedList;
 public class DefaultNavigationCallbackHandler
 		implements NavigationCallbackHandler {
 
-	private static Map<Class<? extends KrailView>, Multimap<String, ParameterProvider<?>>> parametersProvidersCache = new HashMap<>();
-
+	
 	public static class ConversionException extends RuntimeException {
 		public ConversionException(String message, Throwable cause) {
 			super(message, cause);
@@ -48,10 +47,6 @@ public class DefaultNavigationCallbackHandler
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigationCallbackHandler.class);
-	
-	//static injection
-	@Inject
-	private static Provider<Injector> injector;
 
 	private static void fireNavigationCallback(KrailView view,
 			KrailViewChangeEvent event, Class<? extends Annotation> annotation)
@@ -124,26 +119,7 @@ public class DefaultNavigationCallbackHandler
 							? true
 							: useCalculatedParameters;
 					try {
-						Object parameterValue = null;
-						try {
-							parameterValue = parameters.get(parameterKey);
-						} catch (NoSuchElementException e) {
-							;
-						}
-
-						if (parameterValue == null
-								&& useCalculatedParameters == true) {
-							try {
-								parameterValue = calculateParameter(
-										parameterKey, view, event, parameters);
-							} catch (NoSuchElementException e) {
-								;
-							}
-						}
-
-						if (parameterValue == null) {
-							throw new NoSuchElementException();
-						}
+						Object parameterValue = parameters.get(parameterKey);
 
 						if (parametersTypes[i]
 								.isAssignableFrom(parameterValue.getClass())) {
@@ -279,64 +255,6 @@ public class DefaultNavigationCallbackHandler
 			}
 		}
 		return sb.toString();
-	}
-
-	private static Multimap<String, ParameterProvider<?>> getParametersProviders(
-			Class<? extends KrailView> viewClass) {
-
-		Multimap<String, ParameterProvider<?>> providers = parametersProvidersCache
-				.get(viewClass);
-		if (providers == null) {
-			providers = MultimapBuilder.hashKeys().arrayListValues().build();
-
-			CalculatedParameters calculatedParametersAnnotation = viewClass
-					.getAnnotation(CalculatedParameters.class);
-			List<CalculatedParameter> providerClasses = new LinkedList<>(
-					Arrays.asList(calculatedParametersAnnotation.value()));
-			CalculatedParameter calculatedParameterAnnotation = viewClass
-					.getAnnotation(CalculatedParameter.class);
-			if (calculatedParameterAnnotation != null) {
-				providerClasses.add(calculatedParameterAnnotation);
-			}
-
-			for (CalculatedParameter annotation : providerClasses) {
-				String name = annotation.name();
-				Class<? extends ParameterProvider<?>> providerClass = annotation
-						.provider();
-				ParameterProvider<?> instance;
-//				try {
-//					// TODO: use guice to istantiate
-//					instance = providerClass.newInstance();					
-//				} catch (InstantiationException | IllegalAccessException e) {
-//					LOGGER.error(
-//							"Unable to instantiate '" + providerClass + "'", e);
-//					continue;
-//				}
-				instance = injector.get().getInstance(providerClass);
-				providers.put(name, instance);
-			}
-
-			parametersProvidersCache.put(viewClass, providers);
-		}
-		return providers;
-	}
-
-	private static Object calculateParameter(String parameterKey,
-			KrailView view, KrailViewChangeEvent event, Parameters parameters) {
-
-		Multimap<String, ParameterProvider<?>> map = getParametersProviders(
-				view.getClass());
-
-		Collection<ParameterProvider<?>> providers = map.get(parameterKey);
-		for (ParameterProvider<?> p : providers) {
-			try {
-				return p.get(parameters);
-			} catch (UnsupportedOperationException e) {
-				// can't calculate this parameter, try the next provider
-				continue;
-			}
-		}
-		throw new NoSuchElementException();
 	}
 
 	private static void report(Class<? extends Annotation> annotation,

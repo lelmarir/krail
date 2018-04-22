@@ -6,7 +6,7 @@ import uk.q3c.krail.core.view.KrailView;
 
 public class NavigationTarget {
 	
-	private Class<? extends KrailView> view;
+	private final Class<? extends KrailView> view;
 	private Parameters paraeters;
 	
 	public NavigationTarget(Class<? extends KrailView> view,
@@ -20,19 +20,24 @@ public class NavigationTarget {
 		this.view = view;
 	}
 
-	public Class<? extends KrailView> getView() {
+	public Class<? extends KrailView> getViewClass() {
 		return view;
 	}
 	
 	public Parameters getParaeters() {
 		if(paraeters == null){
-			paraeters = new ParametersImpl();
+			paraeters = new ParametersImpl(getViewClass());
 		}
 		return paraeters;
 	}
 
 	public void putParameter(String key, Object value) {
 		getParaeters().put(key, value);
-	}	
+	}
+	
+	public NavigationTarget withParameter(String key, Object value) {
+		putParameter(key, value);
+		return this;
+	}
 	
 }

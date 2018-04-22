@@ -97,7 +97,7 @@ public abstract class AbstractNode implements SitemapNode {
 		assert fragment != null;
 		Matcher m = pattern.matcher(fragment);
 		if (m.matches()) {
-			Parameters params = new ParametersImpl();
+			Parameters params = new ParametersImpl(getViewClass());
 			for (int i = 0; i < parametersId.size(); i++) {
 				String id = parametersId.get(i);
 				Object value = m.group(i + 1);// groups are 1 based

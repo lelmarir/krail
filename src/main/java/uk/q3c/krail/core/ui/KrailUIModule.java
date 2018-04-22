@@ -8,6 +8,8 @@ import uk.q3c.krail.core.navigate.DefaultNavigationCallbackHandler;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.InvalidURIExceptionHandler;
 import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
@@ -39,7 +41,7 @@ public abstract class KrailUIModule extends AbstractModule {
 	protected void bindNavigator() {
 		bind(Navigator.class).to(DefaultNavigator.class).in(UIScoped.class);
 		//TODO: cercare e iniettare dutti i field statici senza dover richidere esplicitamente
-		requestStaticInjection(DefaultNavigationCallbackHandler.class);
+		requestStaticInjection(ParametersImpl.class);
 	}
 
 	/**

@@ -128,7 +128,7 @@ public class DefaultNavigator implements Navigator {
 	
 	@Override
 	public void navigateTo(NavigationTarget target) {
-		navigateTo(target.getView(), target.getParaeters());
+		navigateTo(target.getViewClass(), target.getParaeters());
 	}
 	
 	public void navigateTo(NavigationState navigationState)
@@ -305,12 +305,12 @@ public class DefaultNavigator implements Navigator {
 		updateUriFragment(navigationState, false);
 	}
 
-	private void updateUriFragment(NavigationState navigationState,
+	private void updateUriFragment(NavigationState targetNavigationState,
 			boolean fireEvents) {
-		assert navigationState != null;
+		assert targetNavigationState != null;
 		Page page = ui.getPage();
-		if (!navigationState.getFragment().equals(page.getUriFragment())) {
-			page.setUriFragment(navigationState.getFragment(), fireEvents);
+		if (!targetNavigationState.getFragment().equals(page.getUriFragment())) {
+			page.setUriFragment(targetNavigationState.getFragment(), fireEvents);
 		}
 	}
 
