@@ -174,7 +174,7 @@ public abstract class DefaultBindingManager
 
 	protected ServletModule getServletModule() {
 		if (this.servletModule == null) {
-			this.servletModule = new BaseServletModule();
+			throw new IllegalStateException("You must provide a BaseServletModule implementation");
 		}
 		return this.servletModule;
 	}

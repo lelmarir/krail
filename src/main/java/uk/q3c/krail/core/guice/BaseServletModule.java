@@ -14,13 +14,12 @@ package uk.q3c.krail.core.guice;
 
 import com.google.inject.servlet.ServletModule;
 
-public class BaseServletModule extends ServletModule {
-
+public abstract class BaseServletModule extends ServletModule {
+	
 	/**
-	 * <code>serve("/*").with(BaseServlet.class);</code>
+	 * <b>don't configure servlets with</b> <code>serve("/*").with(Servlet.class);</code>
+	 * use @WebServlet annotation instead and inject dependencies with {@link #requestStaticInjection(Class...)})
 	 */
 	@Override
-	protected void configureServlets() {
-		serve("/*").with(BaseServlet.class);
-	}
+	protected abstract void configureServlets();
 }
