@@ -7,7 +7,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uk.q3c</groupId>
 	<artifactId>krail</artifactId>
-	<version>0.9.33-SNAPSHOT</version>
+	<version>0.9.35-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
 
 	<licenses>

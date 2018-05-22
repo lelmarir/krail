@@ -53,18 +53,20 @@ import uk.q3c.krail.i18n.LocaleChangeListener;
  * @date modified 31 Mar 2014
  */
 
-public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChangeListener {
+public abstract class ScopedUI extends UI
+		implements KrailViewHolder, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
-	
+
 	@Inject
 	private Provider<ErrorHandler> errorHandlerProvider;
 	@Inject
 	private Provider<Navigator> navigatorProvider;
 	@Inject
 	private Provider<CurrentLocale> currentLocaleProvider;
-	
+
 	private final Panel headerDisplayPanel;
-	private final Panel viewDisplayPanel;
+	private Panel viewDisplayPanel;
+	private boolean layoutDone = false;
 	private UIKey instanceKey;
 	private Component screenLayout;
 	private UIScope uiScope;
@@ -96,20 +98,10 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		super.detach();
 	}
 
-	/**
-	 * The Vaadin navigator has been replaced by the Navigator.
-	 *
-	 * @see com.vaadin.ui.UI#getNavigator()
-	 */
-	@Override
-	@Deprecated
-	public com.vaadin.navigator.Navigator getNavigator() {
-		return null;
-	}
-
 	@Override
 	public void setNavigator(com.vaadin.navigator.Navigator navigator) {
-		throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
+		throw new MethodReconfigured(
+				"UI.setNavigator() not available, use injection instead");
 	}
 
 	@Override
@@ -118,7 +110,8 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 			throw new IllegalArgumentException("toView should not be null");
 		}
 		if (log.isDebugEnabled()) {
-			String to = (toView == null) ? "null" : toView.getClass().getSimpleName();
+			String to = (toView == null) ? "null"
+					: toView.getClass().getSimpleName();
 			log.debug("changing view to {}", to);
 		}
 
@@ -142,12 +135,19 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 */
 	@Override
 	protected void init(VaadinRequest request) {
-		
+
 		VaadinSession session = getSession();
 
 		Navigator navigator = navigatorProvider.get();
 		// page isn't available during injected construction, so we have to do
 		// this here
+		if (navigator instanceof com.vaadin.navigator.Navigator) {
+			super.setNavigator((com.vaadin.navigator.Navigator) navigator);
+		} else {
+			super.setNavigator(null);
+			log.warn(
+					"The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");
+		}
 		Page page = getPage();
 
 		ErrorHandler errorHandler = errorHandlerProvider.get();
@@ -184,6 +184,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		if (screenLayout == null) {
 			screenLayout = screenLayout();
 		}
+		layoutDone = true;
 		if (viewDisplayPanel.getParent() == null) {
 			String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
 					+ "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
@@ -204,7 +205,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	 *
 	 * @return
 	 */
-	protected abstract Layout screenLayout();
+	protected abstract Component screenLayout();
 
 	public Panel getHeaderDisplayPanel() {
 		return headerDisplayPanel;
@@ -212,6 +213,14 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 	public Panel getViewDisplayPanel() {
 		return viewDisplayPanel;
+	}
+
+	public void setViewDisplayPanel(Panel viewDisplayPanel) {
+		if (layoutDone == true) {
+			throw new UnsupportedOperationException(
+					"You have the chance to replace teh default DisplayPanel only in or before #screenLayout() has been called.");
+		}
+		this.viewDisplayPanel = viewDisplayPanel;
 	}
 
 	/**
@@ -223,7 +232,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		// during initial set up view has not been created but locale change
 		// gets called for other components
 		if (getView() != null) {
-			
+
 		}
 	}
 

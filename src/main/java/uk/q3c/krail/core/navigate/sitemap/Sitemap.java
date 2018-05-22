@@ -1,5 +1,7 @@
 package uk.q3c.krail.core.navigate.sitemap;
 
+import com.vaadin.navigator.View;
+
 import uk.q3c.krail.core.navigate.InvalidURIException;
 import uk.q3c.krail.core.navigate.PageNotFoundException;
 import uk.q3c.krail.core.navigate.parameters.Parameters;
@@ -28,5 +30,7 @@ public interface Sitemap {
 	ViewNode addView(String uri, Class<? extends KrailView> view);
 
 	RedirectNode addRedirect(String uri, SitemapNode targetNode);
+
+	boolean contains(Class<? extends View> viewClass);
 
 }

@@ -13,6 +13,7 @@
 
 package uk.q3c.krail.core.view;
 
+import com.vaadin.navigator.View;
 import com.vaadin.ui.Component;
 
 import uk.q3c.krail.core.navigate.Navigator;
@@ -38,7 +39,7 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
  * {@link KrailViewChangeEvent}, which contains the current {@link NavigationState} so that, for example, parameter
  * information can be used to determine how the View is to be built or respond in some other way to URL parameters.
  */
-public interface KrailView {
+public interface KrailView extends View {
 
 	/**
 	 * @return the componet to be displayed in the header (if the
@@ -55,7 +56,18 @@ public interface KrailView {
      * @return
      * @throws ViewBuildException
      */
-    public Component getRootComponent() throws ViewBuildException;
+    public default Component getRootComponent() throws ViewBuildException {
+        if (!(this instanceof Component)) {
+            throw new IllegalStateException(
+                    "View is not a Component. Override getViewComponent() to return the root view component");
+        }
+        return (Component) this;
+    }
+    
+    @Override
+    default Component getViewComponent() {
+    	return getRootComponent();
+    }
 
     /**
      * A name for the view, typically displayed in a title bar

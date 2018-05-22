@@ -16,4 +16,8 @@ public interface SitemapNode {
 	 */
 	String buildFragment(Parameters parameters) throws IllegalArgumentException;
 
+	NavigationState buildNavigationState(String fragment);
+
+	NavigationState buildNavigationState(Parameters params);
+
 }

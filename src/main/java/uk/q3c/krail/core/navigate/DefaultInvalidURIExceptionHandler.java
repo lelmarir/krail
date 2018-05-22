@@ -16,11 +16,16 @@ import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 public class DefaultInvalidURIExceptionHandler implements
 		InvalidURIExceptionHandler {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInvalidURIExceptionHandler.class);
+	
 	private final UserNotifier notifier;
 	private final Navigator navigator;
 
@@ -33,7 +38,8 @@ public class DefaultInvalidURIExceptionHandler implements
 
 	private void onInvalidUri(InvalidURIException error) {
 		//FIXME: localizzare
-		notifier.show(NotificationType.ERROR, "Invalid URI: '" + error.getTargetURI() + "'");
+		notifier.show(NotificationType.ERROR, "Invalid URI: '" + error.getMessage() + "'");
+		LOGGER.info("Invalid URI: '" + error.getMessage() + "'");
 		if (navigator.getCurrentNavigationState() != null) {
 			navigator.updateUriFragment();
 		} else {

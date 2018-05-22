@@ -46,8 +46,7 @@ public class SitemapModule extends AbstractModule {
 		private final Sitemap sitemap;
 
 		@Inject
-		public SitemapProvider(Set<SitemapLoader> loaders) {
-			DefaultSitemap sitemap = new DefaultSitemap();
+		public SitemapProvider(Set<SitemapLoader> loaders, DefaultSitemap sitemap) {
 			this.sitemap = sitemap;
 
 			for (SitemapLoader loader : loaders) {

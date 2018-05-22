@@ -93,7 +93,8 @@ public abstract class AbstractNode implements SitemapNode {
 		return rawUriPattern;
 	}
 
-	public NavigationState match(String fragment) {
+	@Override
+	public NavigationState buildNavigationState(String fragment) {
 		assert fragment != null;
 		Matcher m = pattern.matcher(fragment);
 		if (m.matches()) {
@@ -103,12 +104,14 @@ public abstract class AbstractNode implements SitemapNode {
 				Object value = m.group(i + 1);// groups are 1 based
 				params.put(id, value);
 			}
-			return new NavigationStateImpl(this, params);
-
+			return buildNavigationState(params);
 		} else {
 			return null;
 		}
 	}
+	
+	@Override
+	public abstract NavigationState buildNavigationState(Parameters params);
 
 	public String buildFragment(Parameters parameters) {
 		return buildFragment(rawUriPattern, parameters, false).toString();

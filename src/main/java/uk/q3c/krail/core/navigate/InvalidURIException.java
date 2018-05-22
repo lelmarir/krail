@@ -12,22 +12,26 @@
  */
 package uk.q3c.krail.core.navigate;
 
+import java.util.LinkedList;
+
+import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
 
 public class InvalidURIException extends PageNotFoundException {
 
 	private static final long serialVersionUID = -2965666735662621325L;
 
 	private final String uri;
-	
+
 	public InvalidURIException(String uri) {
 		this(uri, null);
 	}
 
-	public InvalidURIException(String uri, Throwable cause) {
-		super("Unable to find the uri '"+uri+"'", cause);
+	public InvalidURIException(String uri, LinkedList<AbstractNode> nodes) {
+		super("Unable to find the node for the fragment '" + uri + "'\n"
+				+ "\tregistered nodes: " + nodes.toString());
 		this.uri = uri;
 	}
-	
+
 	public String getTargetURI() {
 		return uri;
 	}
