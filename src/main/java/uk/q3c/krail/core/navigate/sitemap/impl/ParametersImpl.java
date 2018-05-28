@@ -67,28 +67,20 @@ public class ParametersImpl implements Parameters {
 		return providers;
 	}
 
-	private Object calculateParameter(String parameterKey) {
-
-		Multimap<String, ParameterProvider<?>> map = getParametersProviders(
-				targetViewClass);
-
-		Collection<ParameterProvider<?>> providers = map.get(parameterKey);
-		for (ParameterProvider<?> p : providers) {
-			try {
-				return p.get(this);
-			} catch (UnsupportedOperationException e) {
-				// can't calculate this parameter, try the next provider
-				continue;
-			}
-		}
-		throw new NoSuchElementException();
-	}
-
 	private final Class<? extends KrailView> targetViewClass;
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 
 	public ParametersImpl(Class<? extends KrailView> targetViewClass) {
 		this.targetViewClass = targetViewClass;
+	}
+	
+	public ParametersImpl(ParametersImpl parameters) {
+		this(parameters.targetViewClass);
+		this.parameters = parameters.parameters;
+	}
+
+	public Class<? extends KrailView> getTargetViewClass() {
+		return targetViewClass;
 	}
 
 	@Override
@@ -120,6 +112,23 @@ public class ParametersImpl implements Parameters {
 			throw new NoSuchElementException("for parameter '" + id + "'");
 		}
 		return value;
+	}
+
+	protected Object calculateParameter(String parameterKey) throws NoSuchElementException {
+
+		Multimap<String, ParameterProvider<?>> map = getParametersProviders(
+				targetViewClass);
+
+		Collection<ParameterProvider<?>> providers = map.get(parameterKey);
+		for (ParameterProvider<?> p : providers) {
+			try {
+				return p.get(LooplessCalculatedParametersWrapper.build(this, parameterKey));
+			} catch (UnsupportedOperationException e) {
+				// can't calculate this parameter, try the next provider
+				continue;
+			}
+		}
+		throw new NoSuchElementException();
 	}
 
 	@Override
