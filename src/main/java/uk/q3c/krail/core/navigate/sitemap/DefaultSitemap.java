@@ -50,7 +50,7 @@ public class DefaultSitemap implements Sitemap {
 
 		@Override
 		public NavigationState buildNavigationState(Parameters params) {
-			return DefaultSitemap.this.buildNavigationState(getViewClass());
+			return DefaultSitemap.this.buildNavigationState(getViewClass(), params);
 		}
 
 		@Override
