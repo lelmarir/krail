@@ -13,6 +13,11 @@ public class VaadinSecuritySession implements SecuritySession {
 	}
 	
 	@Override
+	public Object getSessionId() {
+		return session;
+	}
+	
+	@Override
 	public Object getAttribute(String name) {
 		return session.getAttribute(name);
 	}
@@ -21,5 +26,9 @@ public class VaadinSecuritySession implements SecuritySession {
 	public void setAttribute(String name, Object value) {
 		session.setAttribute(name, value);
 	}
-
+	
+	@Override
+	public String toString() {
+		return session.toString();
+	}
 }

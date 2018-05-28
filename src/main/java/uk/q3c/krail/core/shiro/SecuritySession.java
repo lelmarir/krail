@@ -3,6 +3,11 @@ package uk.q3c.krail.core.shiro;
 public interface SecuritySession {
 	
 	/**
+	 * A unique id that rapresent the session. Will be used in identity (==) comparisons.
+	 */
+	public Object getSessionId();
+	
+	/**
 	 * Returns the object bound with the specified name in this session, or
 	 * <code>null</code> if no object is bound under the name.
 	 *
@@ -47,4 +52,5 @@ public interface SecuritySession {
 	 *                if this method is called on an invalidated session
 	 */
 	public void setAttribute(String name, Object value);
+
 }

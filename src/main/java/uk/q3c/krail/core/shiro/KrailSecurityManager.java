@@ -85,7 +85,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	@Inject
 	private Provider<SecuritySession> sessionProvider;
 
-	private LoadingCache<SecuritySession, Set<AuthenticationListener>> loginEventListeners;
+	private LoadingCache<Object, Set<AuthenticationListener>> loginEventListeners;
 	/**
 	 * will be used if no sessions are present (background threads)
 	 */
@@ -94,10 +94,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
 		this.loginEventListeners = CacheBuilder.newBuilder().weakKeys()
-				.build(new CacheLoader<SecuritySession, Set<AuthenticationListener>>() {
+				.build(new CacheLoader<Object, Set<AuthenticationListener>>() {
 
 					@Override
-					public Set<AuthenticationListener> load(SecuritySession key) throws Exception {
+					public Set<AuthenticationListener> load(Object key) throws Exception {
 						return Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
 					}
 
@@ -106,7 +106,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	private Set<AuthenticationListener> getCurrentSessionAuthenticationListeners() {
 		try {
-			return loginEventListeners.get(sessionProvider.get());
+			return loginEventListeners.get(sessionProvider.get().getSessionId());
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
