@@ -30,6 +30,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.Parameter;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
@@ -44,13 +45,11 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	private Throwable error;
 	private TextArea textArea;
 
-	private final Navigator navigator;
-	private SitemapNode previousSitemapNode;
+	private NavigationState previousNavigationState;
 
 	@Inject
 	protected DefaultErrorView(Navigator navigator) {
 		super();
-		this.navigator = navigator;
 		CssLayout outerLayout = new CssLayout();
 		{
 			VerticalLayout mainLayout = new VerticalLayout();
@@ -71,8 +70,8 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 					Button backButton = new Button("Back", new ClickListener() {
 						@Override
 						public void buttonClick(ClickEvent event) {
-							if(previousSitemapNode != null) {
-								navigator.navigateTo(previousSitemapNode.getViewClass());
+							if(previousNavigationState != null) {
+								navigator.navigateTo(previousNavigationState);
 							}else{
 								navigator.navigateTo(StandardPageKey.Public_Home);
 							}
@@ -147,7 +146,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		textArea.setReadOnly(true);
 
 		if (event.getSourceNavigationState() != null) {
-			previousSitemapNode = event.getSourceNavigationState().getSitemapNode();
+			previousNavigationState = event.getSourceNavigationState();
 		}
 	}
 }
