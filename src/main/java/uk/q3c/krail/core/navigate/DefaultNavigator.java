@@ -93,6 +93,7 @@ public class DefaultNavigator implements Navigator {
 
 		setStateManager(createNavigationStateManager(ui));
 		try {
+			//kickstart
 			navigateTo(stateManager.getState());
 		} catch (InvalidURIException e) {
 			// TODO: gestire le url errate in maniera piu "gentile", con una
