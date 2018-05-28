@@ -71,7 +71,7 @@ public class DefaultNavigator implements Navigator {
 
 	private final NavigationCallbackHandler callbackHandler = new DefaultNavigationCallbackHandler();
 
-	private NavigationStateManager stateManager;
+	protected NavigationStateManager stateManager;
 
 	private final Provider<Subject> subjectProvider;
 	private final Sitemap sitemap;

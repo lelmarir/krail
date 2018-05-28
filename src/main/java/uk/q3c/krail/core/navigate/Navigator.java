@@ -9,6 +9,7 @@ import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.BeforeViewChangeNotifier;
 
 import com.vaadin.server.Page.UriFragmentChangedListener;
+import com.vaadin.ui.UI;
 
 /**
  * Uses the {@link UserSitemap} to control navigation from one 'page' to another, using a uri String, or a

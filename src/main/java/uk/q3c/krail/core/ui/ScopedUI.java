@@ -34,7 +34,9 @@ import com.vaadin.ui.UI;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
+import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
 import uk.q3c.krail.i18n.CurrentLocale;
@@ -143,7 +145,11 @@ public abstract class ScopedUI extends UI
 		// this here
 		if (navigator instanceof com.vaadin.navigator.Navigator) {
 			super.setNavigator((com.vaadin.navigator.Navigator) navigator);
-		} else {
+		} else if(navigator instanceof DefaultNavigator) {
+			log.debug(
+					"The injected nagigator has been wrapped in VaadinNavigatorWrapper");
+			super.setNavigator(new VaadinNavigatorWrapper((DefaultNavigator)navigator));
+		}else {
 			super.setNavigator(null);
 			log.warn(
 					"The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");

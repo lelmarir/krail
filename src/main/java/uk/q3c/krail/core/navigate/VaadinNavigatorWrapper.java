@@ -45,7 +45,7 @@ public class VaadinNavigatorWrapper extends Navigator{
 
 	@Override
 	protected NavigationStateManager getStateManager() {
-		return stateManager;
+		return navigator.stateManager;
 	}
 
 	@Override
