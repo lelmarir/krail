@@ -10,6 +10,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.vaadin.server.DefaultErrorHandler;
+import com.vaadin.server.VaadinSession;
 
 public class ShiroVaadinModule extends AbstractModule {
 
@@ -28,6 +29,11 @@ public class ShiroVaadinModule extends AbstractModule {
 		bindUnauthenticatedHandler();
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
+	}
+
+	@Provides
+	private SecuritySession provideSecuritySession(VaadinSessionProvider sessionProvider) {
+		return new VaadinSecuritySession(sessionProvider.get());
 	}
 
 	@Provides

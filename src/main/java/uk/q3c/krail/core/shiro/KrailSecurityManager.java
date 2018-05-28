@@ -21,14 +21,12 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 
-import javax.servlet.http.HttpSession;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
+import com.google.inject.Singleton;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -54,6 +52,7 @@ import uk.q3c.krail.core.shiro.loginevent.AbstractAuthenticationEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 
+@Singleton
 public class KrailSecurityManager extends DefaultSecurityManager implements AuthenticationNotifier {
 
 	private static class SubjectSerializableWrapper implements Serializable {
@@ -84,9 +83,9 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	private static final Logger LOGGER = LoggerFactory.getLogger(KrailSecurityManager.class);
 
 	@Inject
-	private Provider<HttpSession> sessionProvider;
+	private Provider<SecuritySession> sessionProvider;
 
-	private LoadingCache<HttpSession, Set<AuthenticationListener>> loginEventListeners;
+	private LoadingCache<SecuritySession, Set<AuthenticationListener>> loginEventListeners;
 	/**
 	 * will be used if no sessions are present (background threads)
 	 */
@@ -95,10 +94,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
 		this.loginEventListeners = CacheBuilder.newBuilder().weakKeys()
-				.build(new CacheLoader<HttpSession, Set<AuthenticationListener>>() {
+				.build(new CacheLoader<SecuritySession, Set<AuthenticationListener>>() {
 
 					@Override
-					public Set<AuthenticationListener> load(HttpSession key) throws Exception {
+					public Set<AuthenticationListener> load(SecuritySession key) throws Exception {
 						return Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
 					}
 
@@ -177,7 +176,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			return subject;
 		}
 		
-		HttpSession session = sessionProvider.get();
+		SecuritySession session = sessionProvider.get();
 		if (session != null) {
 			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session.getAttribute(SubjectSerializableWrapper.class.getName());
 			if (subjectWrapper == null) {
@@ -201,7 +200,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	protected void setSubject(Subject subject) {
-		HttpSession session = sessionProvider.get();
+		SecuritySession session = sessionProvider.get();
 		if (session != null) {
 			LOGGER.debug("storing Subject instance in VaadinSession");
 			session.setAttribute(SubjectSerializableWrapper.class.getName(), new SubjectSerializableWrapper(subject));
@@ -263,7 +262,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 		super.setSessionManager(sessionManager);
 	}
 
-	public void setSessionProvider(Provider<HttpSession> sessionProvider) {
+	protected void setSessionProvider(Provider<SecuritySession> sessionProvider) {
 		this.sessionProvider = sessionProvider;
 	}
 
