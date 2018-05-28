@@ -22,13 +22,9 @@ public class InvalidURIException extends PageNotFoundException {
 
 	private final String uri;
 
-	public InvalidURIException(String uri) {
-		this(uri, null);
-	}
-
 	public InvalidURIException(String uri, LinkedList<AbstractNode> nodes) {
 		super("Unable to find the node for the fragment '" + uri + "'\n"
-				+ "\tregistered nodes: " + nodes.toString());
+				+ "\tregistered nodes: " + nodes);
 		this.uri = uri;
 	}
 
