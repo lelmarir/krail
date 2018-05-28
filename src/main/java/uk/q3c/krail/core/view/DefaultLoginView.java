@@ -15,6 +15,7 @@ package uk.q3c.krail.core.view;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -32,8 +33,6 @@ import java.util.Optional;
 public class DefaultLoginView extends GridViewBase implements  ClickListener {
     private final Provider<Subject> subjectProvider;
     private Panel centrePanel;
-    private Label demoInfoLabel;
-    private Label demoInfoLabel2;
     private Label label;
     private PasswordField passwordBox;
     private Label statusMsgLabel;
@@ -57,20 +56,17 @@ public class DefaultLoginView extends GridViewBase implements  ClickListener {
         vl.setSizeUndefined();
         label = new Label();
         usernameBox = new TextField();
+        usernameBox.setWidth(100, Unit.PERCENTAGE);
         passwordBox = new PasswordField();
+        passwordBox.setWidth(100, Unit.PERCENTAGE);
 
-        demoInfoLabel = new Label("for this demo, enter any user name, and a password of 'password'");
-        demoInfoLabel2 = new Label("In a real application your Shiro Realm implementation defines how to authenticate");
-
-        submitButton = new Button();
+        submitButton = new Button("Login");
         submitButton.setDisableOnClick(true);
         submitButton.addClickListener(this);
 
         statusMsgLabel = new Label("Please enter your username and password");
 
         vl.addComponent(label);
-        vl.addComponent(demoInfoLabel);
-        vl.addComponent(demoInfoLabel2);
         vl.addComponent(usernameBox);
         vl.addComponent(passwordBox);
         vl.addComponent(submitButton);
