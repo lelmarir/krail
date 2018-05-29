@@ -7,17 +7,17 @@ import com.google.inject.multibindings.Multibinder;
 
 public abstract class ServiceModule extends AbstractModule {
 
-	private Multibinder<Service> uriBinder;
+	private Multibinder<Service> servicesBinder;
 
 	@Override
 	protected final void configure() {
-		this.uriBinder = Multibinder.newSetBinder(binder(), Service.class);
+		this.servicesBinder = Multibinder.newSetBinder(binder(), Service.class);
 		configureService();
 	}
 	
 	protected abstract void configureService();
 
 	protected ScopedBindingBuilder addService(Class<? extends Service> service) {
-		return uriBinder.addBinding().to(service);
+		return servicesBinder.addBinding().to(service);
 	}
 }

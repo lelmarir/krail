@@ -12,34 +12,117 @@
  */
 package uk.q3c.krail.core.guice;
 
+import uk.q3c.krail.core.shiro.MDCSubjectHandler;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.vaadin.server.CustomizedSystemMessages;
+import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.RequestHandler;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.SessionInitListener;
+import com.vaadin.server.SystemMessages;
+import com.vaadin.server.SystemMessagesInfo;
+import com.vaadin.server.SystemMessagesProvider;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletService;
+import com.vaadin.server.VaadinSession;
 
 @Singleton
 public class BaseServlet extends VaadinServlet implements SessionInitListener {
-	
-	private static final long serialVersionUID = 4490881052475037408L;
-	
-	private final ScopedUIProvider uiProvider;
 
+	private static final long serialVersionUID = 4490881052475037408L;
+
+	// Static injection, becouse this class will not be instantiated by guice
 	@Inject
-	public BaseServlet(ScopedUIProvider uiProvider) {
-		this.uiProvider = uiProvider;
+	private static ScopedUIProvider uiProvider;
+	@Inject
+	private static Set<KrailRequestHandler> requestHandlers;
+
+	// will not be instantiated by guice
+	public BaseServlet() {
+		;
 	}
 
 	@Override
-	protected void servletInitialized() {
+	protected void servletInitialized() throws ServletException {
+		super.servletInitialized();
 		getService().addSessionInitListener(this);
+		getService().setSystemMessagesProvider(new SystemMessagesProvider() {
+
+			@Override
+			public SystemMessages getSystemMessages(
+					SystemMessagesInfo systemMessagesInfo) {
+				// disabilita il messaggio di errore e ricarica immediatamente
+				// la pagina
+				CustomizedSystemMessages messages = new CustomizedSystemMessages();
+				messages.setSessionExpiredNotificationEnabled(false);
+				return messages;
+			}
+		});
 	}
 
 	@Override
 	public void sessionInit(SessionInitEvent event) throws ServiceException {
 		event.getSession().addUIProvider(uiProvider);
+	}
+
+	@Override
+	protected VaadinServletService createServletService(
+			DeploymentConfiguration deploymentConfiguration)
+			throws ServiceException {
+
+		VaadinServletService service = new VaadinServletService(this,
+				deploymentConfiguration) {
+
+			@Override
+			protected List<RequestHandler> createRequestHandlers()
+					throws ServiceException {
+				List<RequestHandler> handlers = super.createRequestHandlers();
+				for (KrailRequestHandler handler : requestHandlers) {
+					handlers.add(handler);
+					handler.init();
+				}
+				return handlers;
+			}
+
+			@Override
+			public void requestStart(VaadinRequest request,
+					VaadinResponse response) {
+				for (KrailRequestHandler handler : requestHandlers) {
+					handler.requestStart(request, response);
+				}
+				super.requestStart(request, response);
+			}
+
+			@Override
+			public void requestEnd(VaadinRequest request,
+					VaadinResponse response, VaadinSession session) {
+				super.requestEnd(request, response, session);
+				for (KrailRequestHandler handler : requestHandlers) {
+					handler.requestEnd(request, response, session);
+				}
+			}
+
+			@Override
+			public void destroy() {
+				for (KrailRequestHandler handler : requestHandlers) {
+					handler.init();
+				}
+				super.destroy();
+			}
+		};
+		service.init();
+		return service;
 	}
 }

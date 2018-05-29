@@ -12,14 +12,30 @@
  */
 package uk.q3c.krail.core.guice;
 
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.servlet.ServletModule;
 
 public abstract class BaseServletModule extends ServletModule {
-	
+
 	/**
-	 * <b>don't configure servlets with</b> <code>serve("/*").with(Servlet.class);</code>
-	 * use @WebServlet annotation instead and inject dependencies with {@link #requestStaticInjection(Class...)})
+	 * <b>don't configure servlets with</b>
+	 * <code>serve("/*").with(Servlet.class);</code> use @WebServlet annotation
+	 * instead and inject dependencies with
+	 * {@link #requestStaticInjection(Class...)})
 	 */
 	@Override
-	protected abstract void configureServlets();
+	protected void configureServlets() {
+		//in case there are no krailRequestHandler, to create an empty set
+		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder
+				.newSetBinder(binder(), KrailRequestHandler.class);
+		bindRequestHandlers(krailRequestHandlerBinder);
+
+		// BaseServlet will not be instantiated by guice
+		requestStaticInjection(BaseServlet.class);
+	}
+
+	protected void bindRequestHandlers(
+			Multibinder<KrailRequestHandler> multibinder) {
+		;
+	}
 }

@@ -3,6 +3,7 @@ package uk.q3c.krail.core.shiro;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.ShiroException;
 
+import uk.q3c.krail.core.guice.KrailRequestHandler;
 import uk.q3c.krail.core.guice.errors.ErrorHandler;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 
@@ -29,6 +30,10 @@ public class ShiroVaadinModule extends AbstractModule {
 		bindUnauthenticatedHandler();
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
+		
+		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder
+				.newSetBinder(binder(), KrailRequestHandler.class);
+		krailRequestHandlerBinder.addBinding().to(MDCSubjectHandler.class);
 	}
 
 	@Provides
