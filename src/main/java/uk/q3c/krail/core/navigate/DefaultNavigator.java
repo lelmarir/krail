@@ -16,6 +16,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -69,7 +72,9 @@ public class DefaultNavigator implements Navigator {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigator.class);
 
-	private final NavigationCallbackHandler callbackHandler = new DefaultNavigationCallbackHandler();
+	@Inject
+	private Provider<DefaultNavigationCallbackHandler> defaultCallbackHandlerProvider;
+	private NavigationCallbackHandler callbackHandler;
 
 	protected NavigationStateManager stateManager;
 
@@ -92,6 +97,11 @@ public class DefaultNavigator implements Navigator {
 		this.sitemap = sitemap;
 
 		setStateManager(createNavigationStateManager(ui));
+		
+	}
+	
+	@PostConstruct
+	private void init() {
 		try {
 			//kickstart
 			navigateTo(stateManager.getState());
@@ -102,6 +112,13 @@ public class DefaultNavigator implements Navigator {
 		}
 	}
 
+	protected NavigationCallbackHandler getCallbackHandler() {
+		if(callbackHandler == null) {
+			callbackHandler = defaultCallbackHandlerProvider.get();
+		}
+		return callbackHandler;
+	}
+	
 	protected NavigationStateManager createNavigationStateManager(UI ui) {
 		if (ui.getClass().getAnnotation(PushStateNavigation.class) != null) {
 			return new PushStateManager(ui);
@@ -160,7 +177,7 @@ public class DefaultNavigator implements Navigator {
 	public void navigateTo(NavigationState navigationState)
 			throws AuthorizationException {
 		checkNotNull(navigationState);
-		checkNotNull(callbackHandler);
+		checkNotNull(getCallbackHandler());
 
 		// stop unnecessary changes, but also to prevent navigation aware
 		// components from causing a loop by responding to a change of URI (they
@@ -205,7 +222,7 @@ public class DefaultNavigator implements Navigator {
 		// notify Outbound navigation to current view
 		if (getCurrentView() != null) {
 			fireViewBeforeOutboundNavigationEvent(getCurrentView(), cancellable,
-					callbackHandler);
+					getCallbackHandler());
 			if (cancellable.isCancelled()) {
 				LOGGER.debug(
 						"navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation beforeOutboundNavigation",
@@ -220,7 +237,7 @@ public class DefaultNavigator implements Navigator {
 		// notify before Inbound navigation to target view
 
 		fireViewBeforeInboundNavigationEvent(view, cancellable,
-				callbackHandler);
+				getCallbackHandler());
 		if (cancellable.isCancelled()) {
 			LOGGER.debug(
 					"navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
@@ -349,7 +366,7 @@ public class DefaultNavigator implements Navigator {
 
 	private void fireViewAfterInboundNavigationEvent(KrailView view,
 			KrailViewChangeEvent event) {
-		callbackHandler.afterInbounNavigationEvent(view, event);
+		getCallbackHandler().afterInbounNavigationEvent(view, event);
 	}
 
 	@Override

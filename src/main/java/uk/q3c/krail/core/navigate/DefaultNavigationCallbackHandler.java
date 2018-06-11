@@ -1,12 +1,10 @@
 package uk.q3c.krail.core.navigate;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -19,15 +17,10 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
-
-import uk.q3c.krail.core.navigate.parameters.CalculatedParameter;
-import uk.q3c.krail.core.navigate.parameters.CalculatedParameters;
-import uk.q3c.krail.core.navigate.parameters.ParameterProvider;
+import com.google.inject.Key;
 import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewChangeEvent;
@@ -38,7 +31,6 @@ import uk.q3c.util.ReversedList;
 public class DefaultNavigationCallbackHandler
 		implements NavigationCallbackHandler {
 
-	
 	public static class ConversionException extends RuntimeException {
 		public ConversionException(String message, Throwable cause) {
 			super(message, cause);
@@ -47,186 +39,6 @@ public class DefaultNavigationCallbackHandler
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(DefaultNavigationCallbackHandler.class);
-
-	private static void fireNavigationCallback(KrailView view,
-			KrailViewChangeEvent event, Class<? extends Annotation> annotation)
-			throws IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException {
-		LinkedHashMap<Class<?>, LinkedList<Method>> methodshierarchy = getAnnotatedMethods(
-				unproxy(view.getClass()), annotation);
-		if (LOGGER.isDebugEnabled()) {
-			report(annotation, methodshierarchy);
-		}
-
-		if (!methodshierarchy.isEmpty()) {
-			List<Entry<Class<?>, LinkedList<Method>>> list = new ArrayList<>(
-					methodshierarchy.entrySet());
-			Iterator<Entry<Class<?>, LinkedList<Method>>> reverseIterator = new ReversedList<>(
-					list).iterator();
-
-			while (reverseIterator.hasNext()) {
-				Entry<Class<?>, LinkedList<Method>> entry = reverseIterator
-						.next();
-				LinkedList<Method> alternateMethods = entry.getValue();
-
-				checkReturnType(annotation, entry.getValue());
-
-				Parameters parameters = event.getTargetNavigationState()
-						.parameters();
-
-				callMatchingMethodForAvailibleParameters(view, event,
-						parameters, alternateMethods);
-			}
-		}
-	}
-
-	private static void callMatchingMethodForAvailibleParameters(KrailView view,
-			KrailViewChangeEvent event, Parameters parameters,
-			LinkedList<Method> alternateMethods) throws IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
-		callMatchingMethodForAvailibleParameters(view, event, parameters,
-				alternateMethods, null);
-	}
-
-	private static void callMatchingMethodForAvailibleParameters(KrailView view,
-			KrailViewChangeEvent event, Parameters parameters,
-			LinkedList<Method> alternateMethods,
-			Boolean useCalculatedParameters) throws IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
-
-		Map<Method, Object[]> matchingMethods = new HashMap<Method, Object[]>();
-
-		methodsLoop: for (Method method : alternateMethods) {
-			LOGGER.trace("checking method {}:", method);
-			Class<?>[] parametersTypes = method.getParameterTypes();
-			Annotation[][] parametersAnnotations = method
-					.getParameterAnnotations();
-			Object[] args = new Object[parametersTypes.length];
-
-			for (int i = 0; i < parametersTypes.length; i++) {
-				Parameter parameterAnnotation;
-				if (parametersTypes[i].isAssignableFrom(event.getClass())) {
-					args[i] = event;
-					LOGGER.trace(
-							"parameter {} of type {} -> CancellableKrailViewChangeEvent",
-							i, parametersTypes[i]);
-				} else if ((parameterAnnotation = getAnnotation(
-						parametersAnnotations[i], Parameter.class)) != null) {
-
-					String parameterKey = parameterAnnotation.value();
-					boolean parameterOptional = parameterAnnotation.optional();
-					useCalculatedParameters = useCalculatedParameters == null
-							? true
-							: useCalculatedParameters;
-					try {
-						Object parameterValue = parameters.get(parameterKey);
-
-						if (parametersTypes[i]
-								.isAssignableFrom(parameterValue.getClass())) {
-							args[i] = parameterValue;
-						} else if (parameterValue.getClass()
-								.equals(String.class)) {
-							// proviene dall'uri? Provo a convertirlo nel tipo
-							// richiesto
-							try {
-								args[i] = convert((String) parameterValue,
-										parametersTypes[i]);
-							} catch (ConversionException e) {
-								throw new IllegalStateException(
-										"The parameter '" + parameterKey
-												+ "' with value '"
-												+ parameterValue
-												+ "' is not of the required type ("
-												+ parametersTypes[i] + ").",
-										e);
-							}
-						} else {
-							throw new IllegalStateException(
-									"The parameter '" + parameterKey
-											+ "' with value '" + parameterValue
-											+ "' is not of the required type ("
-											+ parametersTypes[i] + ").");
-						}
-
-					} catch (NoSuchElementException e) {
-						// the required parameter is not present...
-						if (parameterOptional) {
-							// ...but is optional, so the value can be null
-							args[i] = null;
-						} else {
-							// ...and is not optional, this method is not the
-							// correct one
-							;
-						}
-						continue methodsLoop;
-					}
-
-				} else /* if(parameterAnnotation == null) */ {
-					// method parameter not annotated with @Parameter
-					throw new IllegalStateException("Unable to bind parameter "
-							+ i + " (of type " + parametersTypes[i]
-							+ ") of the callback method " + method);
-				}
-			} // parameters for loop
-
-			// all parameters found
-			// TODO: optional parameters
-			matchingMethods.put(method, args);
-
-			// remove methods with the same parameters but some more
-			Iterator<Method> it = matchingMethods.keySet().iterator();
-			while (it.hasNext()) {
-				boolean toBeRemover = false;
-				Method m = it.next();
-				for (Method m2 : matchingMethods.keySet()) {
-					if (m2 == m) {
-						continue;
-					}
-					Class<?>[] m2Parameters = m2.getParameterTypes();
-					Class<?>[] mParameters = m.getParameterTypes();
-					if (m2Parameters.length > mParameters.length
-							&& Arrays.asList(m2Parameters)
-									.containsAll(Arrays.asList(mParameters))) {
-						// il metodo m2 contiene tutti i parametri di m, e
-						// altri, quindi m va scartato
-						toBeRemover = true;
-						break;
-					}
-				}
-				if (toBeRemover) {
-					it.remove();
-				}
-			}
-
-		} // methods foor loop
-
-		if (matchingMethods.isEmpty()) {
-			if (useCalculatedParameters == null) {
-				// try with calculated parameters
-				callMatchingMethodForAvailibleParameters(view, event,
-						parameters, alternateMethods, true);
-			} else {
-				throw new IllegalStateException(
-						"Unable to find the method to call for the provided parameters:\n"
-								+ "   parameters: " + parameters + "\n"
-								+ "   methods:    "
-								+ methodsToString(alternateMethods) + "\n\n");
-			}
-		} else if (matchingMethods.size() > 1) {
-			throw new IllegalStateException(
-					"Unable to tell wich method to call within the matching ones:\n"
-							+ "   parameters: " + parameters + "\n"
-							+ "   methods:    "
-							+ methodsToString(alternateMethods) + "\n\n");
-		}
-
-		Entry<Method, Object[]> entry = matchingMethods.entrySet().iterator()
-				.next();
-		Method method = entry.getKey();
-		Object[] args = entry.getValue();
-		method.setAccessible(true);
-		method.invoke(view, args);
-	}
 
 	private static String methodsToString(LinkedList<Method> alternateMethods) {
 		return alternateMethods.stream()
@@ -355,8 +167,11 @@ public class DefaultNavigationCallbackHandler
 		}
 	}
 
-	public DefaultNavigationCallbackHandler() {
-		;
+	private Injector injecotr;
+
+	@Inject
+	public DefaultNavigationCallbackHandler(Injector injecotr) {
+		this.injecotr = injecotr;
 	}
 
 	@Override
@@ -392,4 +207,210 @@ public class DefaultNavigationCallbackHandler
 		}
 	}
 
+	private void fireNavigationCallback(KrailView view,
+			KrailViewChangeEvent event, Class<? extends Annotation> annotation)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		LinkedHashMap<Class<?>, LinkedList<Method>> methodshierarchy = getAnnotatedMethods(
+				unproxy(view.getClass()), annotation);
+		if (LOGGER.isDebugEnabled()) {
+			report(annotation, methodshierarchy);
+		}
+
+		if (!methodshierarchy.isEmpty()) {
+			List<Entry<Class<?>, LinkedList<Method>>> list = new ArrayList<>(
+					methodshierarchy.entrySet());
+			Iterator<Entry<Class<?>, LinkedList<Method>>> reverseIterator = new ReversedList<>(
+					list).iterator();
+
+			while (reverseIterator.hasNext()) {
+				Entry<Class<?>, LinkedList<Method>> entry = reverseIterator
+						.next();
+				LinkedList<Method> alternateMethods = entry.getValue();
+
+				checkReturnType(annotation, entry.getValue());
+
+				Parameters parameters = event.getTargetNavigationState()
+						.parameters();
+
+				callMatchingMethodForAvailibleParameters(view, event,
+						parameters, alternateMethods);
+			}
+		}
+	}
+
+	private void callMatchingMethodForAvailibleParameters(KrailView view,
+			KrailViewChangeEvent event, Parameters parameters,
+			LinkedList<Method> alternateMethods) throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+		callMatchingMethodForAvailibleParameters(view, event, parameters,
+				alternateMethods, null);
+	}
+
+	private void callMatchingMethodForAvailibleParameters(KrailView view,
+			KrailViewChangeEvent event, Parameters parameters,
+			LinkedList<Method> alternateMethods,
+			Boolean useCalculatedParameters) throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+
+		Map<Method, Object[]> matchingMethods = new HashMap<Method, Object[]>();
+
+		methodsLoop: for (Method method : alternateMethods) {
+			LOGGER.trace("checking method {}:", method);
+			Class<?>[] parametersTypes = method.getParameterTypes();
+			Annotation[][] parametersAnnotations = method
+					.getParameterAnnotations();
+			Object[] args = new Object[parametersTypes.length];
+
+			for (int i = 0; i < parametersTypes.length; i++) {
+				Parameter parameterAnnotation;
+				if (parametersTypes[i].isAssignableFrom(event.getClass())) {
+					args[i] = event;
+					LOGGER.trace(
+							"parameter {} of type {} -> CancellableKrailViewChangeEvent",
+							i, parametersTypes[i]);
+				} else if ((parameterAnnotation = getAnnotation(
+						parametersAnnotations[i], Parameter.class)) != null) {
+
+					String parameterKey = parameterAnnotation.value();
+					boolean parameterOptional = parameterAnnotation.optional();
+					useCalculatedParameters = useCalculatedParameters == null
+							? true
+							: useCalculatedParameters;
+					try {
+						Object parameterValue = parameters.get(parameterKey);
+
+						if (parametersTypes[i]
+								.isAssignableFrom(parameterValue.getClass())) {
+							args[i] = parameterValue;
+						} else if (parameterValue.getClass()
+								.equals(String.class)) {
+							// proviene dall'uri? Provo a convertirlo nel tipo
+							// richiesto
+							try {
+								args[i] = convert((String) parameterValue,
+										parametersTypes[i]);
+							} catch (ConversionException e) {
+								throw new IllegalStateException(
+										"The parameter '" + parameterKey
+												+ "' with value '"
+												+ parameterValue
+												+ "' is not of the required type ("
+												+ parametersTypes[i] + ").",
+										e);
+							}
+						} else {
+							throw new IllegalStateException(
+									"The parameter '" + parameterKey
+											+ "' with value '" + parameterValue
+											+ "' is not of the required type ("
+											+ parametersTypes[i] + ").");
+						}
+
+					} catch (NoSuchElementException e) {
+						// the required parameter is not present...
+						if (parameterOptional) {
+							// ...but is optional, so the value can be null
+							args[i] = null;
+						} else {
+							// ...and is not optional, this method is not the
+							// correct one
+							;
+						}
+						continue methodsLoop;
+					}
+
+				} else /* if(parameterAnnotation == null) */ {
+
+					// provo a creare il parametro con l'injector
+					Object instance = null;
+					if (parametersAnnotations[i].length > 0) {
+						for (int j = 0; j < parametersAnnotations[i].length; j++) {
+							try {
+								
+								instance = injecotr
+										.getInstance(Key.get(method.getParameters()[i].getParameterizedType(),
+												parametersAnnotations[i][j]));
+							} catch (ConfigurationException e) {
+								;
+							}
+							if (instance != null) {
+								break;
+							}
+						}
+					} else {
+						instance = injecotr
+								.getInstance(Key.get(parametersTypes[i]));
+					}
+					if (instance != null) {
+						args[i] = instance;
+					} else {
+						// method parameter not annotated with @Parameter and
+						// can't retrieve with injector
+						throw new IllegalStateException(
+								"Unable to bind parameter " + i + " (of type "
+										+ parametersTypes[i]
+										+ ") of the callback method " + method);
+					}
+				}
+			} // parameters for loop
+
+			// all parameters found
+			// TODO: optional parameters
+			matchingMethods.put(method, args);
+
+			// remove methods with the same parameters but some more
+			Iterator<Method> it = matchingMethods.keySet().iterator();
+			while (it.hasNext()) {
+				boolean toBeRemover = false;
+				Method m = it.next();
+				for (Method m2 : matchingMethods.keySet()) {
+					if (m2 == m) {
+						continue;
+					}
+					Class<?>[] m2Parameters = m2.getParameterTypes();
+					Class<?>[] mParameters = m.getParameterTypes();
+					if (m2Parameters.length > mParameters.length
+							&& Arrays.asList(m2Parameters)
+									.containsAll(Arrays.asList(mParameters))) {
+						// il metodo m2 contiene tutti i parametri di m, e
+						// altri, quindi m va scartato
+						toBeRemover = true;
+						break;
+					}
+				}
+				if (toBeRemover) {
+					it.remove();
+				}
+			}
+
+		} // methods foor loop
+
+		if (matchingMethods.isEmpty()) {
+			if (useCalculatedParameters == null) {
+				// try with calculated parameters
+				callMatchingMethodForAvailibleParameters(view, event,
+						parameters, alternateMethods, true);
+			} else {
+				throw new IllegalStateException(
+						"Unable to find the method to call for the provided parameters:\n"
+								+ "   parameters: " + parameters + "\n"
+								+ "   methods:    "
+								+ methodsToString(alternateMethods) + "\n\n");
+			}
+		} else if (matchingMethods.size() > 1) {
+			throw new IllegalStateException(
+					"Unable to tell wich method to call within the matching ones:\n"
+							+ "   parameters: " + parameters + "\n"
+							+ "   methods:    "
+							+ methodsToString(alternateMethods) + "\n\n");
+		}
+
+		Entry<Method, Object[]> entry = matchingMethods.entrySet().iterator()
+				.next();
+		Method method = entry.getKey();
+		Object[] args = entry.getValue();
+		method.setAccessible(true);
+		method.invoke(view, args);
+	}
 }
