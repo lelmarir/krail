@@ -141,7 +141,18 @@ public class SitemapModule extends AbstractModule {
 			}
 		}
 	}
+	
+	private String basePackage;
 
+	public SitemapModule() {
+		super();
+	}
+	
+	public SitemapModule(String basePackage) {
+		super();
+		this.basePackage = basePackage;
+	}
+	
 	@Override
 	protected void configure() {
 		Multibinder<SitemapLoader> sitemapLoadersBinder = Multibinder
@@ -174,7 +185,7 @@ public class SitemapModule extends AbstractModule {
 	 */
 	protected void bindLoaders(Multibinder<SitemapLoader> sitemapLoadersBinder) {
 		sitemapLoadersBinder.addBinding().toInstance(
-				new AnnotationSitemapLoader(""));
+				new AnnotationSitemapLoader(basePackage));
 	}
 
 }

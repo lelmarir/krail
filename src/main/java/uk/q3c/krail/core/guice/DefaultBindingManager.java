@@ -52,6 +52,8 @@ public abstract class DefaultBindingManager
 	private static Logger log = LoggerFactory
 			.getLogger(DefaultBindingManager.class);
 
+	private String basePackage = "";
+	
 	private ServiceManagerModule servicesModule;
 	private I18NModule i18NModule;
 	private UserOptionModule userOptionModule;
@@ -147,6 +149,20 @@ public abstract class DefaultBindingManager
 					"The injector has already been created, it's no more possible to change the configuration");
 		}
 	}
+	
+	public String getBasePackage() {
+		if(log.isDebugEnabled()) {
+			if(basePackage == null || basePackage.isEmpty()) {
+				log.warn("No basePackadge provided for reflection.");
+			}
+		}
+		return basePackage;
+	}
+	
+	public void setBasePackage(String basePackage) {
+		checkIfConfigurationStillPossible();
+		this.basePackage = basePackage;
+	}
 
 	protected UserOptionModule getUserOptionModule() {
 		if (this.userOptionModule == null) {
@@ -210,7 +226,7 @@ public abstract class DefaultBindingManager
 
 	public SitemapModule getSitemapModule() {
 		if (this.sitemapModule == null) {
-			this.sitemapModule = new SitemapModule();
+			this.sitemapModule = new SitemapModule(getBasePackage());
 		}
 		return this.sitemapModule;
 	}

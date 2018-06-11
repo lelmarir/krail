@@ -28,7 +28,7 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 	private String basePackage;
 
 	public AnnotationSitemapLoader(String basePackage) {
-		this.basePackage = basePackage;
+		this.basePackage = basePackage!=null?basePackage:"";
 	}
 
 	@Override
