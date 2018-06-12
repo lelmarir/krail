@@ -274,7 +274,7 @@ public abstract class DefaultBindingManager
 
 	protected ErrorModule getErrorModule() {
 		if (this.errorModule == null) {
-			this.errorModule = new ErrorModule();
+			this.errorModule = new ErrorModule(getBasePackage());
 		}
 		return this.errorModule;
 	}
