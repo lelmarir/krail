@@ -22,6 +22,11 @@ public class InvalidURIException extends PageNotFoundException {
 
 	private final String uri;
 
+	public InvalidURIException(String uri) {
+		super("Unable to find the node for the fragment '" + uri + "'");
+		this.uri = uri;
+	}
+	
 	public InvalidURIException(String uri, LinkedList<AbstractNode> nodes) {
 		super("Unable to find the node for the fragment '" + uri + "'\n"
 				+ "\tregistered nodes: " + nodes);

@@ -24,6 +24,7 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.q3c.krail.core.guice.errors.ErrorHandler.ErrorEvent;
 import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
@@ -75,6 +76,9 @@ public class DefaultNavigator implements Navigator {
 	@Inject
 	private Provider<DefaultNavigationCallbackHandler> defaultCallbackHandlerProvider;
 	private NavigationCallbackHandler callbackHandler;
+	
+	@Inject
+	private Provider<InvalidURIExceptionHandler> invalidUriHandlerProvider;
 
 	protected NavigationStateManager stateManager;
 
@@ -106,9 +110,8 @@ public class DefaultNavigator implements Navigator {
 			//kickstart
 			navigateTo(stateManager.getState());
 		} catch (InvalidURIException e) {
-			// TODO: gestire le url errate in maniera piu "gentile", con una
-			// pagina 404 o simili piuttosto che un generico errore
-			navigateToErrorView(e);
+			//in questo momento eventuali eccezioni non vengono gestite da Vaadin
+			invalidUriHandlerProvider.get().handle(new ErrorEvent(e));
 		}
 	}
 
