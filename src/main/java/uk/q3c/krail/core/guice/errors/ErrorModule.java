@@ -39,6 +39,7 @@ public class ErrorModule extends AbstractModule {
 	protected void bindAnnotatedErrorHandlers(
 			Multibinder<ErrorHandler> errorHandlersBinder) {
 		LOGGER.info("scanning {} for HandleErrors annotations", basePackage);
+		//TODO: usare sempre lo stesso Reflections in tutti i moduli, non ricrearlo sempre
 		Reflections reflections = new Reflections(basePackage);
 
 		// find the View annotations
