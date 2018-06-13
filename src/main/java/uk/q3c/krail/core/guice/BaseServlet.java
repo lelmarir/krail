@@ -117,7 +117,7 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 			@Override
 			public void destroy() {
 				for (KrailRequestHandler handler : requestHandlers) {
-					handler.init();
+					handler.destroy();
 				}
 				super.destroy();
 			}
