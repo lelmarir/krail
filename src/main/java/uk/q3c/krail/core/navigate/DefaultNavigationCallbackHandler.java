@@ -303,7 +303,7 @@ public class DefaultNavigationCallbackHandler
 							throw new IllegalStateException(
 									"The parameter '" + parameterKey
 											+ "' with value '" + parameterValue
-											+ "' is not of the required type ("
+											+ "' of type "+ (parameterValue!=null?parameterValue.getClass():null)  +" is not of the required type ("
 											+ parametersTypes[i] + ").");
 						}
 

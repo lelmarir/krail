@@ -111,7 +111,8 @@ public class DefaultNavigator implements Navigator {
 			navigateTo(stateManager.getState());
 		} catch (InvalidURIException e) {
 			//in questo momento eventuali eccezioni non vengono gestite da Vaadin
-			invalidUriHandlerProvider.get().handle(new ErrorEvent(e));
+			//TODO: dovrei gestire meglio i 404 piuttosto che andare alla pagina di errore
+			navigateToErrorView(e, "<b>404</b> Page not Found");
 		}
 	}
 
@@ -392,13 +393,15 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateToErrorView(final Throwable error) {
-		LOGGER.debug("A {} Error has been thrown, reporting via the Error View",
-				error.getClass().getName(), error);
+		navigateToErrorView(error, null);
+	}
+	
+	@Override
+	public void navigateToErrorView(final Throwable error, String message) {
+		LOGGER.debug("A {} Error has been thrown, reporting via the Error View: {}",
+				error.getClass().getName(), message, error);
 
-		NavigationTarget navigationTarget = new NavigationTarget(
-				ErrorView.class);
-		navigationTarget.putParameter("error", error);
-		navigateTo(navigationTarget);
+		navigateTo(ErrorView.buildNavigationTarget(error, message));
 	}
 
 	@Override

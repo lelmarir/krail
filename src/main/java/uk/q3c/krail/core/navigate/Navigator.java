@@ -71,6 +71,8 @@ public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNoti
 	NavigationState getPreviousNavigationState();
 
 	void navigateToErrorView(Throwable throwable);
+	
+	void navigateToErrorView(Throwable error, String message);
 
 	/**
 	 * Update the visible fragment to the current 

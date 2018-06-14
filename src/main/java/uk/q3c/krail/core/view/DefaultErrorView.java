@@ -14,6 +14,8 @@
 package uk.q3c.krail.core.view;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
@@ -44,11 +46,14 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 
 	private Throwable error;
 	private TextArea textArea;
+	private Label descriptionLabel;
 
 	private NavigationState previousNavigationState;
 
 	@Inject
-	protected DefaultErrorView(Navigator navigator) {
+	private Provider<Navigator> navigatorProvider;
+
+	protected DefaultErrorView() {
 		super();
 		CssLayout outerLayout = new CssLayout();
 		{
@@ -56,31 +61,34 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 			{
 				mainLayout.setSizeFull();
 
-				VerticalLayout desriptionLayout = new VerticalLayout();
+				VerticalLayout descriptionLayout = new VerticalLayout();
 				{
-					desriptionLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+					descriptionLayout.setDefaultComponentAlignment(
+							Alignment.MIDDLE_CENTER);
 
-					Label description = new Label("Something went wrong");
+					descriptionLabel = new Label("Something went wrong");
 					{
-						description.setSizeUndefined();
-						description.addStyleName(ValoTheme.LABEL_H1);
+						descriptionLabel.setSizeUndefined();
+						descriptionLabel.addStyleName(ValoTheme.LABEL_H1);
+						descriptionLabel.setContentMode(ContentMode.HTML);
 					}
-					desriptionLayout.addComponent(description);
+					descriptionLayout.addComponent(descriptionLabel);
 
 					Button backButton = new Button("Back", new ClickListener() {
 						@Override
 						public void buttonClick(ClickEvent event) {
-							if(previousNavigationState != null) {
-								navigator.navigateTo(previousNavigationState);
-							}else{
-								navigator.navigateTo(StandardPageKey.Public_Home);
+							if (previousNavigationState != null) {
+								navigatorProvider.get().navigateTo(previousNavigationState);
+							} else {
+								navigatorProvider.get().navigateTo(
+										StandardPageKey.Public_Home);
 							}
 						}
 					});
 					backButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
-					desriptionLayout.addComponent(backButton);
-					
-					//FIXME: localizzare
+					descriptionLayout.addComponent(backButton);
+
+					// FIXME: localizzare
 					Button moreButton = new Button("show more");
 					{
 						moreButton.addStyleName(ValoTheme.BUTTON_LINK);
@@ -88,20 +96,22 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 							@Override
 							public void buttonClick(ClickEvent event) {
 								textArea.setVisible(true);
-								desriptionLayout.setVisible(false);
+								descriptionLayout.setVisible(false);
 							}
 						});
 					}
-					desriptionLayout.addComponent(moreButton);
+					descriptionLayout.addComponent(moreButton);
 				}
-				mainLayout.addComponent(desriptionLayout);
-				mainLayout.setComponentAlignment(desriptionLayout, Alignment.MIDDLE_CENTER);
+				mainLayout.addComponent(descriptionLayout);
+				mainLayout.setComponentAlignment(descriptionLayout,
+						Alignment.MIDDLE_CENTER);
 
 				textArea = new TextArea();
 				{
 					textArea.setSizeFull();
 					textArea.setVisible(false);
-					textArea.setValue("Error view has been called but no error has been set.  This should not happen");
+					textArea.setValue(
+							"Error view has been called but no error has been set.  This should not happen");
 					textArea.setReadOnly(true);
 				}
 				mainLayout.addComponent(textArea);
@@ -122,17 +132,21 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	}
 
 	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event) {
+	protected void beforeInboundNavigation(
+			CancellableKrailViewChangeEvent event) {
 		event.cancel();
 		event.getNavigator().navigateTo(StandardPageKey.Public_Home);
 	}
 
 	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event,
-			@Parameter(value = "error", optional = true) Throwable error) {
+	protected void beforeInboundNavigation(
+			CancellableKrailViewChangeEvent event,
+			@Parameter(value = ErrorView.ERROR_PARAMETER, optional = true) Throwable error,
+			@Parameter(value = ErrorView.LOCALIZED_MESSAGE_PARAMETER, optional = true) String localizedMessage) {
 		// try to close any opened windows
 		int loopCount = 10;
-		while (loopCount > 0 && UI.getCurrent().getWindows().iterator().hasNext()) {
+		while (loopCount > 0
+				&& UI.getCurrent().getWindows().iterator().hasNext()) {
 			try {
 				UI.getCurrent().getWindows().iterator().next().close();
 			} catch (Exception e) {
@@ -144,6 +158,10 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		textArea.setReadOnly(false);
 		textArea.setValue(StackTraceUtil.getStackTrace(error));
 		textArea.setReadOnly(true);
+		
+		if(localizedMessage != null && !localizedMessage.isEmpty()) {
+			descriptionLabel.setValue(localizedMessage);
+		}
 
 		if (event.getSourceNavigationState() != null) {
 			previousNavigationState = event.getSourceNavigationState();
