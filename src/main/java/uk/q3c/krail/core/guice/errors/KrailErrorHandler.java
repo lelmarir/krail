@@ -28,6 +28,7 @@ import uk.q3c.krail.core.guice.errors.ErrorHandler.ErrorEvent;
 import uk.q3c.krail.core.navigate.Navigator;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.vaadin.server.DefaultErrorHandler;
 
 /**
@@ -45,14 +46,13 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KrailErrorHandler.class);
 	
 	private final LinkedList<ErrorHandler> errorHandlers;
-	private final Navigator navigator;
+	@Inject
+	private Provider<Navigator> navigatorProvider;
 
 	@Inject
-	protected KrailErrorHandler(Set<ErrorHandler> errorHandlers,
-			Navigator navigator) {
+	protected KrailErrorHandler(Set<ErrorHandler> errorHandlers) {
 		super();
 		this.errorHandlers = new LinkedList<>(errorHandlers);
-		this.navigator = navigator;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 
 		if (handled == false) {
 			LOGGER.error("Unable to handle the error: navigating to the error page", event.getThrowable());
-			navigator.navigateToErrorView(event.getThrowable());
+			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 		}
 	}
 

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class DefaultInvalidURIExceptionHandler implements
 		InvalidURIExceptionHandler {
@@ -27,17 +28,18 @@ public class DefaultInvalidURIExceptionHandler implements
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInvalidURIExceptionHandler.class);
 	
 	private final UserNotifier notifier;
-	private final Navigator navigator;
+	private final Provider<Navigator> navigatorProvider;
 
 	@Inject
 	protected DefaultInvalidURIExceptionHandler(UserNotifier notifier,
-			Navigator navigator) {
+			Provider<Navigator> navigatorProvider) {
 		this.notifier = notifier;
-		this.navigator = navigator;
+		this.navigatorProvider = navigatorProvider;
 	}
 
 	private void onInvalidUri(InvalidURIException error) {
 		//FIXME: localizzare
+		Navigator navigator = navigatorProvider.get();
 		notifier.show(NotificationType.ERROR, "Invalid URI: '" + error.getMessage() + "'");
 		LOGGER.info("Invalid URI: '" + error.getMessage() + "'");
 		if (navigator.getCurrentNavigationState() != null) {

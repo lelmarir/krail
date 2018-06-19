@@ -140,25 +140,27 @@ public abstract class ScopedUI extends UI
 
 		VaadinSession session = getSession();
 
+		ErrorHandler errorHandler = errorHandlerProvider.get();
+		setErrorHandler(errorHandler);
+		session.setErrorHandler(errorHandler);
+
 		Navigator navigator = navigatorProvider.get();
 		// page isn't available during injected construction, so we have to do
 		// this here
 		if (navigator instanceof com.vaadin.navigator.Navigator) {
 			super.setNavigator((com.vaadin.navigator.Navigator) navigator);
-		} else if(navigator instanceof DefaultNavigator) {
+		} else if (navigator instanceof DefaultNavigator) {
 			log.debug(
 					"The injected nagigator has been wrapped in VaadinNavigatorWrapper");
-			super.setNavigator(new VaadinNavigatorWrapper((DefaultNavigator)navigator));
-		}else {
+			super.setNavigator(
+					new VaadinNavigatorWrapper((DefaultNavigator) navigator));
+		} else {
 			super.setNavigator(null);
 			log.warn(
 					"The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");
 		}
 		Page page = getPage();
 
-		ErrorHandler errorHandler = errorHandlerProvider.get();
-		setErrorHandler(errorHandler);
-		session.setErrorHandler(errorHandler);
 		page.setTitle(pageTitle());
 
 		CurrentLocale currentLocale = this.currentLocaleProvider.get();
@@ -168,6 +170,9 @@ public abstract class ScopedUI extends UI
 		currentLocale.addListener(this);
 
 		doLayout();
+		
+		//FIXME: non dovrei chiamare a mano init(), dovrebbe essere eseguito come @PostConstruct, a eventuali errori causano un loop
+		navigator.init();
 	}
 
 	/**

@@ -28,23 +28,24 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.vaadin.server.VaadinSession;
 
 public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
-	private final Navigator navigator;
+	private final Provider<Navigator> navigatorProvider;
 
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 
 	private VaadinSession session;
 
 	@Inject
-	protected AutenticationHandler(Navigator navigator, AuthenticationNotifier authenticationNotifier,
+	protected AutenticationHandler(Provider<Navigator> navigatorProvider, AuthenticationNotifier authenticationNotifier,
 			VaadinSessionProvider vaadinSessionProvider) {
 		super();
-		this.navigator = navigator;
+		this.navigatorProvider = navigatorProvider;
 		this.session = vaadinSessionProvider.get();
 		authenticationNotifier.addListener(this);
 	}
@@ -53,7 +54,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 			UnauthenticatedException throwable) {
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
 
-		navigator.navigateTo(StandardPageKey.Log_In);
+		navigatorProvider.get().navigateTo(StandardPageKey.Log_In);
 
 	}
 
@@ -88,10 +89,10 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		session.access(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
-				navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
+				navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				targetNavigationStateBeforeUnathenticatedException = null;
 			} else {
-				navigator.navigateTo(StandardPageKey.Private_Home);
+				navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
 			}
 		});
 
@@ -105,6 +106,6 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	@Override
 	public void onLogout(LogoutEvent event) {
 		LOGGER.info("logout(user={})", event.getSubject());
-		navigator.navigateTo(StandardPageKey.Log_Out);
+		navigatorProvider.get().navigateTo(StandardPageKey.Log_Out);
 	}
 }

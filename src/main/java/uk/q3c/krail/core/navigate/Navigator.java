@@ -79,4 +79,9 @@ public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNoti
 	 */
 	void updateUriFragment();
 
+	/**
+	 * kickstart the navigator
+	 */
+	void init();
+
 }
