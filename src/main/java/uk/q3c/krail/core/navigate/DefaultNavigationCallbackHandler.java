@@ -262,7 +262,7 @@ public class DefaultNavigationCallbackHandler
 					.getParameterAnnotations();
 			Object[] args = new Object[parametersTypes.length];
 
-			for (int i = 0; i < parametersTypes.length; i++) {
+			parametersLoop: for (int i = 0; i < parametersTypes.length; i++) {
 				Parameter parameterAnnotation;
 				if (parametersTypes[i].isAssignableFrom(event.getClass())) {
 					args[i] = event;
@@ -317,7 +317,7 @@ public class DefaultNavigationCallbackHandler
 							// correct one
 							;
 						}
-						continue methodsLoop;
+						continue parametersLoop;
 					}
 
 				} else /* if(parameterAnnotation == null) */ {
