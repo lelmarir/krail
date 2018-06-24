@@ -155,11 +155,13 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 			loopCount--;
 		}
 		this.error = error;
-		textArea.setReadOnly(false);
-		textArea.setValue(StackTraceUtil.getStackTrace(error));
-		textArea.setReadOnly(true);
-		
-		if(localizedMessage != null && !localizedMessage.isEmpty()) {
+		if (error != null) {
+			textArea.setReadOnly(false);
+			textArea.setValue(StackTraceUtil.getStackTrace(error));
+			textArea.setReadOnly(true);
+		}
+
+		if (localizedMessage != null && !localizedMessage.isEmpty()) {
 			descriptionLabel.setValue(localizedMessage);
 		}
 

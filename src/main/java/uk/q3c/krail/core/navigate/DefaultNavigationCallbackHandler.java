@@ -3,6 +3,8 @@ package uk.q3c.krail.core.navigate;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -96,6 +98,17 @@ public class DefaultNavigationCallbackHandler
 		}
 	}
 
+	private static boolean isAssignableFrom(Type type,
+			Class<?> clazz) {
+		if(type instanceof Class) {
+			return ((Class<?>)type).isAssignableFrom(clazz);
+		}else if(type instanceof ParameterizedType){
+			return false;
+		}else {
+			throw new IllegalArgumentException();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static Class<? extends KrailView> unproxy(
 			Class<? extends KrailView> clazz) {
@@ -151,15 +164,19 @@ public class DefaultNavigationCallbackHandler
 		return null;
 	}
 
-	private static Object convert(String string, Class<?> clazz)
+	private static Object convert(String string, Type type)
 			throws ConversionException {
 
 		if (string == null) {
 			return null;
 		}
 
+		if(!(type instanceof Class)) {
+			throw new IllegalStateException("the parameter type is not a class: " + type);
+		}
+		
 		try {
-			return clazz.getConstructor(String.class).newInstance(string);
+			return ((Class<?>)type).getConstructor(String.class).newInstance(string);
 		} catch (NoSuchMethodException | SecurityException
 				| InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
@@ -255,16 +272,16 @@ public class DefaultNavigationCallbackHandler
 
 		Map<Method, Object[]> matchingMethods = new HashMap<Method, Object[]>();
 
-		methodsLoop: for (Method method : alternateMethods) {
+		for (Method method : alternateMethods) {
 			LOGGER.trace("checking method {}:", method);
-			Class<?>[] parametersTypes = method.getParameterTypes();
+			Type[] parametersTypes = method.getGenericParameterTypes();
 			Annotation[][] parametersAnnotations = method
 					.getParameterAnnotations();
 			Object[] args = new Object[parametersTypes.length];
 
-			parametersLoop: for (int i = 0; i < parametersTypes.length; i++) {
+			for (int i = 0; i < parametersTypes.length; i++) {
 				Parameter parameterAnnotation;
-				if (parametersTypes[i].isAssignableFrom(event.getClass())) {
+				if (isAssignableFrom(parametersTypes[i], event.getClass())) {
 					args[i] = event;
 					LOGGER.trace(
 							"parameter {} of type {} -> CancellableKrailViewChangeEvent",
@@ -280,8 +297,7 @@ public class DefaultNavigationCallbackHandler
 					try {
 						Object parameterValue = parameters.get(parameterKey);
 
-						if (parametersTypes[i]
-								.isAssignableFrom(parameterValue.getClass())) {
+						if (isAssignableFrom(parametersTypes[i], parameterValue.getClass())) {
 							args[i] = parameterValue;
 						} else if (parameterValue.getClass()
 								.equals(String.class)) {
@@ -300,11 +316,14 @@ public class DefaultNavigationCallbackHandler
 										e);
 							}
 						} else {
-							throw new IllegalStateException(
-									"The parameter '" + parameterKey
-											+ "' with value '" + parameterValue
-											+ "' of type "+ (parameterValue!=null?parameterValue.getClass():null)  +" is not of the required type ("
-											+ parametersTypes[i] + ").");
+							throw new IllegalStateException("The parameter '"
+									+ parameterKey + "' with value '"
+									+ parameterValue + "' of type "
+									+ (parameterValue != null
+											? parameterValue.getClass()
+											: null)
+									+ " is not of the required type ("
+									+ parametersTypes[i] + ").");
 						}
 
 					} catch (NoSuchElementException e) {
@@ -317,7 +336,7 @@ public class DefaultNavigationCallbackHandler
 							// correct one
 							;
 						}
-						continue parametersLoop;
+						continue;
 					}
 
 				} else /* if(parameterAnnotation == null) */ {
@@ -327,10 +346,11 @@ public class DefaultNavigationCallbackHandler
 					if (parametersAnnotations[i].length > 0) {
 						for (int j = 0; j < parametersAnnotations[i].length; j++) {
 							try {
-								
-								instance = injecotr
-										.getInstance(Key.get(method.getParameters()[i].getParameterizedType(),
-												parametersAnnotations[i][j]));
+
+								instance = injecotr.getInstance(Key.get(
+										method.getParameters()[i]
+												.getParameterizedType(),
+										parametersAnnotations[i][j]));
 							} catch (ConfigurationException e) {
 								;
 							}
@@ -339,8 +359,12 @@ public class DefaultNavigationCallbackHandler
 							}
 						}
 					} else {
-						instance = injecotr
-								.getInstance(Key.get(parametersTypes[i]));
+						try {
+							instance = injecotr
+									.getInstance(Key.get(parametersTypes[i]));
+						} catch (ConfigurationException e) {
+							;
+						}
 					}
 					if (instance != null) {
 						args[i] = instance;
