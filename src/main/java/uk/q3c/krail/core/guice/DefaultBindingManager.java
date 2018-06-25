@@ -99,7 +99,7 @@ public abstract class DefaultBindingManager
 	protected Injector createInjector() {
 		bridgeJULToSLF4J();
 
-		return LifecycleInjector.builder()
+		return LifecycleInjector.builder().usingBasePackages(getBasePackage())
 				.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
 				.withModules(getModules()).build().createInjector();
 	}
