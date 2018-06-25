@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,15 +143,15 @@ public class SitemapModule extends AbstractModule {
 		}
 	}
 	
-	private String basePackage;
+	private final Reflections basePackageReflections;
 
-	public SitemapModule() {
-		super();
-	}
-	
 	public SitemapModule(String basePackage) {
+		this(new Reflections(basePackage));
+	}
+
+	public SitemapModule(Reflections basePackageReflections) {
 		super();
-		this.basePackage = basePackage;
+		this.basePackageReflections = basePackageReflections;
 	}
 	
 	@Override
@@ -185,7 +186,7 @@ public class SitemapModule extends AbstractModule {
 	 */
 	protected void bindLoaders(Multibinder<SitemapLoader> sitemapLoadersBinder) {
 		sitemapLoadersBinder.addBinding().toInstance(
-				new AnnotationSitemapLoader(basePackage));
+				new AnnotationSitemapLoader(basePackageReflections));
 	}
 
 }

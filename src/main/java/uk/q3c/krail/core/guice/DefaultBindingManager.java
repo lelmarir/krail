@@ -21,6 +21,7 @@ import javax.servlet.ServletContextEvent;
 
 import org.apache.shiro.guice.ShiroModule;
 import org.apache.shiro.guice.aop.ShiroAopModule;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -53,6 +54,7 @@ public abstract class DefaultBindingManager
 			.getLogger(DefaultBindingManager.class);
 
 	private String basePackage = "";
+	private Reflections basePackageReflections;
 	
 	private ServiceManagerModule servicesModule;
 	private I18NModule i18NModule;
@@ -159,6 +161,13 @@ public abstract class DefaultBindingManager
 		return basePackage;
 	}
 	
+	public Reflections getBasePackageReflections() {
+		if(basePackageReflections == null) {
+			basePackageReflections = new Reflections(getBasePackage());
+		}
+		return basePackageReflections;
+	}
+	
 	public void setBasePackage(String basePackage) {
 		checkIfConfigurationStillPossible();
 		this.basePackage = basePackage;
@@ -226,7 +235,7 @@ public abstract class DefaultBindingManager
 
 	public SitemapModule getSitemapModule() {
 		if (this.sitemapModule == null) {
-			this.sitemapModule = new SitemapModule(getBasePackage());
+			this.sitemapModule = new SitemapModule(getBasePackageReflections());
 		}
 		return this.sitemapModule;
 	}
@@ -274,7 +283,7 @@ public abstract class DefaultBindingManager
 
 	protected ErrorModule getErrorModule() {
 		if (this.errorModule == null) {
-			this.errorModule = new ErrorModule(getBasePackage());
+			this.errorModule = new ErrorModule(getBasePackageReflections());
 		}
 		return this.errorModule;
 	}

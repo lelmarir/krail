@@ -25,25 +25,24 @@ public class AnnotationSitemapLoader implements SitemapLoader {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(AnnotationSitemapLoader.class);
 
-	private String basePackage;
+	private Reflections basePackageReflections;
 
-	public AnnotationSitemapLoader(String basePackage) {
-		this.basePackage = basePackage!=null?basePackage:"";
+	public AnnotationSitemapLoader(Reflections basePackageReflections) {
+		this.basePackageReflections = basePackageReflections;
 	}
 
 	@Override
 	public void configure(Sitemap sitemap) {
 
-		LOGGER.info("scanning {} for View annotations", basePackage);
-		Reflections reflections = new Reflections(basePackage);
+		LOGGER.info("scanning {} for View annotations", basePackageReflections.getConfiguration().getUrls());
 
 		// find the View annotations
-		Set<Class<?>> typesWithView = reflections
+		Set<Class<?>> typesWithView = basePackageReflections
 				.getTypesAnnotatedWith(View.class);
 		LOGGER.info("{} KrailViews with View annotation found",
 				typesWithView.size());
 
-		checkRedirectAnnotations(reflections, typesWithView);
+		checkRedirectAnnotations(basePackageReflections, typesWithView);
 
 		// process the View annotations
 		for (Class<?> clazz : typesWithView) {

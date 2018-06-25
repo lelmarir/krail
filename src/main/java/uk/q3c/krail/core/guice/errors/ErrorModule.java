@@ -14,10 +14,14 @@ public class ErrorModule extends AbstractModule {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ErrorModule.class);
 
-	private final String basePackage;
+	private final Reflections basePackageReflections;
 
 	public ErrorModule(String basePackage) {
-		this.basePackage = basePackage;
+		this(new Reflections(basePackage));
+	}
+
+	public ErrorModule(Reflections basePackageReflections) {
+		this.basePackageReflections = basePackageReflections;
 	}
 
 	@Override
@@ -38,12 +42,12 @@ public class ErrorModule extends AbstractModule {
 
 	protected void bindAnnotatedErrorHandlers(
 			Multibinder<ErrorHandler> errorHandlersBinder) {
-		LOGGER.info("scanning {} for HandleErrors annotations", basePackage);
+		LOGGER.info("scanning {} for HandleErrors annotations", basePackageReflections.getConfiguration().getUrls());
 		//TODO: usare sempre lo stesso Reflections in tutti i moduli, non ricrearlo sempre
-		Reflections reflections = new Reflections(basePackage);
+		
 
 		// find the View annotations
-		Set<Class<?>> typesWithView = reflections
+		Set<Class<?>> typesWithView = basePackageReflections
 				.getTypesAnnotatedWith(HandleErrors.class);
 		LOGGER.info("{} ErrorHandlers with HandleErrors annotation found",
 				typesWithView.size());
