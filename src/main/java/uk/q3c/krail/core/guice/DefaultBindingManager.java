@@ -66,6 +66,7 @@ public abstract class DefaultBindingManager
 	private ShiroModule shiroModule;
 	private UserModule userModule;
 	private ErrorModule errorModule;
+	private boolean automaticStaticInjection = true;
 
 	private Collection<Module> appModules = new ArrayList<>();
 
@@ -139,6 +140,10 @@ public abstract class DefaultBindingManager
 		coreModules.add(getUserOptionModule());
 
 		coreModules.addAll(appModules);
+		
+		if(automaticStaticInjection) {
+			coreModules.add(new StaticInjectionModule(getBasePackageReflections()));
+		}
 
 		// bind after appModules to allow other servlets
 		coreModules.add(getServletModule());
@@ -295,6 +300,14 @@ public abstract class DefaultBindingManager
 
 	protected void addModule(Module module) {
 		this.appModules.add(module);
+	}
+	
+	public boolean isAutomaticStaticInjection() {
+		return automaticStaticInjection;
+	}
+	
+	public void setAutomaticStaticInjection(boolean automaticStaticInjection) {
+		this.automaticStaticInjection = automaticStaticInjection;
 	}
 
 	@Override
