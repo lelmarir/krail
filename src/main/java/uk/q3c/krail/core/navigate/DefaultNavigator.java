@@ -76,7 +76,7 @@ public class DefaultNavigator implements Navigator {
 	@Inject
 	private Provider<DefaultNavigationCallbackHandler> defaultCallbackHandlerProvider;
 	private NavigationCallbackHandler callbackHandler;
-	
+
 	@Inject
 	private Provider<InvalidURIExceptionHandler> invalidUriHandlerProvider;
 
@@ -101,13 +101,13 @@ public class DefaultNavigator implements Navigator {
 		this.sitemap = sitemap;
 
 		setStateManager(createNavigationStateManager(ui));
-		
+
 	}
-	
+
 	@Override
 	public void init() {
 		try {
-			//kickstart
+			// kickstart
 			navigateTo(stateManager.getState());
 		} catch (InvalidURIException e) {
 			//TODO: dovrei gestire meglio i 404 piuttosto che andare alla pagina di errore
@@ -116,12 +116,12 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	protected NavigationCallbackHandler getCallbackHandler() {
-		if(callbackHandler == null) {
+		if (callbackHandler == null) {
 			callbackHandler = defaultCallbackHandlerProvider.get();
 		}
 		return callbackHandler;
 	}
-	
+
 	protected NavigationStateManager createNavigationStateManager(UI ui) {
 		if (ui.getClass().getAnnotation(PushStateNavigation.class) != null) {
 			return new PushStateManager(ui);
@@ -142,7 +142,16 @@ public class DefaultNavigator implements Navigator {
 	protected Sitemap getSitemap() {
 		return sitemap;
 	}
-	
+
+	@Override
+	public void navigateBack() throws UnknownPreviousNavigationState {
+		if (getPreviousNavigationState() != null) {
+			navigateTo(getPreviousNavigationState());
+		}else {
+			throw new UnknownPreviousNavigationState();
+		}
+	}
+
 	@Override
 	public void navigateTo(String fragment) throws InvalidURIException {
 		LOGGER.debug("Navigating to fragment: {}", fragment);
@@ -380,7 +389,7 @@ public class DefaultNavigator implements Navigator {
 	public ScopedUI getUI() {
 		return ui;
 	}
-	
+
 	public KrailView getCurrentView() {
 		return getUI().getView();
 	}
@@ -394,7 +403,7 @@ public class DefaultNavigator implements Navigator {
 	public void navigateToErrorView(final Throwable error) {
 		navigateToErrorView(error, null);
 	}
-	
+
 	@Override
 	public void navigateToErrorView(final Throwable error, String localizedMessage) {
 		LOGGER.debug("A {} Error has been thrown, reporting via the Error View: {}",

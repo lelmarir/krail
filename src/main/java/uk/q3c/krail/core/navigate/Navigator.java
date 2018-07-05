@@ -32,6 +32,10 @@ import com.vaadin.ui.UI;
  */
 public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNotifier, BeforeSecurityCheckNotifier {
 
+	public static class UnknownPreviousNavigationState extends Exception {
+		
+	}
+	
 	void navigateTo(String fragment) throws InvalidURIException;
 
 	/**
@@ -83,5 +87,7 @@ public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNoti
 	 * kickstart the navigator
 	 */
 	void init();
+
+	void navigateBack() throws UnknownPreviousNavigationState;
 
 }
