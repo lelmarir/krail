@@ -22,6 +22,10 @@ import javax.servlet.ServletContextEvent;
 import org.apache.shiro.guice.ShiroModule;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -55,7 +59,7 @@ public abstract class DefaultBindingManager
 
 	private String basePackage = "";
 	private Reflections basePackageReflections;
-	
+
 	private ServiceManagerModule servicesModule;
 	private I18NModule i18NModule;
 	private UserOptionModule userOptionModule;
@@ -140,8 +144,8 @@ public abstract class DefaultBindingManager
 		coreModules.add(getUserOptionModule());
 
 		coreModules.addAll(appModules);
-		
-		if(automaticStaticInjection) {
+
+		if (automaticStaticInjection) {
 			coreModules.add(new StaticInjectionModule(getBasePackageReflections()));
 		}
 
@@ -156,23 +160,27 @@ public abstract class DefaultBindingManager
 					"The injector has already been created, it's no more possible to change the configuration");
 		}
 	}
-	
+
 	public String getBasePackage() {
-		if(log.isDebugEnabled()) {
-			if(basePackage == null || basePackage.isEmpty()) {
+		if (log.isDebugEnabled()) {
+			if (basePackage == null || basePackage.isEmpty()) {
 				log.warn("No basePackadge provided for reflection.");
 			}
 		}
 		return basePackage;
 	}
-	
+
 	public Reflections getBasePackageReflections() {
-		if(basePackageReflections == null) {
-			basePackageReflections = new Reflections(getBasePackage());
+		if (basePackageReflections == null) {
+			basePackageReflections = new Reflections(basePackage,
+					new Scanner[] { 
+							new TypeAnnotationsScanner(),
+							new SubTypesScanner(),
+							new MethodAnnotationsScanner() });
 		}
 		return basePackageReflections;
 	}
-	
+
 	public void setBasePackage(String basePackage) {
 		checkIfConfigurationStillPossible();
 		this.basePackage = basePackage;
@@ -301,11 +309,11 @@ public abstract class DefaultBindingManager
 	protected void addModule(Module module) {
 		this.appModules.add(module);
 	}
-	
+
 	public boolean isAutomaticStaticInjection() {
 		return automaticStaticInjection;
 	}
-	
+
 	public void setAutomaticStaticInjection(boolean automaticStaticInjection) {
 		this.automaticStaticInjection = automaticStaticInjection;
 	}
