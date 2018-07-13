@@ -22,10 +22,6 @@ import java.lang.annotation.Target;
 
 @Target({ TYPE })
 @Retention(RUNTIME)
-//@Inherited
 public @interface View {
-
 	String uri();
-
-	String labelKeyName();
 }
