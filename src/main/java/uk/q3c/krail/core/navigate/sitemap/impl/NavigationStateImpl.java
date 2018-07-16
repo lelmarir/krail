@@ -26,7 +26,7 @@ public class NavigationStateImpl implements NavigationState {
 
 	@Override
 	public String getFragment() {
-		return node.buildFragment(parameters);
+		return node.buildFragment(getView(), parameters);
 	}
 
 	@Override

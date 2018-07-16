@@ -3,6 +3,8 @@ package uk.q3c.krail.core.navigate.sitemap.impl;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 
+import uk.q3c.krail.core.view.KrailView;
+
 public class LooplessCalculatedParametersWrapper extends ParametersImpl {
 
 	public static LooplessCalculatedParametersWrapper build(
@@ -28,12 +30,12 @@ public class LooplessCalculatedParametersWrapper extends ParametersImpl {
 	}
 
 	@Override
-	protected Object calculateParameter(String parameterKey)
+	protected Object calculateParameter(String parameterKey, KrailView view)
 			throws NoSuchElementException {
 		if (pendingCalculatedParameters.contains(parameterKey)) {
 			throw new NoSuchElementException();
 		} else {
-			return super.calculateParameter(parameterKey);
+			return super.calculateParameter(parameterKey, view);
 		}
 	}
 }

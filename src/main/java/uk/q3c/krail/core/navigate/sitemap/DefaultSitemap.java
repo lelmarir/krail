@@ -84,8 +84,8 @@ public class DefaultSitemap implements Sitemap {
 		}
 
 		@Override
-		public String buildFragment(Parameters parameters) {
-			return target.buildFragment(parameters);
+		public String buildFragment(KrailView viewInstance, Parameters parameters) {
+			return target.buildFragment(viewInstance, parameters);
 		}
 
 		@Override

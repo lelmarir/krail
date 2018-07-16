@@ -24,6 +24,7 @@ import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.RedirectNode;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.ViewNode;
 import uk.q3c.krail.core.navigate.sitemap.annotations.AnnotationSitemapLoader;
 import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
+import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;
 import uk.q3c.krail.core.view.DefaultErrorView;
 import uk.q3c.krail.core.view.DefaultLoginView;
 import uk.q3c.krail.core.view.DefaultLogoutView;
@@ -163,6 +164,8 @@ public class SitemapModule extends AbstractModule {
 
 		bind(Sitemap.class).toProvider(SitemapProvider.class)
 				.asEagerSingleton();
+		//FIXME: static injection
+		requestStaticInjection(ParametersImpl.class);
 
 		bindErrorView();
 	}

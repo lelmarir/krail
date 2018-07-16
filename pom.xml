@@ -194,6 +194,11 @@
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>1.7.25</version>
 		</dependency>
+		<dependency>
+			<groupId>ru.vyarus</groupId>
+			<artifactId>generics-resolver</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

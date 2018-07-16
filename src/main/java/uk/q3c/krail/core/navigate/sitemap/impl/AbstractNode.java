@@ -11,12 +11,9 @@ import uk.q3c.krail.core.view.KrailView;
 
 public abstract class AbstractNode implements SitemapNode {
 
-	private static final Pattern OUTER_OPTIONAL_GROUP_PATTERN = Pattern
-			.compile("\\[(.*)\\]");
-	private static final Pattern INNER_OPTIONAL_GROUP_PATTERN = Pattern
-			.compile("\\[([^\\[\\]]*)\\]");
-	private static final Pattern PARAMETER_PATTERN = Pattern
-			.compile("\\{(\\w*)(?::(.*))?\\}");
+	private static final Pattern OUTER_OPTIONAL_GROUP_PATTERN = Pattern.compile("\\[(.*)\\]");
+	private static final Pattern INNER_OPTIONAL_GROUP_PATTERN = Pattern.compile("\\[([^\\[\\]]*)\\]");
+	private static final Pattern PARAMETER_PATTERN = Pattern.compile("\\{(\\w*)(?::(.*))?\\}");
 	private static final String DEFAULT_PARAM_CONSTRAINT = "\\w*";
 
 	private String rawUriPattern;
@@ -35,8 +32,7 @@ public abstract class AbstractNode implements SitemapNode {
 		Matcher m = OUTER_OPTIONAL_GROUP_PATTERN.matcher(string);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
-			StringBuffer before = pharse(string.subSequence(lastAppendPosition,
-					m.start()));
+			StringBuffer before = pharse(string.subSequence(lastAppendPosition, m.start()));
 			sb.append(before);
 			sb.append("(?:" + pharse(m.group(1)) + ")?");
 			lastAppendPosition = m.end();
@@ -54,8 +50,7 @@ public abstract class AbstractNode implements SitemapNode {
 		string = sb;
 		sb = new StringBuffer();
 		while (m.find()) {
-			StringBuffer before = escape(string.subSequence(lastAppendPosition,
-					m.start()));
+			StringBuffer before = escape(string.subSequence(lastAppendPosition, m.start()));
 			sb.append(before);
 			parametersId.add(m.group(1));
 			String paramConstraint = m.group(2);
@@ -69,8 +64,7 @@ public abstract class AbstractNode implements SitemapNode {
 			// dont escape if no match
 			sb.append(string.subSequence(lastAppendPosition, string.length()));
 		} else {
-			sb.append(escape(string.subSequence(lastAppendPosition,
-					string.length())));
+			sb.append(escape(string.subSequence(lastAppendPosition, string.length())));
 		}
 
 		return sb;
@@ -109,16 +103,17 @@ public abstract class AbstractNode implements SitemapNode {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public abstract NavigationState buildNavigationState(Parameters params);
 
-	public String buildFragment(Parameters parameters) {
-		return buildFragment(rawUriPattern, parameters, false).toString();
+	public String buildFragment(KrailView viewInstance, Parameters parameters) {
+		return buildFragment(viewInstance, rawUriPattern, parameters, false).toString();
 	}
 
 	/**
 	 * 
+	 * @param viewInstance 
 	 * @param pattern
 	 * @param parameters
 	 * @param optional
@@ -126,19 +121,17 @@ public abstract class AbstractNode implements SitemapNode {
 	 *            they are null) a empty sring will be returned
 	 * @return
 	 */
-	private CharSequence buildFragment(CharSequence pattern,
-			Parameters parameters, boolean optional) {
+	private CharSequence buildFragment(KrailView viewInstance, CharSequence pattern, Parameters parameters, boolean optional) {
 		boolean foundNotNullParameter = false;
-		
+
 		int lastAppendPosition = 0;
 		Matcher m = INNER_OPTIONAL_GROUP_PATTERN.matcher(pattern);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
-			CharSequence before = pattern.subSequence(lastAppendPosition,
-					m.start());
+			CharSequence before = pattern.subSequence(lastAppendPosition, m.start());
 			sb.append(before);
-			CharSequence optionalFragment = buildFragment(m.group(1), parameters, true);
-			if(optionalFragment.length() > 0) {
+			CharSequence optionalFragment = buildFragment(viewInstance, m.group(1), parameters, true);
+			if (optionalFragment.length() > 0) {
 				foundNotNullParameter = true;
 			}
 			sb.append(optionalFragment);
@@ -151,10 +144,9 @@ public abstract class AbstractNode implements SitemapNode {
 		pattern = sb;
 		sb = new StringBuffer();
 		while (m.find()) {
-			CharSequence before = pattern.subSequence(lastAppendPosition,
-					m.start());
+			CharSequence before = pattern.subSequence(lastAppendPosition, m.start());
 			sb.append(before);
-			String value = parameters.getAsString(m.group(1));
+			String value = parameters.getAsString(m.group(1), viewInstance);
 			if (value != null) {
 				foundNotNullParameter = true;
 			}
@@ -162,10 +154,10 @@ public abstract class AbstractNode implements SitemapNode {
 			lastAppendPosition = m.end();
 		}
 		sb.append(pattern.subSequence(lastAppendPosition, pattern.length()));
-		
-		if(optional == true && foundNotNullParameter == false) {
+
+		if (optional == true && foundNotNullParameter == false) {
 			return "";
-		}else{
+		} else {
 			return sb;
 		}
 	}
