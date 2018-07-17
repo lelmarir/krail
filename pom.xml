@@ -81,7 +81,7 @@
 			<groupId>com.netflix.governator</groupId>
 			<artifactId>governator</artifactId>
 			<version>1.17.5</version>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
