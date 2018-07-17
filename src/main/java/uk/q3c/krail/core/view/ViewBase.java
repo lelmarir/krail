@@ -66,11 +66,6 @@ public abstract class ViewBase<R extends Component> implements KrailView {
         return getClass().getSimpleName();
     }
     
-    @Override
-    public Component getHeaderComponent() {
-    	return new Label(getViewName());
-    }
-    
     public UI getUI() {
     	if(!getRootComponent().isAttached()) {
     		throw new IllegalStateException("can't get the UI before the component is attached");

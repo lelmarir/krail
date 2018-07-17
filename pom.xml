@@ -7,7 +7,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.bonfiglioli</groupId>
 	<artifactId>krail</artifactId>
-	<version>0.9.37-SNAPSHOT</version>
+	<version>0.9.38-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
 
 	<licenses>

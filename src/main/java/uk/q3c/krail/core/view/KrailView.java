@@ -40,12 +40,6 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
  * information can be used to determine how the View is to be built or respond in some other way to URL parameters.
  */
 public interface KrailView extends View {
-
-	/**
-	 * @return the componet to be displayed in the header (if the
-	 *         headerDisplayPanel has been attached to the page)
-	 */
-	public Component getHeaderComponent();
 	
     /**
 	 * To enable implementations to implement this interface without descending

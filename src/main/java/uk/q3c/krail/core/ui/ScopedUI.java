@@ -66,7 +66,6 @@ public abstract class ScopedUI extends UI
 	@Inject
 	private Provider<CurrentLocale> currentLocaleProvider;
 
-	private final Panel headerDisplayPanel;
 	private Panel viewDisplayPanel;
 	private boolean layoutDone = false;
 	private UIKey instanceKey;
@@ -76,7 +75,6 @@ public abstract class ScopedUI extends UI
 
 	protected ScopedUI() {
 		super();
-		headerDisplayPanel = new Panel();
 		viewDisplayPanel = new Panel();
 	}
 
@@ -117,10 +115,8 @@ public abstract class ScopedUI extends UI
 			log.debug("changing view to {}", to);
 		}
 
-		Component header = toView.getHeaderComponent();
 		Component content = toView.getRootComponent();
 		content.setSizeFull();
-		headerDisplayPanel.setContent(header);
 		viewDisplayPanel.setContent(content);
 		this.view = toView;
 	}
@@ -217,10 +213,6 @@ public abstract class ScopedUI extends UI
 	 * @return
 	 */
 	protected abstract Component screenLayout();
-
-	public Panel getHeaderDisplayPanel() {
-		return headerDisplayPanel;
-	}
 
 	public Panel getViewDisplayPanel() {
 		return viewDisplayPanel;

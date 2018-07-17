@@ -16,10 +16,21 @@ package uk.q3c.krail.core.view;
 import com.google.inject.Inject;
 import com.vaadin.ui.VerticalLayout;
 
-public abstract class VerticalViewBase extends AbstractOrderedView<VerticalLayout> {
+public abstract class VerticalViewBase extends VerticalLayout implements KrailView {
     @Inject
     protected VerticalViewBase() {
-        super(new VerticalLayout());
+        super();
     }
+
+    @Override
+    public VerticalLayout getRootComponent() throws ViewBuildException {
+    	return this;
+    }
+    
+	@Override
+	public String getViewName() {
+		//TODO
+		return getClass().getSimpleName();
+	}
 
 }
