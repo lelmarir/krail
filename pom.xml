@@ -5,9 +5,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>uk.q3c</groupId>
+	<groupId>it.bonfiglioli</groupId>
 	<artifactId>krail</artifactId>
-	<version>0.9.36-SNAPSHOT</version>
+	<version>0.9.37-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
 
 	<licenses>
