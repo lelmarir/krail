@@ -72,8 +72,8 @@ public class BrowserCookie {
 
 		JavaScript.getCurrent()
 				.execute(String.format(
-						"document.cookie = \"%s=%s; path=%s\"; Expires=%s\";",
-						key, value, path, expires));
+						"document.cookie = \"%s=%s; Expires=%s; path=%s\"",
+						key, value, expires, path));
 	}
 
 	public static void setCookie(String key, String value, String path)
