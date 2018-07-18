@@ -71,6 +71,7 @@ public abstract class DefaultBindingManager
 	private UserModule userModule;
 	private ErrorModule errorModule;
 	private boolean automaticStaticInjection = true;
+	private boolean automaticFactoryBinging = true;
 
 	private Collection<Module> appModules = new ArrayList<>();
 
@@ -147,6 +148,9 @@ public abstract class DefaultBindingManager
 
 		if (automaticStaticInjection) {
 			coreModules.add(new StaticInjectionModule(getBasePackageReflections()));
+		}
+		if (automaticFactoryBinging) {
+			coreModules.add(new AutoAsssitedInjectModule(getBasePackageReflections()));
 		}
 
 		// bind after appModules to allow other servlets
@@ -316,6 +320,14 @@ public abstract class DefaultBindingManager
 
 	public void setAutomaticStaticInjection(boolean automaticStaticInjection) {
 		this.automaticStaticInjection = automaticStaticInjection;
+	}
+	
+	public boolean isAutomaticFactoryBinging() {
+		return automaticFactoryBinging;
+	}
+	
+	public void setAutomaticFactoryBinging(boolean automaticFactoryBinging) {
+		this.automaticFactoryBinging = automaticFactoryBinging;
 	}
 
 	@Override
