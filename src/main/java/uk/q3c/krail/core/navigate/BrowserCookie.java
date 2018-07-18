@@ -33,30 +33,24 @@ public class BrowserCookie {
 		void onValueDetected(String value);
 	}
 
-	private static String encode(String value)
-			throws UnsupportedEncodingException {
+	private static String encode(String value) throws UnsupportedEncodingException {
 		return URLEncoder.encode(value, "UTF-8");
 	}
 
-	private static String decode(String string)
-			throws UnsupportedEncodingException {
+	private static String decode(String string) throws UnsupportedEncodingException {
 		return URLDecoder.decode(string, "UTF-8");
 	}
 
-	public static void setCookie(String key, String value)
-			throws RuntimeException {
+	public static void setCookie(String key, String value) throws RuntimeException {
 		setCookie(key, value, "/", LocalDateTime.now().plusYears(10l));
 	}
 
-	public static void setCookie(String key, String value,
-			LocalDateTime expirationTime) {
+	public static void setCookie(String key, String value, LocalDateTime expirationTime) {
+		setCookie(key, value, null, expirationTime);
+	}
 
-		String expires = toCookieGMTDate(expirationTime);
-
-		JavaScript.getCurrent()
-				.execute(String.format(
-						"document.cookie = \"%s=%s; expires=%s\";", key, value,
-						expires));
+	public static void setCookie(String key, String value, String path) throws RuntimeException {
+		setCookie(key, value, path, null);
 	}
 
 	private static String toCookieGMTDate(LocalDateTime expirationTime) {
@@ -65,57 +59,54 @@ public class BrowserCookie {
 		return expires;
 	}
 
-	public static void setCookie(String key, String value, String path,
-			LocalDateTime expirationTime) {
+	public static void setCookie(String key, String value, String path, LocalDateTime expirationTime) {
+		Objects.requireNonNull(key);
 
-		String expires = toCookieGMTDate(expirationTime);
+		StringBuilder sb = new StringBuilder("document.cookie = \"");
 
-		JavaScript.getCurrent()
-				.execute(String.format(
-						"document.cookie = \"%s=%s; Expires=%s; path=%s\"",
-						key, value, expires, path));
-	}
-
-	public static void setCookie(String key, String value, String path)
-			throws RuntimeException {
 		try {
-			JavaScript.getCurrent()
-					.execute(String.format(
-							"document.cookie = \"%s=%s; path=%s\";", key,
-							encode(value), path));
+			sb.append(encode(key)+"="+encode(value));
 		} catch (UnsupportedEncodingException e) {
-			new RuntimeException(e);
+			throw new RuntimeException(e);
 		}
+
+		if (path != null) {
+			sb.append(String.format("; path=%s", path));
+		}
+
+		if (expirationTime != null) {
+			String expires = toCookieGMTDate(expirationTime);
+			sb.append(String.format("; Expires=%s", expires));
+		}
+
+		sb.append("\"");
+
+		JavaScript.getCurrent().execute(sb.toString());
 	}
 
-	public static void getCookieValueAsync(String key,
-			final Callback callback) {
-		final String callbackid = "viritincookiecb"
-				+ UUID.randomUUID().toString().substring(0, 8);
-		JavaScript.getCurrent().addFunction(callbackid,
-				new JavaScriptFunction() {
-					private static final long serialVersionUID = -3426072590182105863L;
+	public static void getCookieValueAsync(String key, final Callback callback) {
+		final String callbackid = "viritincookiecb" + UUID.randomUUID().toString().substring(0, 8);
+		JavaScript.getCurrent().addFunction(callbackid, new JavaScriptFunction() {
+			private static final long serialVersionUID = -3426072590182105863L;
 
-					@Override
-					public void call(JsonArray arguments) {
-						JavaScript.getCurrent().removeFunction(callbackid);
-						if (arguments.length() == 0) {
-							callback.onValueDetected(null);
-						} else {
-							try {
-								callback.onValueDetected(
-										decode(arguments.getString(0)));
-							} catch (UnsupportedEncodingException e) {
-								throw new RuntimeException(e);
-							}
-						}
+			@Override
+			public void call(JsonArray arguments) {
+				JavaScript.getCurrent().removeFunction(callbackid);
+				if (arguments.length() == 0) {
+					callback.onValueDetected(null);
+				} else {
+					try {
+						callback.onValueDetected(decode(arguments.getString(0)));
+					} catch (UnsupportedEncodingException e) {
+						throw new RuntimeException(e);
 					}
-				});
+				}
+			}
+		});
 
 		JavaScript.getCurrent().execute(String.format(
 				"var nameEQ = \"%2$s=\";var ca = document.cookie.split(';');for(var i=0;i < ca.length;i++) {var c = ca[i];while (c.charAt(0)==' ') c = c.substring(1,c.length); if (c.indexOf(nameEQ) == 0) {%1$s( c.substring(nameEQ.length,c.length)); return;};} %1$s();",
 				callbackid, key));
-
 	}
 
 	/**
@@ -130,17 +121,15 @@ public class BrowserCookie {
 	 * @param name
 	 *            The name of the cookie
 	 * @param cb
-	 *            A BrowserCookie.Callback that gets called with the actual
-	 *            value of the cookie. The value is guaranteed to be not null.
+	 *            A BrowserCookie.Callback that gets called with the actual value of
+	 *            the cookie. The value is guaranteed to be not null.
 	 *
 	 * @throws IllegalArgumentException
 	 *             if field or name are null or if name is empty.
 	 */
-	public static <V> void bindValueToCookie(HasValue<V> field, String name,
-			Callback cb) {
+	public static <V> void bindValueToCookie(HasValue<V> field, String name, Callback cb) {
 		if (Objects.isNull(name) || name.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Name must not be null or empty");
+			throw new IllegalArgumentException("Name must not be null or empty");
 		}
 		if (Objects.isNull(field)) {
 			throw new IllegalArgumentException("Field must not be null");
@@ -153,8 +142,7 @@ public class BrowserCookie {
 		});
 
 		field.addValueChangeListener((event) -> {
-			setCookie(name, event.getValue().toString(),
-					LocalDateTime.now().plusMonths(1l));
+			setCookie(name, event.getValue().toString(), LocalDateTime.now().plusMonths(1l));
 		});
 	}
 
@@ -173,8 +161,7 @@ public class BrowserCookie {
 	 */
 	public static void bindValueToCookie(HasValue<String> field, String name) {
 		if (Objects.isNull(name) || name.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Name must not be null or empty");
+			throw new IllegalArgumentException("Name must not be null or empty");
 		}
 		if (Objects.isNull(field)) {
 			throw new IllegalArgumentException("Field must not be null");
@@ -187,8 +174,7 @@ public class BrowserCookie {
 		});
 
 		field.addValueChangeListener((event) -> {
-			setCookie(name, event.getValue(),
-					LocalDateTime.now().plusMonths(1l));
+			setCookie(name, event.getValue(), LocalDateTime.now().plusMonths(1l));
 		});
 	}
 }
