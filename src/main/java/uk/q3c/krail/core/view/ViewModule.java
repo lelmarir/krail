@@ -38,11 +38,16 @@ public class ViewModule extends AbstractModule {
 		bindRequestSystemAccountRefreshView();
 		bindSystemAccountView();
 		bindViewFactory();
+		bindLayoutFactory();
 
 	}
 
 	protected void bindViewFactory() {
 		bind(ViewFactory.class).to(DefaultViewFactory.class);
+	}
+	
+	protected void bindLayoutFactory() {
+		bind(LayoutFactory.class).to(DefaultLayoutFactory.class);
 	}
 
 	/**

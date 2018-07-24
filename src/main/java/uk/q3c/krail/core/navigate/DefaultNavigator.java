@@ -17,19 +17,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.q3c.krail.core.guice.errors.ErrorHandler.ErrorEvent;
 import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
+import uk.q3c.krail.core.navigate.sitemap.annotations.View;
+import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 import uk.q3c.krail.core.view.ErrorView;
@@ -41,6 +40,7 @@ import uk.q3c.krail.core.view.KrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEventImpl;
 import uk.q3c.krail.core.view.KrailViewChangeEventImpl.CancellableWrapper;
+import uk.q3c.krail.core.view.LayoutFactory;
 import uk.q3c.krail.core.view.ViewBuildException;
 
 import com.google.inject.Inject;
@@ -70,15 +70,15 @@ import com.vaadin.ui.UI;
  */
 public class DefaultNavigator implements Navigator {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DefaultNavigator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
 	@Inject
 	private Provider<DefaultNavigationCallbackHandler> defaultCallbackHandlerProvider;
-	private NavigationCallbackHandler callbackHandler;
 
 	@Inject
-	private Provider<InvalidURIExceptionHandler> invalidUriHandlerProvider;
+	private LayoutFactory layoutFactory;
+
+	private NavigationCallbackHandler callbackHandler;
 
 	protected NavigationStateManager stateManager;
 
@@ -92,8 +92,7 @@ public class DefaultNavigator implements Navigator {
 	private final List<AfterViewChangeListener> afterViewChangeListeners = new LinkedList<AfterViewChangeListener>();
 
 	@Inject
-	public DefaultNavigator(Provider<Subject> subjectProvider, Sitemap sitemap,
-			ScopedUIProvider uiProvider) {
+	public DefaultNavigator(Provider<Subject> subjectProvider, Sitemap sitemap, ScopedUIProvider uiProvider) {
 		super();
 		this.ui = uiProvider.get();
 		assert this.ui != null;
@@ -110,7 +109,7 @@ public class DefaultNavigator implements Navigator {
 			// kickstart
 			navigateTo(stateManager.getState());
 		} catch (InvalidURIException e) {
-			//TODO: dovrei gestire meglio i 404 piuttosto che andare alla pagina di errore
+			// TODO: dovrei gestire meglio i 404 piuttosto che andare alla pagina di errore
 			navigateToErrorView(e, "<b>404</b> Page not Found");
 		}
 	}
@@ -147,7 +146,7 @@ public class DefaultNavigator implements Navigator {
 	public void navigateBack() throws UnknownPreviousNavigationState {
 		if (getPreviousNavigationState() != null) {
 			navigateTo(getPreviousNavigationState());
-		}else {
+		} else {
 			throw new UnknownPreviousNavigationState();
 		}
 	}
@@ -157,8 +156,7 @@ public class DefaultNavigator implements Navigator {
 		LOGGER.debug("Navigating to fragment: {}", fragment);
 
 		// set up the navigation state
-		NavigationState navigationState = sitemap
-				.buildNavigationStateFor(fragment);
+		NavigationState navigationState = sitemap.buildNavigationStateFor(fragment);
 		navigateTo(navigationState);
 	}
 
@@ -174,10 +172,8 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public <T extends KrailView> void navigateTo(Class<T> viewClass,
-			Parameters parameters) {
-		NavigationState ns = sitemap.buildNavigationState(viewClass,
-				parameters);
+	public <T extends KrailView> void navigateTo(Class<T> viewClass, Parameters parameters) {
+		NavigationState ns = sitemap.buildNavigationState(viewClass, parameters);
 		navigateTo(ns);
 	}
 
@@ -186,15 +182,24 @@ public class DefaultNavigator implements Navigator {
 		navigateTo(target.getViewClass(), target.getParaeters());
 	}
 
-	public void navigateTo(NavigationState navigationState)
-			throws AuthorizationException {
+	@Override
+	public void refresh() {
+		navigateTo(getCurrentNavigationState(), true);
+	}
+
+	@Override
+	public void navigateTo(NavigationState navigationState) {
+		navigateTo(navigationState, false);
+	}
+
+	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
 		checkNotNull(navigationState);
 		checkNotNull(getCallbackHandler());
 
 		// stop unnecessary changes, but also to prevent navigation aware
 		// components from causing a loop by responding to a change of URI (they
 		// should suppress events when they do, but may not)
-		if (navigationState.equals(currentNavigationState)) {
+		if (refresh == false && navigationState.equals(currentNavigationState)) {
 			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
@@ -202,15 +207,13 @@ public class DefaultNavigator implements Navigator {
 		SitemapNode node = navigationState.getSitemapNode();
 		assert node != null;
 
-		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this,
-				currentNavigationState, navigationState);
+		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this, currentNavigationState, navigationState);
 
 		CancellableWrapper cancellable = new CancellableWrapper(event);
 
 		fireBeforeSecurityCheck(cancellable);
 		if (cancellable.isCancelled()) {
-			LOGGER.debug(
-					"navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
+			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
 			return;
 		}
 
@@ -226,15 +229,13 @@ public class DefaultNavigator implements Navigator {
 		// if change is blocked revert to previous state
 		fireBeforeViewChange(cancellable);
 		if (cancellable.isCancelled()) {
-			LOGGER.debug(
-					"navigation canceled by a KrailViewChangeListener beforeViewChange");
+			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeViewChange");
 			return;
 		}
 
 		// notify Outbound navigation to current view
 		if (getCurrentView() != null) {
-			fireViewBeforeOutboundNavigationEvent(getCurrentView(), cancellable,
-					getCallbackHandler());
+			fireViewBeforeOutboundNavigationEvent(getCurrentView(), cancellable, getCallbackHandler());
 			if (cancellable.isCancelled()) {
 				LOGGER.debug(
 						"navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation beforeOutboundNavigation",
@@ -248,11 +249,9 @@ public class DefaultNavigator implements Navigator {
 
 		// notify before Inbound navigation to target view
 
-		fireViewBeforeInboundNavigationEvent(view, cancellable,
-				getCallbackHandler());
+		fireViewBeforeInboundNavigationEvent(view, cancellable, getCallbackHandler());
 		if (cancellable.isCancelled()) {
-			LOGGER.debug(
-					"navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
+			LOGGER.debug("navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
 					view.getClass().getSimpleName());
 			return;
 		}
@@ -282,9 +281,7 @@ public class DefaultNavigator implements Navigator {
 						"getRootComponent() should have trowned a ViewBuildException instead of returning null");
 			}
 		} catch (ViewBuildException e) {
-			throw new RuntimeException(
-					"The rootComponent shuld not be null after BeforeInboundNavigation()",
-					e);
+			throw new RuntimeException("The rootComponent shuld not be null after BeforeInboundNavigation()", e);
 		}
 	}
 
@@ -295,15 +292,14 @@ public class DefaultNavigator implements Navigator {
 	 * <code>false</code>, the rest of the listeners are not called and the view
 	 * change is blocked.
 	 * <p/>
-	 * The view change listeners may also e.g. open a warning or question dialog
-	 * and save the parameters to re-initiate the navigation operation upon user
-	 * action.
+	 * The view change listeners may also e.g. open a warning or question dialog and
+	 * save the parameters to re-initiate the navigation operation upon user action.
 	 * 
 	 * @param event
 	 *            view change event (not null, view change not yet performed)
 	 * 
-	 * @return true if the view change should be allowed, false to silently
-	 *         block the navigation operation
+	 * @return true if the view change should be allowed, false to silently block
+	 *         the navigation operation
 	 */
 	protected void fireBeforeViewChange(CancellableKrailViewChangeEvent event) {
 		for (BeforeViewChangeListener l : beforeViewChangeListeners) {
@@ -339,14 +335,12 @@ public class DefaultNavigator implements Navigator {
 		}
 	}
 
-	private void fireViewBeforeOutboundNavigationEvent(KrailView view,
-			CancellableWrapper cancellable,
+	private void fireViewBeforeOutboundNavigationEvent(KrailView view, CancellableWrapper cancellable,
 			NavigationCallbackHandler callbackHandler) {
 		callbackHandler.beforeOutboundNavigationEvent(view, cancellable);
 	}
 
-	private void fireViewBeforeInboundNavigationEvent(KrailView view,
-			CancellableKrailViewChangeEvent cancellable,
+	private void fireViewBeforeInboundNavigationEvent(KrailView view, CancellableKrailViewChangeEvent cancellable,
 			NavigationCallbackHandler callbackHandler) {
 		callbackHandler.beforeInboundNavigationEvent(view, cancellable);
 	}
@@ -366,18 +360,16 @@ public class DefaultNavigator implements Navigator {
 	private void updateUriFragment(NavigationState targetNavigationState) {
 		assert targetNavigationState != null;
 		Page page = getUI().getPage();
-		if (!targetNavigationState.getFragment()
-				.equals(page.getUriFragment())) {
+		if (!targetNavigationState.getFragment().equals(page.getUriFragment())) {
 			stateManager.setState(targetNavigationState.getFragment());
 		}
 	}
 
 	protected void changeView(KrailView view) {
-		ui.changeView(view);
+		ui.changeView(view, layoutFactory.get(view));
 	}
 
-	private void fireViewAfterInboundNavigationEvent(KrailView view,
-			KrailViewChangeEvent event) {
+	private void fireViewAfterInboundNavigationEvent(KrailView view, KrailViewChangeEvent event) {
 		getCallbackHandler().afterInbounNavigationEvent(view, event);
 	}
 
@@ -406,8 +398,8 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateToErrorView(final Throwable error, String localizedMessage) {
-		LOGGER.debug("A {} Error has been thrown, reporting via the Error View: {}",
-				error.getClass().getName(), localizedMessage, error);
+		LOGGER.debug("A {} Error has been thrown, reporting via the Error View: {}", error.getClass().getName(),
+				localizedMessage, error);
 
 		navigateTo(ErrorView.buildNavigationTarget(error, localizedMessage));
 	}
@@ -418,8 +410,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void removeBeforeViewChangeListener(
-			BeforeViewChangeListener listener) {
+	public void removeBeforeViewChangeListener(BeforeViewChangeListener listener) {
 		beforeViewChangeListeners.remove(listener);
 	}
 
@@ -429,20 +420,17 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void removeAfterViewChangeListener(
-			AfterViewChangeListener listener) {
+	public void removeAfterViewChangeListener(AfterViewChangeListener listener) {
 		afterViewChangeListeners.remove(listener);
 	}
 
 	@Override
-	public void addBeforeSecurityCheckListener(
-			BeforeSecurityCheckListener listener) {
+	public void addBeforeSecurityCheckListener(BeforeSecurityCheckListener listener) {
 		beforeSecurityCheckListener.add(listener);
 	}
 
 	@Override
-	public void removeBeforeSecurityCheckListener(
-			BeforeSecurityCheckListener listener) {
+	public void removeBeforeSecurityCheckListener(BeforeSecurityCheckListener listener) {
 		beforeSecurityCheckListener.remove(listener);
 	}
 

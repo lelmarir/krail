@@ -90,4 +90,9 @@ public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNoti
 
 	void navigateBack() throws UnknownPreviousNavigationState;
 
+	/**
+	 * Reload the current page
+	 */
+	void refresh();
+
 }

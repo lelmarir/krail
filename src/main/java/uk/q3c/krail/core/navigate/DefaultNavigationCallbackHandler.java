@@ -327,6 +327,9 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 							instance = injector.getInstance(Key.get(parametersTypes[i]));
 						} catch (ConfigurationException e) {
 							;
+						}catch (Exception e) {
+							LOGGER.debug("Errore non gestito durante la creazione dell'istanza del parametro '{}' per il metodo {}: ", parametersTypes[i], method, e);
+							throw e;
 						}
 					}
 					if (instance != null) {

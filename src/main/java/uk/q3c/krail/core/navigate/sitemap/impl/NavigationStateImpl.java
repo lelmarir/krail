@@ -61,14 +61,14 @@ public class NavigationStateImpl implements NavigationState {
 	public boolean equals(Object obj) {
 		if(obj instanceof NavigationState) {
 			NavigationState state = (NavigationState)obj;
-			return Objects.equals(state.getFragment(), getFragment());
+			return Objects.equals(state.getFragment(), getFragment()) && Objects.equals(state.parameters(), parameters());
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getFragment());
+		return Objects.hash(getFragment(), parameters());
 	}
 
 }

@@ -13,8 +13,10 @@
 
 package uk.q3c.krail.core.view;
 
+import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
+
 public interface KrailViewHolder {
 
-	void changeView(KrailView toView);
+	void changeView(KrailView toView, ViewLayout layout);
 
 }

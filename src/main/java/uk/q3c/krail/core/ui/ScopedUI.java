@@ -27,8 +27,11 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
 
 import uk.q3c.krail.core.guice.uiscope.UIKey;
@@ -37,6 +40,7 @@ import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
+import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
 import uk.q3c.krail.i18n.CurrentLocale;
@@ -55,8 +59,7 @@ import uk.q3c.krail.i18n.LocaleChangeListener;
  * @date modified 31 Mar 2014
  */
 
-public abstract class ScopedUI extends UI
-		implements KrailViewHolder, LocaleChangeListener {
+public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChangeListener {
 	private static Logger log = LoggerFactory.getLogger(ScopedUI.class);
 
 	@Inject
@@ -66,7 +69,7 @@ public abstract class ScopedUI extends UI
 	@Inject
 	private Provider<CurrentLocale> currentLocaleProvider;
 
-	private Panel viewDisplayPanel;
+	private SingleComponentContainer viewDisplayContainer;
 	private boolean layoutDone = false;
 	private UIKey instanceKey;
 	private Component screenLayout;
@@ -75,7 +78,7 @@ public abstract class ScopedUI extends UI
 
 	protected ScopedUI() {
 		super();
-		viewDisplayPanel = new Panel();
+		viewDisplayContainer = new Panel();
 	}
 
 	public UIKey getInstanceKey() {
@@ -100,34 +103,36 @@ public abstract class ScopedUI extends UI
 
 	@Override
 	public void setNavigator(com.vaadin.navigator.Navigator navigator) {
-		throw new MethodReconfigured(
-				"UI.setNavigator() not available, use injection instead");
+		throw new MethodReconfigured("UI.setNavigator() not available, use injection instead");
 	}
 
 	@Override
-	public void changeView(KrailView toView) {
+	public void changeView(KrailView toView, ViewLayout layout) {
 		if (toView == null) {
 			throw new IllegalArgumentException("toView should not be null");
 		}
 		if (log.isDebugEnabled()) {
-			String to = (toView == null) ? "null"
-					: toView.getClass().getSimpleName();
+			String to = (toView == null) ? "null" : toView.getClass().getSimpleName();
 			log.debug("changing view to {}", to);
 		}
 
 		Component content = toView.getRootComponent();
 		content.setSizeFull();
-		viewDisplayPanel.setContent(content);
+		if (layout != null) {
+			layout.setViewContent(content);
+			viewDisplayContainer.setContent(layout);
+		} else {
+			viewDisplayContainer.setContent(content);
+		}
 		this.view = toView;
 	}
 
 	/**
 	 * Make sure you call this from sub-class overrides. The Vaadin Page is not
-	 * available during the construction of this class, but is available when
-	 * this method is invoked. As a result, this method sets the navigator a
-	 * listener for URI changes and obtains the browser locale setting for
-	 * initialising {@link CurrentLocale}. Both of these are provided by the
-	 * Vaadin Page.
+	 * available during the construction of this class, but is available when this
+	 * method is invoked. As a result, this method sets the navigator a listener for
+	 * URI changes and obtains the browser locale setting for initialising
+	 * {@link CurrentLocale}. Both of these are provided by the Vaadin Page.
 	 *
 	 * @see com.vaadin.ui.UI#init(com.vaadin.server.VaadinRequest)
 	 */
@@ -146,14 +151,11 @@ public abstract class ScopedUI extends UI
 		if (navigator instanceof com.vaadin.navigator.Navigator) {
 			super.setNavigator((com.vaadin.navigator.Navigator) navigator);
 		} else if (navigator instanceof DefaultNavigator) {
-			log.debug(
-					"The injected nagigator has been wrapped in VaadinNavigatorWrapper");
-			super.setNavigator(
-					new VaadinNavigatorWrapper((DefaultNavigator) navigator));
+			log.debug("The injected nagigator has been wrapped in VaadinNavigatorWrapper");
+			super.setNavigator(new VaadinNavigatorWrapper((DefaultNavigator) navigator));
 		} else {
 			super.setNavigator(null);
-			log.warn(
-					"The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");
+			log.warn("The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");
 		}
 		Page page = getPage();
 
@@ -166,15 +168,16 @@ public abstract class ScopedUI extends UI
 		currentLocale.addListener(this);
 
 		doLayout();
-		
-		//FIXME: non dovrei chiamare a mano init(), dovrebbe essere eseguito come @PostConstruct, a eventuali errori causano un loop
+
+		// FIXME: non dovrei chiamare a mano init(), dovrebbe essere eseguito come
+		// @PostConstruct, a eventuali errori causano un loop
 		navigator.init();
 	}
 
 	/**
-	 * Provides a locale sensitive title for your application (which appears in
-	 * the browser tab). The title is defined by the {@link #applicationTitle},
-	 * which should be specified in your sub-class of {@link UIModule}
+	 * Provides a locale sensitive title for your application (which appears in the
+	 * browser tab). The title is defined by the {@link #applicationTitle}, which
+	 * should be specified in your sub-class of {@link UIModule}
 	 *
 	 * @return
 	 */
@@ -184,46 +187,50 @@ public abstract class ScopedUI extends UI
 
 	/**
 	 * Uses the {@link #screenLayout} defined by sub-class implementations of
-	 * {@link #screenLayout()}, expands it to full size, and sets the View
-	 * display panel to take up all spare space.
+	 * {@link #screenLayout()}, expands it to full size, and sets the View display
+	 * panel to take up all spare space.
 	 */
 	protected void doLayout() {
 		if (screenLayout == null) {
 			screenLayout = screenLayout();
 		}
 		layoutDone = true;
-		if (viewDisplayPanel.getParent() == null) {
+		if (screenLayout != viewDisplayContainer && !viewDisplayContainer.equals(screenLayout)
+				&& viewDisplayContainer.getParent() == null) {
 			String msg = "Your implementation of ScopedUI.screenLayout() must include getViewDisplayPanel().  AS a "
-					+ "minimum this could be 'return new VerticalLayout(getViewDisplayPanel())'";
+					+ "minimum this could be 'return getViewDisplayPanel()' or 'return new VerticalLayout(getViewDisplayPanel())'";
 			log.error(msg);
 			throw new NotImplementedException(msg);
 		}
-		viewDisplayPanel.setSizeFull();
+		viewDisplayContainer.setSizeFull();
 		setContent(screenLayout);
 	}
 
 	/**
-	 * Override this to provide your screen layout. In order for Views to work
-	 * one child component of this layout must be provided by
+	 * Override this to provide your screen layout. In order for Views to work one
+	 * child component of this layout must be provided by
 	 * {@link #getViewDisplayPanel()}. The simplest example would be
-	 * {@code return new VerticalLayout(getViewDisplayPanel()}, which would set
-	 * the View to take up all the available screen space. {@link BasicUI} is an
-	 * example of a UI which contains a header and footer bar.
+	 * {@code return new VerticalLayout(getViewDisplayPanel()}, which would set the
+	 * View to take up all the available screen space.
 	 *
 	 * @return
 	 */
 	protected abstract Component screenLayout();
 
-	public Panel getViewDisplayPanel() {
-		return viewDisplayPanel;
+	public SingleComponentContainer getViewDisplayPanel() {
+		return viewDisplayContainer;
 	}
 
-	public void setViewDisplayPanel(Panel viewDisplayPanel) {
+	public void setViewDisplayPanel(ComponentContainer viewDisplay) {
+		setViewDisplayPanel(new SingleComponentContainerWrapper(viewDisplay));
+	}
+
+	public void setViewDisplayPanel(SingleComponentContainer viewDisplay) {
 		if (layoutDone == true) {
 			throw new UnsupportedOperationException(
 					"You have the chance to replace teh default DisplayPanel only in or before #screenLayout() has been called.");
 		}
-		this.viewDisplayPanel = viewDisplayPanel;
+		this.viewDisplayContainer = viewDisplay;
 	}
 
 	/**

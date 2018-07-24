@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import uk.q3c.krail.core.navigate.parameters.ProvidesParameter;
 import uk.q3c.krail.core.navigate.DefaultNavigationCallbackHandler;
@@ -38,8 +39,9 @@ public class ParametersImpl implements Parameters {
 			final Class<? extends Annotation> annotation) {
 		final List<Method> methods = new ArrayList<Method>();
 		Class<?> klass = type;
-		while (klass != Object.class && klass != null) { // need to iterated thought hierarchy in order to retrieve methods from above
-										// the current instance
+		while (klass != Object.class && klass != null) { // need to iterated thought hierarchy in order to retrieve
+															// methods from above
+			// the current instance
 			// iterate though the list of methods declared in the class represented by klass
 			// variable, and add those annotated with the specified annotation
 			final List<Method> allMethods = new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods()));
@@ -126,10 +128,11 @@ public class ParametersImpl implements Parameters {
 
 		Collection<Method> providers = map.get(parameterKey);
 		Map<Method, Object[]> parameterProviderMethods = DefaultNavigationCallbackHandler
-				.getMatchingMethodForAvailibleParameters(injectorProvider.get(), view, null, LooplessCalculatedParametersWrapper.build(this, parameterKey), providers, true);
-		if(!parameterProviderMethods.isEmpty()) {
+				.getMatchingMethodForAvailibleParameters(injectorProvider.get(), view, null,
+						LooplessCalculatedParametersWrapper.build(this, parameterKey), providers, true);
+		if (!parameterProviderMethods.isEmpty()) {
 			Throwable error = null;
-			for(Entry<Method, Object[]> entry : parameterProviderMethods.entrySet()) {
+			for (Entry<Method, Object[]> entry : parameterProviderMethods.entrySet()) {
 				Method method = entry.getKey();
 				Object[] args = entry.getValue();
 				try {
@@ -139,7 +142,7 @@ public class ParametersImpl implements Parameters {
 					error = e;
 				}
 			}
-			if(error != null) {
+			if (error != null) {
 				throw new RuntimeException(error);
 			}
 		}
@@ -159,6 +162,22 @@ public class ParametersImpl implements Parameters {
 	@Override
 	public boolean contains(String id) {
 		return parameters.containsKey(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ParametersImpl) {
+			Map<String, Object> objParameters = ((ParametersImpl) obj).parameters;
+			return Objects.equals(targetViewClass, ((ParametersImpl) obj).targetViewClass)
+					&& Objects.equals(parameters, objParameters);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(targetViewClass, parameters);
 	}
 
 	@Override

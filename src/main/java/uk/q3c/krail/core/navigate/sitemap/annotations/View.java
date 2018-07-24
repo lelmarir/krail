@@ -23,5 +23,15 @@ import java.lang.annotation.Target;
 @Target({ TYPE })
 @Retention(RUNTIME)
 public @interface View {
+	/**
+	 * Detault value, is equal to null and the appropriate default value is used if set in the navigator
+	 */
+	public static final Class<? extends ViewLayout> UNDEFINED_LAYOUT = UndefinedViewLayout.class;
+	/**
+	 * A layout that simply display the view, disabling any default layout
+	 */
+	public static final Class<? extends ViewLayout> NO_LAYOUT = EmptyViewLayout.class;
+	
 	String uri();
+	Class<? extends ViewLayout> layout() default UndefinedViewLayout.class;
 }
