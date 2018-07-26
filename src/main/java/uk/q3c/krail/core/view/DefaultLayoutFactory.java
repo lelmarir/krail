@@ -77,13 +77,17 @@ public class DefaultLayoutFactory implements LayoutFactory {
 	@Override
 	public ViewLayout get(KrailView view) {
 		View viewAnnotation = view.getClass().getAnnotation(View.class);
-		Class<? extends ViewLayout> layoutClass = viewAnnotation.layout();
-		if (layoutClass == View.NO_LAYOUT) {
-			return null;
-		} else if (layoutClass == View.UNDEFINED_LAYOUT) {
+		if (viewAnnotation != null) {
+			Class<? extends ViewLayout> layoutClass = viewAnnotation.layout();
+			if (layoutClass == View.NO_LAYOUT) {
+				return null;
+			} else if (layoutClass == View.UNDEFINED_LAYOUT) {
+				return getDefault(view);
+			} else {
+				return get(layoutClass);
+			}
+		}else {
 			return getDefault(view);
-		} else {
-			return get(layoutClass);
 		}
 	}
 
