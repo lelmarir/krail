@@ -15,6 +15,7 @@ package uk.q3c.krail.core.view;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -62,6 +63,7 @@ public class DefaultLoginView extends GridViewBase implements  ClickListener {
 
         submitButton = new Button("Login");
         submitButton.setDisableOnClick(true);
+        submitButton.setClickShortcut(KeyCode.ENTER);
         submitButton.addClickListener(this);
 
         statusMsgLabel = new Label("Please enter your username and password");
