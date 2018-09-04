@@ -307,16 +307,16 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 
 				} else /* if(parameterAnnotation == null) */ {
 
+					ConfigurationException injectionException = null;
 					// provo a creare il parametro con l'injector
 					Object instance = null;
 					if (parametersAnnotations[i].length > 0) {
 						for (int j = 0; j < parametersAnnotations[i].length; j++) {
 							try {
-
 								instance = injector.getInstance(Key.get(
 										method.getParameters()[i].getParameterizedType(), parametersAnnotations[i][j]));
 							} catch (ConfigurationException e) {
-								;
+								injectionException = e;
 							}
 							if (instance != null) {
 								break;
@@ -326,7 +326,7 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 						try {
 							instance = injector.getInstance(Key.get(parametersTypes[i]));
 						} catch (ConfigurationException e) {
-							;
+							injectionException = e;
 						}catch (Exception e) {
 							LOGGER.debug("Errore non gestito durante la creazione dell'istanza del parametro '{}' per il metodo {}: ", parametersTypes[i], method, e);
 							throw e;
@@ -338,7 +338,7 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 						// method parameter not annotated with @Parameter and
 						// can't retrieve with injector
 						throw new IllegalStateException("Unable to bind parameter " + i + " (of type "
-								+ parametersTypes[i] + ") of the callback method " + method);
+								+ parametersTypes[i] + ") of the callback method " + method, injectionException);
 					}
 				}
 			} // parameters for loop

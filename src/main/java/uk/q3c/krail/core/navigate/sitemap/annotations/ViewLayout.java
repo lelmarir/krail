@@ -43,19 +43,6 @@ public interface ViewLayout extends Component {
 	 *            the content component or {@code null} if the layout content is to
 	 *            be cleared.
 	 */
-	default void setViewContent(Component content) {
-		if (content != null) {
-			if(this instanceof SingleComponentContainer)
-			{
-				((SingleComponentContainer)this).setContent(content);
-			}else if(this instanceof ComponentContainer) {
-				((ComponentContainer)this).removeAllComponents();
-				((ComponentContainer)this).addComponent(content);
-			}else {
-				throw new IllegalStateException("you must implement setView()");
-			}
-			
-		}
-	}
+	void setViewContent(Component content);
 
 }

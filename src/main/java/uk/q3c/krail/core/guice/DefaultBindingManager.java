@@ -349,10 +349,14 @@ public abstract class DefaultBindingManager
 			if (injector != null) {
 				ServiceManager serviceManager = injector
 						.getInstance(ServiceManager.class);
+				if(serviceManager != null) {
 				serviceManager.stopAsync();
 				log.debug("Waiting for services to stop...");
 				serviceManager.awaitStopped(60, TimeUnit.SECONDS);
 				log.debug("all service stopped.");
+				}else {
+					log.debug("No service manager present");
+				}
 			}
 		} catch (Exception e) {
 			log.error("Exception while stopping services", e);
