@@ -14,6 +14,8 @@ package uk.q3c.krail.core.view;
 
 import com.google.inject.*;
 
+import java.lang.annotation.Annotation;
+
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -28,8 +30,19 @@ import uk.q3c.krail.core.ui.KrailUIModule.PublicViewDefaultLayout;
 
 public class DefaultLayoutFactory implements LayoutFactory {
 
-	private static Logger log = LoggerFactory.getLogger(DefaultLayoutFactory.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultLayoutFactory.class);
 	private final Injector injector;
+
+	private static <A extends Annotation> A getAnnotation(Class<?> clazz, Class<A> annotationClass) {
+		while (clazz != null) {
+			A annotation = clazz.getAnnotation(annotationClass);
+			if (annotation != null) {
+				return annotation;
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return null;
+	}
 
 	Class<? extends ViewLayout> publicViewDefaultLayout;
 	Class<? extends ViewLayout> privateViewDefaultLayout;
@@ -76,7 +89,7 @@ public class DefaultLayoutFactory implements LayoutFactory {
 
 	@Override
 	public ViewLayout get(KrailView view) {
-		View viewAnnotation = view.getClass().getAnnotation(View.class);
+		View viewAnnotation = getAnnotation(view.getClass(), View.class);
 		if (viewAnnotation != null) {
 			Class<? extends ViewLayout> layoutClass = viewAnnotation.layout();
 			if (layoutClass == View.NO_LAYOUT) {
@@ -86,7 +99,7 @@ public class DefaultLayoutFactory implements LayoutFactory {
 			} else {
 				return get(layoutClass);
 			}
-		}else {
+		} else {
 			return getDefault(view);
 		}
 	}
