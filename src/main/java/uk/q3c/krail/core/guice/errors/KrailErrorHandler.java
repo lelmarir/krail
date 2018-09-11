@@ -44,15 +44,15 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 
 	private static final long serialVersionUID = -8722893607740326862L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(KrailErrorHandler.class);
-	
-	private final LinkedList<ErrorHandler> errorHandlers;
+
+	@Inject
+	private Provider<Set<ErrorHandler>> errorHandlersProvider;
 	@Inject
 	private Provider<Navigator> navigatorProvider;
 
 	@Inject
-	protected KrailErrorHandler(Set<ErrorHandler> errorHandlers) {
+	protected KrailErrorHandler() {
 		super();
-		this.errorHandlers = new LinkedList<>(errorHandlers);
 	}
 
 	@Override
@@ -75,8 +75,8 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			}
 
 			Throwable cause = throwable.getCause();
-			if(cause == null && throwable instanceof InvocationTargetException){
-				cause = ((InvocationTargetException)throwable).getTargetException();
+			if (cause == null && throwable instanceof InvocationTargetException) {
+				cause = ((InvocationTargetException) throwable).getTargetException();
 			}
 			throwable = cause;
 		}
@@ -88,10 +88,16 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 	}
 
 	private boolean handleError(ErrorEvent e) {
-		ListIterator<ErrorHandler> it = errorHandlers.listIterator(errorHandlers.size());
-		while(it.hasPrevious()) {
+		LinkedList<ErrorHandler> handlers = new LinkedList<>();
+		handlers.addAll(errorHandlersProvider.get());
+
+		// li eseguo nell'ordine inverso
+		// FIXME: errorHandlers è un set, perche lo converto in lista e lo eseguo in
+		// ordine inverso? tanto saranno in un ordine casuale...
+		ListIterator<ErrorHandler> it = handlers.listIterator(handlers.size());
+		while (it.hasPrevious()) {
 			ErrorHandler handler = it.previous();
-			
+
 			boolean handled = handler.handle(e);
 			if (handled == true) {
 				LOGGER.debug("Error handled by {} : {}", handler, e.getThrowable());
@@ -100,5 +106,5 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 		return false;
 	}
-	
+
 }
