@@ -243,7 +243,7 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 
 	private static Type[] getParameterTypes(Method method, Class<?> view) {
 		GenericsContext context = GenericsResolver.resolve(view).type(method.getDeclaringClass());
-		MethodGenericsContext methodContext = context  .method(method);
+		MethodGenericsContext methodContext = context.method(method);
 		List<Type> types = methodContext.resolveParametersTypes();
 		return types.toArray(new Type[types.size()]);
 	}
@@ -253,13 +253,13 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 			Boolean useCalculatedParameters) {
 		Map<Method, Object[]> matchingMethods = new HashMap<Method, Object[]>();
 
-		for (Method method : alternateMethods) {
+		methodsLoop: for (Method method : alternateMethods) {
 			LOGGER.trace("checking method {}:", method);
 			Type[] parametersTypes = getParameterTypes(method, view.getClass());
 			Annotation[][] parametersAnnotations = method.getParameterAnnotations();
 			Object[] args = new Object[parametersTypes.length];
 
-			for (int i = 0; i < parametersTypes.length; i++) {
+			parametersLoop: for (int i = 0; i < parametersTypes.length; i++) {
 				Parameter parameterAnnotation;
 				if (event != null && isAssignableFrom(parametersTypes[i], event.getClass())) {
 					args[i] = event;
@@ -297,12 +297,13 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 						if (parameterOptional) {
 							// ...but is optional, so the value can be null
 							args[i] = null;
+							continue parametersLoop;
 						} else {
 							// ...and is not optional, this method is not the
 							// correct one
-							;
+							continue methodsLoop;
 						}
-						continue;
+
 					}
 
 				} else /* if(parameterAnnotation == null) */ {
@@ -327,8 +328,10 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 							instance = injector.getInstance(Key.get(parametersTypes[i]));
 						} catch (ConfigurationException e) {
 							injectionException = e;
-						}catch (Exception e) {
-							LOGGER.debug("Errore non gestito durante la creazione dell'istanza del parametro '{}' per il metodo {}: ", parametersTypes[i], method, e);
+						} catch (Exception e) {
+							LOGGER.debug(
+									"Errore non gestito durante la creazione dell'istanza del parametro '{}' per il metodo {}: ",
+									parametersTypes[i], method, e);
 							throw e;
 						}
 					}
@@ -347,31 +350,32 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 			// TODO: optional parameters
 			matchingMethods.put(method, args);
 
-			// remove methods with the same parameters but some more
-			Iterator<Method> it = matchingMethods.keySet().iterator();
-			while (it.hasNext()) {
-				boolean toBeRemover = false;
-				Method m = it.next();
-				for (Method m2 : matchingMethods.keySet()) {
-					if (m2 == m) {
-						continue;
-					}
-					Class<?>[] m2Parameters = m2.getParameterTypes();
-					Class<?>[] mParameters = m.getParameterTypes();
-					if (m2Parameters.length > mParameters.length
-							&& Arrays.asList(m2Parameters).containsAll(Arrays.asList(mParameters))) {
-						// il metodo m2 contiene tutti i parametri di m, e
-						// altri, quindi m va scartato
-						toBeRemover = true;
-						break;
-					}
+		} // methods foor loop
+
+		// remove methods with the same parameters but some less
+		Iterator<Method> it = matchingMethods.keySet().iterator();
+		while (it.hasNext()) {
+			boolean toBeRemover = false;
+			Method m = it.next();
+			for (Method m2 : matchingMethods.keySet()) {
+				if (m2 == m) {
+					continue;
 				}
-				if (toBeRemover) {
-					it.remove();
+				Class<?>[] m2Parameters = m2.getParameterTypes();
+				Class<?>[] mParameters = m.getParameterTypes();
+				if (m2Parameters.length > mParameters.length
+						&& Arrays.asList(m2Parameters).containsAll(Arrays.asList(mParameters))) {
+					// il metodo m2 contiene tutti i parametri di m, e
+					// altri, quindi scarto m
+					toBeRemover = true;
+					break;
 				}
 			}
+			if (toBeRemover) {
+				it.remove();
+			}
+		}
 
-		} // methods foor loop
 		return matchingMethods;
 	}
 
