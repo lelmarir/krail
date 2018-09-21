@@ -169,8 +169,24 @@ public class ParametersImpl implements Parameters {
 		if (obj instanceof ParametersImpl) {
 			Map<String, Object> objParameters = ((ParametersImpl) obj).parameters;
 			return Objects.equals(targetViewClass, ((ParametersImpl) obj).targetViewClass)
-					&& Objects.equals(parameters, objParameters);
+					&& areSameParameters(objParameters);
 		} else {
+			return false;
+		}
+	}
+
+	private boolean areSameParameters(Map<String, Object> objParameters) {
+		// i parametri sono uguali se sono le stesse chiavi e le stesse ISTANZE per i
+		// valori, non uso equal per confrontare i valori, perche non è sempre detto che
+		// due oggetti "equal" siano davvero identici
+		if(parameters.size() == objParameters.size()) {
+			for(Entry<String, Object> entry : parameters.entrySet()) {
+				if(objParameters.get(entry.getKey()) != entry.getValue()) { // <--  instance equality , not Object.equal !!
+					return false;
+				}
+			}
+			return true;
+		}else {
 			return false;
 		}
 	}

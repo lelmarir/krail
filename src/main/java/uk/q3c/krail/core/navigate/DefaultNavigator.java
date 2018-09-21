@@ -199,7 +199,7 @@ public class DefaultNavigator implements Navigator {
 		// stop unnecessary changes, but also to prevent navigation aware
 		// components from causing a loop by responding to a change of URI (they
 		// should suppress events when they do, but may not)
-		if (refresh == false && navigationState.equals(currentNavigationState)) {
+		if (refresh == false && !isDifferentState(navigationState)) {
 			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
@@ -272,6 +272,10 @@ public class DefaultNavigator implements Navigator {
 		// change events as we have already responded to the change
 		updateUriFragment(navigationState);
 
+	}
+
+	private boolean isDifferentState(NavigationState navigationState) {
+		return !navigationState.equals(currentNavigationState);
 	}
 
 	private void checkViewRootComponentNotNull(KrailView view) {
