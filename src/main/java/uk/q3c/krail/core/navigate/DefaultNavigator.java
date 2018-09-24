@@ -105,13 +105,8 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void init() {
-		try {
-			// kickstart
-			navigateTo(stateManager.getState());
-		} catch (InvalidURIException e) {
-			// TODO: dovrei gestire meglio i 404 piuttosto che andare alla pagina di errore
-			navigateToErrorView(e, "<b>404</b> Page not Found");
-		}
+		//UI will kickstart the navigation
+		;
 	}
 
 	protected NavigationCallbackHandler getCallbackHandler() {
