@@ -52,6 +52,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 
 	protected void onUnauthenticatedException(NavigationState targetNavigationState,
 			UnauthenticatedException throwable) {
+		LOGGER.debug("onUnauthenticatedException(targetNavigationState={})", targetNavigationState);
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
 
 		navigatorProvider.get().navigateTo(StandardPageKey.Log_In);
@@ -89,9 +90,11 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		session.access(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
+				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'", targetNavigationStateBeforeUnathenticatedException);
 				navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				targetNavigationStateBeforeUnathenticatedException = null;
 			} else {
+				LOGGER.debug("onSuccessfulLogin(), no previous navigation state, navigating to PrivateHome");
 				navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
 			}
 		});
