@@ -18,6 +18,7 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
 import uk.q3c.krail.core.navigate.Navigator;
@@ -32,11 +33,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.server.VaadinSession;
 
+@UIScoped
 public class AuthenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
-	private final Provider<Navigator> navigatorProvider;
+	private final Navigator navigator;
 
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 	private NavigationState previousNavigationStateBeforeUnathenticatedException = null;
@@ -44,10 +46,10 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	private VaadinSession session;
 
 	@Inject
-	protected AuthenticationHandler(Provider<Navigator> navigatorProvider, AuthenticationNotifier authenticationNotifier,
+	protected AuthenticationHandler(Navigator navigator, AuthenticationNotifier authenticationNotifier,
 			VaadinSessionProvider vaadinSessionProvider) {
 		super();
-		this.navigatorProvider = navigatorProvider;
+		this.navigator = navigator;
 		this.session = vaadinSessionProvider.get();
 		//FIXME: memory leak, non viene rimosso mai
 		authenticationNotifier.addListener(this);
@@ -57,8 +59,6 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 			UnauthenticatedException throwable) {
 		LOGGER.debug("onUnauthenticatedException(targetNavigationState={})", targetNavigationState);
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
-
-		Navigator navigator = navigatorProvider.get();
 		this.previousNavigationStateBeforeUnathenticatedException = navigator.getCurrentNavigationState();
 
 		navigator.navigateTo(StandardPageKey.Log_In);
@@ -90,29 +90,26 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
 		assert event.getSubject().isAuthenticated();
-
+		
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
-		session.access(() -> {
+		session.accessSynchronously(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
 				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'",
 						targetNavigationStateBeforeUnathenticatedException);
 				try {
-					navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
+					navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				} catch (AuthorizationException e) {
 					if (previousNavigationStateBeforeUnathenticatedException != null) {
-						navigatorProvider.get().navigateTo(previousNavigationStateBeforeUnathenticatedException);
+						navigator.navigateTo(previousNavigationStateBeforeUnathenticatedException);
 					} else {
-						navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
+						navigator.navigateTo(StandardPageKey.Private_Home);
 					}
 					throw e;
 				} finally {
 					targetNavigationStateBeforeUnathenticatedException = null;
 					previousNavigationStateBeforeUnathenticatedException = null;
 				}
-			} else {
-				LOGGER.debug("onSuccessfulLogin(), no previous navigation state, navigating to PrivateHome");
-				navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
 			}
 		});
 
@@ -126,6 +123,6 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	@Override
 	public void onLogout(LogoutEvent event) {
 		LOGGER.info("logout(user={})", event.getSubject());
-		navigatorProvider.get().navigateTo(StandardPageKey.Log_Out);
+		navigator.navigateTo(StandardPageKey.Log_Out);
 	}
 }
