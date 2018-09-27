@@ -271,8 +271,7 @@ public class DefaultNavigator implements Navigator {
 
 	public void checkAuthorization(Class<? extends KrailView> viewClass, Subject subject)
 			throws NavigationAuthorizationException {
-		NavigationState ns = sitemap.buildNavigationState(viewClass, null);
-		checkAuthorization(ns, subject);
+		sitemap.checkAuthorization(viewClass, subject);
 	}
 
 	private void checkAuthorization(NavigationState navigationState, Subject subject)

@@ -95,6 +95,6 @@ public interface Navigator extends BeforeViewChangeNotifier, AfterViewChangeNoti
 	 */
 	void refresh();
 
-	void checkAuthorization(Class<? extends KrailView> viewClass) throws NavigationAuthorizationException;
+	void checkAuthorization(Class<? extends KrailView> viewClass);
 
 }

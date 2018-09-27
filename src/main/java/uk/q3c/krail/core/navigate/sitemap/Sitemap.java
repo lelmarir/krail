@@ -1,5 +1,7 @@
 package uk.q3c.krail.core.navigate.sitemap;
 
+import org.apache.shiro.subject.Subject;
+
 import com.vaadin.navigator.View;
 
 import uk.q3c.krail.core.navigate.InvalidURIException;
@@ -32,5 +34,7 @@ public interface Sitemap {
 	RedirectNode addRedirect(String uri, SitemapNode targetNode);
 
 	boolean contains(Class<? extends View> viewClass);
+
+	void checkAuthorization(Class<? extends KrailView> viewClass, Subject subject);
 
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -272,6 +273,12 @@ public class DefaultSitemap implements Sitemap {
 	@Override
 	public boolean contains(Class<? extends View> viewClass) {
 		return nodesByClass.containsKey(viewClass);
+	}
+	
+	@Override
+	public void checkAuthorization(Class<? extends KrailView> viewClass, Subject subject) {
+		AbstractNode node = get(viewClass);
+		node.getAccesControlRule().checkAuthorization(subject);
 	}
 
 }

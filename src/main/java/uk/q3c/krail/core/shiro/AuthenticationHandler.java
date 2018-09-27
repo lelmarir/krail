@@ -32,7 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.server.VaadinSession;
 
-public class AutenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
+public class AuthenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
@@ -44,11 +44,12 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	private VaadinSession session;
 
 	@Inject
-	protected AutenticationHandler(Provider<Navigator> navigatorProvider, AuthenticationNotifier authenticationNotifier,
+	protected AuthenticationHandler(Provider<Navigator> navigatorProvider, AuthenticationNotifier authenticationNotifier,
 			VaadinSessionProvider vaadinSessionProvider) {
 		super();
 		this.navigatorProvider = navigatorProvider;
 		this.session = vaadinSessionProvider.get();
+		//FIXME: memory leak, non viene rimosso mai
 		authenticationNotifier.addListener(this);
 	}
 
