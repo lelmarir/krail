@@ -50,6 +50,8 @@ import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.navigator.Navigator.PushStateManager;
 import com.vaadin.navigator.Navigator.UriFragmentManager;
 import com.vaadin.server.Page;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.UI;
 
 /**
@@ -291,9 +293,16 @@ public class DefaultNavigator implements Navigator {
 
 	private void checkViewRootComponentNotNull(KrailView view) {
 		try {
-			if (view.getRootComponent() == null) {
+			Component rootComponent = view.getRootComponent();
+			if (rootComponent == null) {
 				throw new RuntimeException(
 						"getRootComponent() should have trowned a ViewBuildException instead of returning null");
+			}else {
+				if(LOGGER.isDebugEnabled()) {
+					if(rootComponent instanceof Layout && ((Layout) rootComponent).getComponentCount() > 0) {
+						LOGGER.warn("It is advisable to creare the view layout components only after attach() or afterNavigationInbound()");
+					}
+				}
 			}
 		} catch (ViewBuildException e) {
 			throw new RuntimeException("The rootComponent shuld not be null after BeforeInboundNavigation()", e);
