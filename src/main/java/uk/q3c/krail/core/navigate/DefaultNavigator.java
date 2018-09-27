@@ -105,7 +105,7 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void init() {
-		//UI will kickstart the navigation
+		// UI will kickstart the navigation
 		;
 	}
 
@@ -173,7 +173,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void navigateTo(NavigationTarget target) {
+	public void navigateTo(NavigationTarget target) throws AuthorizationException {
 		navigateTo(target.getViewClass(), target.getParaeters());
 	}
 
@@ -183,7 +183,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	@Override
-	public void navigateTo(NavigationState navigationState) {
+	public void navigateTo(NavigationState navigationState) throws AuthorizationException {
 		navigateTo(navigationState, false);
 	}
 
@@ -214,12 +214,7 @@ public class DefaultNavigator implements Navigator {
 
 		Subject subject = subjectProvider.get();
 		// throw an exception if not authorized
-		assert node.getAccesControlRule() != null : node;
-		try {
-			node.getAccesControlRule().checkAuthorization(subject);
-		} catch (AuthorizationException e) {
-			throw new NavigationAuthorizationException(navigationState, e);
-		}
+		checkAuthorization(navigationState, subject);
 
 		// if change is blocked revert to previous state
 		fireBeforeViewChange(cancellable);
@@ -269,6 +264,28 @@ public class DefaultNavigator implements Navigator {
 
 	}
 
+	@Override
+	public void checkAuthorization(Class<? extends KrailView> viewClass) throws NavigationAuthorizationException {
+		checkAuthorization(viewClass, subjectProvider.get());
+	}
+
+	public void checkAuthorization(Class<? extends KrailView> viewClass, Subject subject)
+			throws NavigationAuthorizationException {
+		NavigationState ns = sitemap.buildNavigationState(viewClass, null);
+		checkAuthorization(ns, subject);
+	}
+
+	private void checkAuthorization(NavigationState navigationState, Subject subject)
+			throws NavigationAuthorizationException {
+		SitemapNode node = navigationState.getSitemapNode();
+		assert node.getAccesControlRule() != null : node;
+		try {
+			node.getAccesControlRule().checkAuthorization(subject);
+		} catch (AuthorizationException e) {
+			throw new NavigationAuthorizationException(navigationState, e);
+		}
+	}
+
 	private boolean isDifferentState(NavigationState navigationState) {
 		return !navigationState.equals(currentNavigationState);
 	}
@@ -294,8 +311,7 @@ public class DefaultNavigator implements Navigator {
 	 * The view change listeners may also e.g. open a warning or question dialog and
 	 * save the parameters to re-initiate the navigation operation upon user action.
 	 * 
-	 * @param event
-	 *            view change event (not null, view change not yet performed)
+	 * @param event view change event (not null, view change not yet performed)
 	 * 
 	 * @return true if the view change should be allowed, false to silently block
 	 *         the navigation operation
@@ -311,8 +327,7 @@ public class DefaultNavigator implements Navigator {
 	 * <p/>
 	 * Listeners are called in registration order.
 	 * 
-	 * @param event
-	 *            view change event (not null)
+	 * @param event view change event (not null)
 	 */
 	protected void fireAfterViewChange(KrailViewChangeEvent event) {
 		for (AfterViewChangeListener l : afterViewChangeListeners) {
@@ -325,8 +340,7 @@ public class DefaultNavigator implements Navigator {
 	 * <p/>
 	 * Listeners are called in registration order.
 	 * 
-	 * @param event
-	 *            view change event (not null)
+	 * @param event view change event (not null)
 	 */
 	private void fireBeforeSecurityCheck(KrailViewChangeEvent event) {
 		for (BeforeSecurityCheckListener l : beforeSecurityCheckListener) {

@@ -21,24 +21,27 @@ public class ShiroVaadinModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder
-				.newSetBinder(binder(), ErrorHandler.class);
+		Multibinder<ErrorHandler> errorHandlersBinder = Multibinder.newSetBinder(binder(), ErrorHandler.class);
 		errorHandlersBinder.addBinding().to(UnauthorizedExceptionHandler.class);
-		errorHandlersBinder.addBinding().to(
-				UnauthenticatedExceptionHandler.class);
+		errorHandlersBinder.addBinding().to(UnauthenticatedExceptionHandler.class);
 
 		bindUnauthenticatedHandler();
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
-		
-		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder
-				.newSetBinder(binder(), KrailRequestHandler.class);
+
+		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder.newSetBinder(binder(),
+				KrailRequestHandler.class);
 		krailRequestHandlerBinder.addBinding().to(MDCSubjectHandler.class);
 	}
 
 	@Provides
 	private SecuritySession provideSecuritySession(VaadinSessionProvider sessionProvider) {
-		return new VaadinSecuritySession(sessionProvider.get());
+		VaadinSession session = sessionProvider.get();
+		if (session != null) {
+			return new VaadinSecuritySession(session);
+		} else {
+			return null;
+		}
 	}
 
 	@Provides
@@ -48,31 +51,28 @@ public class ShiroVaadinModule extends AbstractModule {
 
 	/**
 	 * the {@link DefaultErrorHandler} calls this handler in response to an
-	 * attempted unauthorised action. If you have defined your own ErrorHandler
-	 * you may of course do something different
+	 * attempted unauthorised action. If you have defined your own ErrorHandler you
+	 * may of course do something different
 	 */
 	protected void bindUnauthorisedHandler() {
-		bind(UnauthorizedExceptionHandler.class).to(
-				DefaultUnauthorizedExceptionHandler.class);
+		bind(UnauthorizedExceptionHandler.class).to(DefaultUnauthorizedExceptionHandler.class);
 	}
 
 	/**
 	 * the {@link DefaultErrorHandler} calls this handler in response to an
-	 * attempted unauthenticated action. If you have defined your own
-	 * ErrorHandler you may of course do something different
+	 * attempted unauthenticated action. If you have defined your own ErrorHandler
+	 * you may of course do something different
 	 */
 	protected void bindUnauthenticatedHandler() {
-		bind(UnauthenticatedExceptionHandler.class).to(
-				AutenticationHandler.class).in(UIScoped.class);
+		bind(UnauthenticatedExceptionHandler.class).to(AutenticationHandler.class).in(UIScoped.class);
 	}
 
 	/**
-	 * The login process may raise a number of {@link ShiroException}s. This
-	 * handler is called to manage those exceptions gracefully.
+	 * The login process may raise a number of {@link ShiroException}s. This handler
+	 * is called to manage those exceptions gracefully.
 	 */
 	protected void bindLoginExceptionsHandler() {
-		bind(LoginExceptionHandler.class)
-				.to(DefaultLoginExceptionHandler.class);
+		bind(LoginExceptionHandler.class).to(DefaultLoginExceptionHandler.class);
 	}
 
 }

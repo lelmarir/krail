@@ -13,6 +13,7 @@
 
 package uk.q3c.krail.core.shiro;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	private final Provider<Navigator> navigatorProvider;
 
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
+	private NavigationState previousNavigationStateBeforeUnathenticatedException = null;
 
 	private VaadinSession session;
 
@@ -55,8 +57,10 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		LOGGER.debug("onUnauthenticatedException(targetNavigationState={})", targetNavigationState);
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
 
-		navigatorProvider.get().navigateTo(StandardPageKey.Log_In);
+		Navigator navigator = navigatorProvider.get();
+		this.previousNavigationStateBeforeUnathenticatedException = navigator.getCurrentNavigationState();
 
+		navigator.navigateTo(StandardPageKey.Log_In);
 	}
 
 	@Override
@@ -76,11 +80,11 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 	}
 
 	/**
-	 * When a user has successfully logged in, they are routed back to the page
-	 * they were on before going to the login page. If they have gone straight
-	 * to the login page (maybe they bookmarked it), or they were on the logout
-	 * page, they will be routed to the 'private home page' (the StandardPage
-	 * for {@link StandardPageKey#Private_Home})
+	 * When a user has successfully logged in, they are routed back to the page they
+	 * were on before going to the login page. If they have gone straight to the
+	 * login page (maybe they bookmarked it), or they were on the logout page, they
+	 * will be routed to the 'private home page' (the StandardPage for
+	 * {@link StandardPageKey#Private_Home})
 	 */
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
@@ -90,9 +94,21 @@ public class AutenticationHandler implements UnauthenticatedExceptionHandler, Au
 		session.access(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
-				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'", targetNavigationStateBeforeUnathenticatedException);
-				navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
-				targetNavigationStateBeforeUnathenticatedException = null;
+				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'",
+						targetNavigationStateBeforeUnathenticatedException);
+				try {
+					navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
+				} catch (AuthorizationException e) {
+					if (previousNavigationStateBeforeUnathenticatedException != null) {
+						navigatorProvider.get().navigateTo(previousNavigationStateBeforeUnathenticatedException);
+					} else {
+						navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
+					}
+					throw e;
+				} finally {
+					targetNavigationStateBeforeUnathenticatedException = null;
+					previousNavigationStateBeforeUnathenticatedException = null;
+				}
 			} else {
 				LOGGER.debug("onSuccessfulLogin(), no previous navigation state, navigating to PrivateHome");
 				navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);

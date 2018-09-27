@@ -1,5 +1,7 @@
 package uk.q3c.krail.core.shiro;
 
+import java.util.Objects;
+
 import com.google.inject.Inject;
 import com.vaadin.server.VaadinSession;
 
@@ -9,7 +11,7 @@ public class VaadinSecuritySession implements SecuritySession {
 	
 	@Inject
 	public VaadinSecuritySession(VaadinSession session) {
-		this.session = session;
+		this.session = Objects.requireNonNull(session);
 	}
 	
 	@Override

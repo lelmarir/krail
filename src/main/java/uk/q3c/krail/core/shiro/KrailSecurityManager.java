@@ -186,13 +186,6 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 				session.setAttribute(SubjectSerializableWrapper.class.getName(), subjectWrapper);
 			}
 			subject = subjectWrapper.get();
-			
-			if (threadLocalSubject.get() != null) {
-				throw new IllegalStateException(
-						"when is present a session, the threadLocalSubject should be null! (thread='"
-								+ Thread.currentThread().getName() + "', session='" + session + "', session.subject='"
-								+ subject + "', threadLocalSubject='" + threadLocalSubject.get() + "')");
-			}
 			return subject;
 		}
 		

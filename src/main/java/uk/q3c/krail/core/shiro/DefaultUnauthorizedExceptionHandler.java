@@ -18,16 +18,22 @@ import java.io.Serializable;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import uk.q3c.krail.core.navigate.NavigationAuthorizationException;
+import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
 import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class DefaultUnauthorizedExceptionHandler implements
 		UnauthorizedExceptionHandler, Serializable {
 
 	private final UserNotifier notifier;
+	
+	@Inject
+	private Provider<Navigator> navigatorProvider;
 
 	@Inject
 	protected DefaultUnauthorizedExceptionHandler(UserNotifier notifier) {
@@ -39,6 +45,10 @@ public class DefaultUnauthorizedExceptionHandler implements
 			UnauthorizedException throwable) {
 		//FIXME: localizzare
 		notifier.show(NotificationType.ERROR, "No Permission");
+		Navigator navigator = navigatorProvider.get();
+		if(navigator.getCurrentNavigationState() == null || navigator.getCurrentNavigationState().equals(targetNavigationState)) {
+			navigator.navigateTo(StandardPageKey.Private_Home);
+		}
 	}
 
 	@Override
