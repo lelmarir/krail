@@ -201,6 +201,15 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 	}
 
 	@Override
+	public void afterOutboundNavigationEvent(KrailView view, KrailViewChangeEvent event) {
+		try {
+			fireNavigationCallback(view, event, AfterOutboundNavigation.class);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
 	public void afterInbounNavigationEvent(KrailView view, KrailViewChangeEvent event) {
 		try {
 			fireNavigationCallback(view, event, AfterInboundNavigation.class);

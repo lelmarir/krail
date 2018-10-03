@@ -201,9 +201,6 @@ public class DefaultNavigator implements Navigator {
 			return;
 		}
 
-		SitemapNode node = navigationState.getSitemapNode();
-		assert node != null;
-
 		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this, currentNavigationState, navigationState);
 
 		CancellableWrapper cancellable = new CancellableWrapper(event);
@@ -215,7 +212,7 @@ public class DefaultNavigator implements Navigator {
 		}
 
 		Subject subject = subjectProvider.get();
-		// throw an exception if not authorized
+		// will throw an exception if not authorized
 		checkAuthorization(navigationState, subject);
 
 		// if change is blocked revert to previous state
@@ -225,37 +222,43 @@ public class DefaultNavigator implements Navigator {
 			return;
 		}
 
-		// notify Outbound navigation to current view
-		if (getCurrentView() != null) {
-			fireViewBeforeOutboundNavigationEvent(getCurrentView(), cancellable, getCallbackHandler());
+		KrailView sourceView = getCurrentView();
+
+		// notify befre Outbound navigation to current view
+		if (sourceView != null) {
+			fireViewBeforeOutboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
 			if (cancellable.isCancelled()) {
-				LOGGER.debug(
-						"navigation canceled by the view {} in NavigationAwareView#onOutboundNavigation beforeOutboundNavigation",
-						getCurrentView().getClass().getSimpleName());
+				LOGGER.debug("navigation canceled by the view {} in @BeforeOutboundNavigation",
+						sourceView.getClass().getSimpleName());
 				return;
 			}
 		}
 
-		LOGGER.debug("obtaining view instance for '{}'", node);
-		KrailView view = navigationState.getView();
-
 		// notify before Inbound navigation to target view
-
-		fireViewBeforeInboundNavigationEvent(view, cancellable, getCallbackHandler());
+		fireViewBeforeInboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
 		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by the view {} in NavigationAwareView#onInboundNavigation",
-					view.getClass().getSimpleName());
+			LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
+					sourceView.getClass().getSimpleName());
 			return;
 		}
 
-		checkViewRootComponentNotNull(view);
+		LOGGER.debug("obtaining view instance for '{}'", navigationState);
+		KrailView targetView = navigationState.getView();
+
+		checkViewRootComponentNotNull(targetView);
 
 		setCurrentNavigationState(navigationState);
+		// TODO: dovrei aggiungere un listener su detach() per notificare
+		// @AfterOutboundNavigation alla vista corrente (ad esempio alla chiusura della
+		// sessione)
 
 		// now change the view
-		changeView(view);
+		changeView(targetView);
 
-		fireViewAfterInboundNavigationEvent(view, event);
+		fireViewAfterOutboundNavigationEvent(sourceView, event);
+		sourceView = null;
+
+		fireViewAfterInboundNavigationEvent(targetView, event);
 
 		// and tell listeners its changed
 		fireAfterViewChange(event);
@@ -297,10 +300,11 @@ public class DefaultNavigator implements Navigator {
 			if (rootComponent == null) {
 				throw new RuntimeException(
 						"getRootComponent() should have trowned a ViewBuildException instead of returning null");
-			}else {
-				if(LOGGER.isDebugEnabled()) {
-					if(rootComponent instanceof Layout && ((Layout) rootComponent).getComponentCount() > 0) {
-						LOGGER.warn("It is advisable to creare the view layout components only after attach() or afterNavigationInbound()");
+			} else {
+				if (LOGGER.isDebugEnabled()) {
+					if (rootComponent instanceof Layout && ((Layout) rootComponent).getComponentCount() > 0) {
+						LOGGER.warn(
+								"It is advisable to creare the view layout components only after attach() or afterNavigationInbound()");
 					}
 				}
 			}
@@ -388,6 +392,10 @@ public class DefaultNavigator implements Navigator {
 
 	protected void changeView(KrailView view) {
 		ui.changeView(view, layoutFactory.get(view));
+	}
+
+	private void fireViewAfterOutboundNavigationEvent(KrailView view, KrailViewChangeEvent event) {
+		getCallbackHandler().afterOutboundNavigationEvent(view, event);
 	}
 
 	private void fireViewAfterInboundNavigationEvent(KrailView view, KrailViewChangeEvent event) {

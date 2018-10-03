@@ -13,6 +13,8 @@ public interface NavigationCallbackHandler {
 	void beforeInboundNavigationEvent(KrailView view,
 			CancellableKrailViewChangeEvent cancellable);
 
+	void afterOutboundNavigationEvent(KrailView view, KrailViewChangeEvent event);
+	
 	void afterInbounNavigationEvent(KrailView view, KrailViewChangeEvent event);
 
 }

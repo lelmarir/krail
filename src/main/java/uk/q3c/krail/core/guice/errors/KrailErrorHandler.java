@@ -82,7 +82,9 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 
 		if (handled == false) {
-			LOGGER.error("Unable to handle the error: navigating to the error page", event.getThrowable());
+			LOGGER.error("Unable to handle the error: navigating to the error page, \n"
+					+ "handlers: {}", errorHandlersProvider.get(), event.getThrowable());
+			
 			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 		}
 	}
