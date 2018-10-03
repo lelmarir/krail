@@ -14,6 +14,7 @@ package uk.q3c.krail.core.navigate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,19 +23,29 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.vaadin.navigator.NavigationStateManager;
+import com.vaadin.navigator.Navigator.PushStateManager;
+import com.vaadin.navigator.Navigator.UriFragmentManager;
+import com.vaadin.navigator.PushStateNavigation;
+import com.vaadin.server.Page;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
+import com.vaadin.ui.UI;
+
 import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.Sitemap;
 import uk.q3c.krail.core.navigate.sitemap.SitemapNode;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.navigate.sitemap.annotations.View;
-import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.ui.ScopedUI;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
-import uk.q3c.krail.core.view.ErrorView;
 import uk.q3c.krail.core.view.AfterViewChangeListener;
 import uk.q3c.krail.core.view.BeforeSecurityCheckListener;
 import uk.q3c.krail.core.view.BeforeViewChangeListener;
+import uk.q3c.krail.core.view.ErrorView;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
@@ -42,17 +53,6 @@ import uk.q3c.krail.core.view.KrailViewChangeEventImpl;
 import uk.q3c.krail.core.view.KrailViewChangeEventImpl.CancellableWrapper;
 import uk.q3c.krail.core.view.LayoutFactory;
 import uk.q3c.krail.core.view.ViewBuildException;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.vaadin.navigator.NavigationStateManager;
-import com.vaadin.navigator.PushStateNavigation;
-import com.vaadin.navigator.Navigator.PushStateManager;
-import com.vaadin.navigator.Navigator.UriFragmentManager;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.UI;
 
 /**
  * The navigator is at the heart of navigation process, and provides navigation
@@ -71,6 +71,17 @@ import com.vaadin.ui.UI;
  * @date 18 Apr 2014
  */
 public class DefaultNavigator implements Navigator {
+
+	public static <A extends Annotation> A getAnnotation(Class<?> clazz, Class<A> annotationClass) {
+		while (clazz != null) {
+			A annotation = clazz.getAnnotation(annotationClass);
+			if (annotation != null) {
+				return annotation;
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return null;
+	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
@@ -232,14 +243,14 @@ public class DefaultNavigator implements Navigator {
 						sourceView.getClass().getSimpleName());
 				return;
 			}
-		}
 
-		// notify before Inbound navigation to target view
-		fireViewBeforeInboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
-		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
-					sourceView.getClass().getSimpleName());
-			return;
+			// notify before Inbound navigation to target view
+			fireViewBeforeInboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
+			if (cancellable.isCancelled()) {
+				LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
+						sourceView.getClass().getSimpleName());
+				return;
+			}
 		}
 
 		LOGGER.debug("obtaining view instance for '{}'", navigationState);
@@ -255,8 +266,10 @@ public class DefaultNavigator implements Navigator {
 		// now change the view
 		changeView(targetView);
 
-		fireViewAfterOutboundNavigationEvent(sourceView, event);
-		sourceView = null;
+		if (sourceView != null) {
+			fireViewAfterOutboundNavigationEvent(sourceView, event);
+			sourceView = null;
+		}
 
 		fireViewAfterInboundNavigationEvent(targetView, event);
 
@@ -391,6 +404,18 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	protected void changeView(KrailView view) {
+		// set default view title from annotation
+		if (view.getViewTitle() == null || view.getViewTitle().isEmpty()) {
+			//solo se non è gia presente un titolo
+			View viewAnnotation = DefaultNavigator.getAnnotation(view.getClass(), View.class);
+			if (viewAnnotation != null) {
+				if (viewAnnotation.title().length > 0) {
+					// TODO: localizazione
+					view.getViewTitleComponet().setTitel(viewAnnotation.title()[0]);
+				}
+			}
+		}
+		// display the view in the ui
 		ui.changeView(view, layoutFactory.get(view));
 	}
 

@@ -31,18 +31,12 @@ import uk.q3c.krail.core.view.KrailView;
 public interface ViewLayout extends Component {
 
 	/**
-	 * Shows the content of the layout which is the router target component
-	 * annotated with a {@link Route @Route}.
-	 * <p>
-	 * <strong>Note</strong> implementors should not care about old {@code @Route}
-	 * content, because {@link Router} automatically removes it before calling the
-	 * method.
-	 * </p>
+	 * Shows the content of the layout. 
+	 * Should use view.getRootComponent() to get the root view component
 	 *
-	 * @param content
-	 *            the content component or {@code null} if the layout content is to
-	 *            be cleared.
+	 * @param view
+	 *            the view to display or null if to be cleared
 	 */
-	void setViewContent(Component content);
+	void setView(KrailView view);
 
 }

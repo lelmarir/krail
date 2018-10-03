@@ -116,12 +116,12 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 			log.debug("changing view to {}", to);
 		}
 
-		Component content = toView.getRootComponent();
-		content.setSizeFull();
 		if (layout != null) {
-			layout.setViewContent(content);
+			layout.setView(toView);
 			viewDisplayContainer.setContent(layout);
 		} else {
+			Component content = toView.getRootComponent();
+			assert content != null;
 			viewDisplayContainer.setContent(content);
 		}
 		this.view = toView;

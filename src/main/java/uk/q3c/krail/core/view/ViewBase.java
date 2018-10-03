@@ -24,53 +24,71 @@ import uk.q3c.util.ID;
 
 import java.util.Optional;
 
+import javax.swing.plaf.ViewportUI;
+
 /**
  * Provides default View behaviour suitable for most view implementations
  */
 public abstract class ViewBase<R extends Component> implements KrailView {
 
-    private static Logger log = LoggerFactory.getLogger(ViewBase.class);
-    private R rootComponent;
+	public static class ViewTitleLabel extends Label implements ViewTitleComponent {
 
-    @Inject
-    protected ViewBase() {
-        super();
-    }
+		@Override
+		public String getTitle() {
+			return getValue();
+		}
 
-    /**
-     * You only need to override / implement this method if you are using TestBench, or another testing tool which
-     * looks
-     * for debug
-     * ids. If you do override it to add your own subclass ids, make sure you call super
-     */
-    protected void setIds() {
-        getRootComponent().setId(ID.getId(Optional.empty(), this, getRootComponent()));
-    }
+		@Override
+		public void setTitel(String title) {
+			setValue(title);
+		}
 
-    @Override
-    public R getRootComponent() {
-        if (rootComponent == null) {
-            throw new ViewBuildException("Root component cannot be null in " + getClass().getName() + ". Has your " +
-                    "buildView() method called " +
-                    "setRootComponent()?");
-        }
-        return rootComponent;
-    }
+	}
 
-    public void setRootComponent(R rootComponent) {
-        this.rootComponent = rootComponent;
-    }
-    
-    @Override
-    public String getViewName() {
-        return getClass().getSimpleName();
-    }
-    
-    public UI getUI() {
-    	if(!getRootComponent().isAttached()) {
-    		throw new IllegalStateException("can't get the UI before the component is attached");
-    	}
-    	return getRootComponent().getUI();
-    }
+	private static Logger log = LoggerFactory.getLogger(ViewBase.class);
+	private R rootComponent;
+	private ViewTitleComponent viewTitleComponent;
+
+	@Inject
+	protected ViewBase() {
+		super();
+	}
+
+	/**
+	 * You only need to override / implement this method if you are using TestBench,
+	 * or another testing tool which looks for debug ids. If you do override it to
+	 * add your own subclass ids, make sure you call super
+	 */
+	protected void setIds() {
+		getRootComponent().setId(ID.getId(Optional.empty(), this, getRootComponent()));
+	}
+
+	@Override
+	public R getRootComponent() {
+		if (rootComponent == null) {
+			throw new ViewBuildException("Root component cannot be null in " + getClass().getName() + ". Has your "
+					+ "buildView() method called " + "setRootComponent()?");
+		}
+		return rootComponent;
+	}
+
+	public void setRootComponent(R rootComponent) {
+		this.rootComponent = rootComponent;
+	}
+
+	@Override
+	public ViewTitleComponent getViewTitleComponet() {
+		if (viewTitleComponent == null) {
+			viewTitleComponent = new ViewTitleLabel();
+		}
+		return viewTitleComponent;
+	}
+
+	public UI getUI() {
+		if (!getRootComponent().isAttached()) {
+			throw new IllegalStateException("can't get the UI before the component is attached");
+		}
+		return getRootComponent().getUI();
+	}
 
 }

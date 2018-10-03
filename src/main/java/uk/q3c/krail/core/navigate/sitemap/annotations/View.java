@@ -33,5 +33,6 @@ public @interface View {
 	public static final Class<? extends ViewLayout> NO_LAYOUT = EmptyViewLayout.class;
 	
 	String uri();
+	String[] title() default {};
 	Class<? extends ViewLayout> layout() default UndefinedViewLayout.class;
 }

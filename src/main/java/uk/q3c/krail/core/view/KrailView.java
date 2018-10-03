@@ -19,12 +19,11 @@ import com.vaadin.ui.Component;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
-
 /**
- * A view is constructed by the {@link ViewFactory} from a Provider defined in the sitemap building process.  When
- * the view is selected for use, calls are made against {@link BeforeViewChangeListener}s added to {@link Navigator},
- * and
- * this interface, in the following order:
+ * A view is constructed by the {@link ViewFactory} from a Provider defined in
+ * the sitemap building process. When the view is selected for use, calls are
+ * made against {@link BeforeViewChangeListener}s added to {@link Navigator},
+ * and this interface, in the following order:
  * <ol>
  * <li>{@link BeforeViewChangeListener#beforeViewChange(KrailViewChangeEvent)}</li>
  * <li>{@link #init()}</li>
@@ -33,41 +32,50 @@ import uk.q3c.krail.core.navigate.sitemap.NavigationState;
  * <li>{@link #afterBuild}</li>
  * <li>{@link BeforeViewChangeListener#afterViewChange(KrailViewChangeEvent)}</li>
  * </ol>
- * where build refers to the creation of UI fields and components which populate the view.  Each method, except
- * readFromEnvironment(),
- * is passed a
- * {@link KrailViewChangeEvent}, which contains the current {@link NavigationState} so that, for example, parameter
- * information can be used to determine how the View is to be built or respond in some other way to URL parameters.
+ * where build refers to the creation of UI fields and components which populate
+ * the view. Each method, except readFromEnvironment(), is passed a
+ * {@link KrailViewChangeEvent}, which contains the current
+ * {@link NavigationState} so that, for example, parameter information can be
+ * used to determine how the View is to be built or respond in some other way to
+ * URL parameters.
  */
 public interface KrailView extends View {
-	
-    /**
-	 * To enable implementations to implement this interface without descending
-	 * from Component. If the implementation does descend from Component, just
-	 * return 'this'. Throws a ViewBuildException if the root component has not
-	 * been set
-     *
-     * @return
-     * @throws ViewBuildException
-     */
-    public default Component getRootComponent() throws ViewBuildException {
-        if (!(this instanceof Component)) {
-            throw new IllegalStateException(
-                    "View is not a Component. Override getViewComponent() to return the root view component");
-        }
-        return (Component) this;
-    }
-    
-    @Override
-    default Component getViewComponent() {
-    	return getRootComponent();
-    }
 
-    /**
-     * A name for the view, typically displayed in a title bar
-     *
-     * @return
-     */
-    public String getViewName();
+	public interface ViewTitleComponent extends Component {
+		String getTitle();
+
+		void setTitel(String title);
+	}
+
+	/**
+	 * To enable implementations to implement this interface without descending from
+	 * Component. If the implementation does descend from Component, just return
+	 * 'this'. Throws a ViewBuildException if the root component has not been set
+	 *
+	 * @return
+	 * @throws ViewBuildException
+	 */
+	public default Component getRootComponent() throws ViewBuildException {
+		if (!(this instanceof Component)) {
+			throw new IllegalStateException(
+					"View is not a Component. Override getViewComponent() to return the root view component");
+		}
+		return (Component) this;
+	}
+
+	@Override
+	default Component getViewComponent() {
+		return getRootComponent();
+	}
+
+	public ViewTitleComponent getViewTitleComponet();
+
+	default String getViewTitle() {
+		return getViewTitleComponet().getTitle();
+	}
+
+	default void setViewTitle(String title) {
+		getViewTitleComponet().setTitel(title);
+	}
 
 }

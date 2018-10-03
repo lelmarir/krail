@@ -23,6 +23,7 @@ import org.apache.shiro.authz.annotation.RequiresUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
+import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.sitemap.annotations.View;
 import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.ui.KrailUIModule.PrivateViewDefaultLayout;
@@ -32,17 +33,6 @@ public class DefaultLayoutFactory implements LayoutFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultLayoutFactory.class);
 	private final Injector injector;
-
-	private static <A extends Annotation> A getAnnotation(Class<?> clazz, Class<A> annotationClass) {
-		while (clazz != null) {
-			A annotation = clazz.getAnnotation(annotationClass);
-			if (annotation != null) {
-				return annotation;
-			}
-			clazz = clazz.getSuperclass();
-		}
-		return null;
-	}
 
 	Class<? extends ViewLayout> publicViewDefaultLayout;
 	Class<? extends ViewLayout> privateViewDefaultLayout;
@@ -89,7 +79,7 @@ public class DefaultLayoutFactory implements LayoutFactory {
 
 	@Override
 	public ViewLayout get(KrailView view) {
-		View viewAnnotation = getAnnotation(view.getClass(), View.class);
+		View viewAnnotation = DefaultNavigator.getAnnotation(view.getClass(), View.class);
 		if (viewAnnotation != null) {
 			Class<? extends ViewLayout> layoutClass = viewAnnotation.layout();
 			if (layoutClass == View.NO_LAYOUT) {
