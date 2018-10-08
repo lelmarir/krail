@@ -56,6 +56,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	protected DefaultErrorView() {
 		super();
 		CssLayout outerLayout = new CssLayout();
+		outerLayout.setSizeFull();
 		{
 			VerticalLayout mainLayout = new VerticalLayout();
 			{

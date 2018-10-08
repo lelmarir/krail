@@ -243,18 +243,18 @@ public class DefaultNavigator implements Navigator {
 						sourceView.getClass().getSimpleName());
 				return;
 			}
-
-			// notify before Inbound navigation to target view
-			fireViewBeforeInboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
-			if (cancellable.isCancelled()) {
-				LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
-						sourceView.getClass().getSimpleName());
-				return;
-			}
 		}
 
 		LOGGER.debug("obtaining view instance for '{}'", navigationState);
 		KrailView targetView = navigationState.getView();
+
+		// notify before Inbound navigation to target view
+		fireViewBeforeInboundNavigationEvent(targetView, cancellable, getCallbackHandler());
+		if (cancellable.isCancelled()) {
+			LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
+					sourceView.getClass().getSimpleName());
+			return;
+		}
 
 		checkViewRootComponentNotNull(targetView);
 
@@ -406,7 +406,7 @@ public class DefaultNavigator implements Navigator {
 	protected void changeView(KrailView view) {
 		// set default view title from annotation
 		if (view.getViewTitle() == null || view.getViewTitle().isEmpty()) {
-			//solo se non è gia presente un titolo
+			// solo se non è gia presente un titolo
 			View viewAnnotation = DefaultNavigator.getAnnotation(view.getClass(), View.class);
 			if (viewAnnotation != null) {
 				if (viewAnnotation.title().length > 0) {
