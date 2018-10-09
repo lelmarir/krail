@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
 import uk.q3c.krail.core.navigate.sitemap.impl.NavigationStateImpl;
 import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;
+import uk.q3c.krail.core.view.DefaultLoginView;
 import uk.q3c.krail.core.view.DefaultViewFactory;
 import uk.q3c.krail.core.view.KrailView;
 
@@ -106,7 +108,7 @@ public class DefaultSitemap implements Sitemap {
 
 	private final DefaultViewFactory viewFactory;
 	private LinkedList<AbstractNode> nodes = new LinkedList<>();
-	private HashMap<StandardPageKey, AbstractNode> standardViews = new HashMap<>();
+	private HashMap<StandardPageKey, SitemapNode> standardViews = new HashMap<>();
 	private HashMap<Class<? extends KrailView>, AbstractNode> nodesByClass = new HashMap<>();
 
 	@Inject
@@ -120,6 +122,13 @@ public class DefaultSitemap implements Sitemap {
 
 		ViewNode node = new ViewNode(uri, view);
 		add(node);
+		return node;
+	}
+	
+	@Override
+	public ViewNode addView(String uri, Class<DefaultLoginView> view, AccesControl accesControl) {
+		ViewNode node = addView(uri, view);
+		node.setAccesControlRule(accesControl);
 		return node;
 	}
 
@@ -146,7 +155,7 @@ public class DefaultSitemap implements Sitemap {
 		return Collections.unmodifiableCollection(nodes);
 	}
 
-	public Map<StandardPageKey, AbstractNode> getStandardViews() {
+	public Map<StandardPageKey, SitemapNode> getStandardViews() {
 		return Collections.unmodifiableMap(standardViews);
 	}
 
@@ -190,8 +199,13 @@ public class DefaultSitemap implements Sitemap {
 	}
 
 	@Override
-	public void setStandardView(StandardPageKey key, ViewNode view) {
-		standardViews.put(key, view);
+	public void setStandardView(StandardPageKey key, SitemapNode viewNode) {
+		standardViews.put(key, Objects.requireNonNull(viewNode));
+	}
+	
+	@Override
+	public void setStandardView(StandardPageKey key, StandardPageKey targetPage) {
+		setStandardView(key, getStandardView(targetPage));
 	}
 
 	@Override
@@ -239,7 +253,7 @@ public class DefaultSitemap implements Sitemap {
 	@Override
 	public NavigationState buildNavigationStateFor(StandardPageKey pageKey)
 			throws PageNotFoundException {
-		AbstractNode node = standardViews.get(pageKey);
+		SitemapNode node = standardViews.get(pageKey);
 		if (node == null) {
 			throw new PageNotFoundException(
 					"Unable to find the node for the standard view '" + pageKey

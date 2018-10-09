@@ -88,7 +88,7 @@ public class SitemapModule extends AbstractModule {
 			sb.append("Standard Pages:" + "\n");
 			{
 				TableBuilder tabeBuilder = new TableBuilder();
-				for (Entry<StandardPageKey, AbstractNode> sp : sitemap
+				for (Entry<StandardPageKey, SitemapNode> sp : sitemap
 						.getStandardViews().entrySet()) {
 					tabeBuilder.addRow("   ", sp.getKey().toString(), "  to  ",
 							format(sp.getValue()));
