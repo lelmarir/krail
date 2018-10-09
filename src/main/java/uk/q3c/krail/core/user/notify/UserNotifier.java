@@ -12,29 +12,29 @@
  */
 package uk.q3c.krail.core.user.notify;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
+import uk.q3c.krail.core.navigate.InvalidURIException;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.user.UserModule;
 
 /**
  * Provides a common entry point for all notifications to users.
  * <p/>
- * The developer can map which notifications are actually available using the {@link UserModule} (for example,
- * the Vaadin supplied notifications, a MessageBar, popup dialogs etc). These all implement the {@link
- * UserNotification}
- * interface.
+ * The developer can map which notifications are actually available using the
+ * {@link UserModule} (for example, the Vaadin supplied notifications, a
+ * MessageBar, popup dialogs etc). These all implement the
+ * {@link UserNotification} interface.
  * <p/>
- * User options are supplied to enable users to determine which notifications they prefer - assuming that the developer
- * makes the selection of those options available to the user.
+ * User options are supplied to enable users to determine which notifications
+ * they prefer - assuming that the developer makes the selection of those
+ * options available to the user.
  *
  * @author David Sowerby
  */
 public interface UserNotifier {
 
-	public static enum NotificationType {
-		ERROR,
-		WARNING,
-		INFO
-	}
+	void notifyNoPermission(NavigationState targetNavigationState, UnauthorizedException throwable);
 
-	void show(NotificationType type, String description);
-
+	void notifyInvalidURI(InvalidURIException error);
 }

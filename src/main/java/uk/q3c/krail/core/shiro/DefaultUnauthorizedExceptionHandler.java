@@ -22,16 +22,14 @@ import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.user.notify.UserNotifier;
-import uk.q3c.krail.core.user.notify.UserNotifier.NotificationType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class DefaultUnauthorizedExceptionHandler implements
-		UnauthorizedExceptionHandler, Serializable {
+public class DefaultUnauthorizedExceptionHandler implements UnauthorizedExceptionHandler, Serializable {
 
 	private final UserNotifier notifier;
-	
+
 	@Inject
 	private Provider<Navigator> navigatorProvider;
 
@@ -41,12 +39,11 @@ public class DefaultUnauthorizedExceptionHandler implements
 		this.notifier = notifier;
 	}
 
-	protected void onUnauthorizedException(NavigationState targetNavigationState,
-			UnauthorizedException throwable) {
-		//FIXME: localizzare
-		notifier.show(NotificationType.ERROR, "No Permission");
+	protected void onUnauthorizedException(NavigationState targetNavigationState, UnauthorizedException throwable) {
+		notifier.notifyNoPermission(targetNavigationState, throwable);
 		Navigator navigator = navigatorProvider.get();
-		if(navigator.getCurrentNavigationState() == null || navigator.getCurrentNavigationState().equals(targetNavigationState)) {
+		if (navigator.getCurrentNavigationState() == null
+				|| navigator.getCurrentNavigationState().equals(targetNavigationState)) {
 			navigator.navigateTo(StandardPageKey.Private_Home);
 		}
 	}
@@ -56,7 +53,8 @@ public class DefaultUnauthorizedExceptionHandler implements
 		Throwable throwable = event.getThrowable();
 		if (throwable instanceof NavigationAuthorizationException) {
 			Throwable cause = throwable.getCause();
-			NavigationState targetNavigationState = ((NavigationAuthorizationException) throwable).getTargetNavigationState();
+			NavigationState targetNavigationState = ((NavigationAuthorizationException) throwable)
+					.getTargetNavigationState();
 			// handle an unauthorised access attempt
 			if (cause instanceof UnauthorizedException) {
 				onUnauthorizedException(targetNavigationState, (UnauthorizedException) cause);

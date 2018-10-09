@@ -14,42 +14,29 @@ package uk.q3c.krail.core.user.notify;
 
 import java.io.Serializable;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.google.inject.Inject;
-import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
+import uk.q3c.krail.core.navigate.InvalidURIException;
+import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 
 public class DefaultUserNotifier implements UserNotifier, Serializable {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Inject
+	@Inject
 	protected DefaultUserNotifier() {
-    	;
-    }
+		;
+	}
 
-    @Override
-	public void show(NotificationType type, String description) {
-		Notification n = new Notification(description, convertType(type));
-		show(n);
-        }
+	@Override
+	public void notifyNoPermission(NavigationState targetNavigationState, UnauthorizedException throwable) {
+		Notification.show("Access denied. No permission.", Type.ERROR_MESSAGE);
+	}
 
-	private Type convertType(NotificationType type) {
-		switch (type) {
-		case ERROR:
-			return Type.ERROR_MESSAGE;
-		case WARNING:
-			return Type.WARNING_MESSAGE;
-		case INFO:
-			return Type.HUMANIZED_MESSAGE;
-		default:
-			return Type.ERROR_MESSAGE;
-        }
-    }
-
-	private void show(Notification n) {
-		n.setPosition(Position.TOP_CENTER);
-		n.setDelayMsec(1000);
-		n.show(UI.getCurrent().getPage());
+	@Override
+	public void notifyInvalidURI(InvalidURIException error) {
+		Notification.show("Invalid URI: " + error.getMessage(), Type.ERROR_MESSAGE);
 	}
 }
