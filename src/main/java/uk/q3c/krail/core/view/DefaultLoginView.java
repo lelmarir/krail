@@ -31,48 +31,48 @@ import uk.q3c.util.ID;
 
 import java.util.Optional;
 
-public class DefaultLoginView extends GridViewBase implements  ClickListener {
-    private final Provider<Subject> subjectProvider;
-    private Panel centrePanel;
-    private Label label;
-    private PasswordField passwordBox;
-    private Label statusMsgLabel;
-    private Button submitButton;
-    private TextField usernameBox;
+public class DefaultLoginView extends GridViewBase implements ClickListener {
+	private final Provider<Subject> subjectProvider;
 
-    @Inject
+	
+	protected Label statusMsgLabel = new Label();
+	protected TextField usernameBox = new TextField();
+	protected Button submitButton = new Button();
+	protected PasswordField passwordBox = new PasswordField();
+
+	@Inject
 	protected DefaultLoginView(SubjectProvider subjectProvider) {
-        super();
-        this.subjectProvider = subjectProvider;
+		super();
+		this.subjectProvider = subjectProvider;
 
 		getRootComponent().setColumns(3);
 		getRootComponent().setRows(3);
 		getRootComponent().setSizeFull();
-        centrePanel = new Panel();
-        centrePanel.addStyleName(ValoTheme.PANEL_WELL);
-        centrePanel.setSizeUndefined();
-        VerticalLayout vl = new VerticalLayout();
-        centrePanel.setContent(vl);
-        vl.setSpacing(true);
-        vl.setSizeUndefined();
-        label = new Label();
-        usernameBox = new TextField();
-        usernameBox.setWidth(100, Unit.PERCENTAGE);
-        passwordBox = new PasswordField();
-        passwordBox.setWidth(100, Unit.PERCENTAGE);
+		Panel centrePanel = new Panel();
+		centrePanel.addStyleName(ValoTheme.PANEL_WELL);
+		centrePanel.setSizeUndefined();
+		VerticalLayout vl = new VerticalLayout();
+		centrePanel.setContent(vl);
+		vl.setSpacing(true);
+		vl.setSizeUndefined();
 
-        submitButton = new Button("Login");
-        submitButton.setDisableOnClick(true);
-        submitButton.setClickShortcut(KeyCode.ENTER);
-        submitButton.addClickListener(this);
+		usernameBox.setWidth(100, Unit.PERCENTAGE);
+		passwordBox.setWidth(100, Unit.PERCENTAGE);
 
-        statusMsgLabel = new Label("Please enter your username and password");
+		submitButton.setCaption("Login");
+		submitButton.setDisableOnClick(true);
+		submitButton.setClickShortcut(KeyCode.ENTER);
+		submitButton.addClickListener(this);
 
-        vl.addComponent(label);
-        vl.addComponent(usernameBox);
-        vl.addComponent(passwordBox);
-        vl.addComponent(submitButton);
-        vl.addComponent(statusMsgLabel);
+		statusMsgLabel.setValue("Please enter your username and password");
+
+		Label label = new Label();
+		vl.addComponent(label);
+		vl.addComponent(usernameBox);
+		vl.addComponent(passwordBox);
+		vl.addComponent(submitButton);
+		vl.setComponentAlignment(submitButton, Alignment.MIDDLE_RIGHT);
+		vl.addComponent(statusMsgLabel);
 
 		getRootComponent().addComponent(centrePanel, 1, 1);
 		getRootComponent().setColumnExpandRatio(0, 1);
@@ -80,53 +80,51 @@ public class DefaultLoginView extends GridViewBase implements  ClickListener {
 
 		getRootComponent().setRowExpandRatio(0, 1);
 		getRootComponent().setRowExpandRatio(2, 1);
-    }
+	}
 
-    @Override
-    protected void setIds() {
-        super.setIds();
-        submitButton.setId(ID.getId(Optional.empty(), this, submitButton));
-        usernameBox.setId(ID.getId(Optional.of("username"), this, usernameBox));
-        passwordBox.setId(ID.getId(Optional.of("password"), this, passwordBox));
-        statusMsgLabel.setId(ID.getId(Optional.of("status"), this, statusMsgLabel));
-    }
+	@Override
+	protected void setIds() {
+		super.setIds();
+		submitButton.setId(ID.getId(Optional.empty(), this, submitButton));
+		usernameBox.setId(ID.getId(Optional.of("username"), this, usernameBox));
+		passwordBox.setId(ID.getId(Optional.of("password"), this, passwordBox));
+		statusMsgLabel.setId(ID.getId(Optional.of("status"), this, statusMsgLabel));
+	}
 
-
-    @Override
-    public void buttonClick(ClickEvent event) {
+	@Override
+	public void buttonClick(ClickEvent event) {
 		submitButton.setEnabled(false);
 
-		UsernamePasswordToken token = new UsernamePasswordToken(
-				usernameBox.getValue(), passwordBox.getValue());
+		UsernamePasswordToken token = new UsernamePasswordToken(usernameBox.getValue(), passwordBox.getValue());
 
-		//FIXME: localizazzione
-        try {
+		// FIXME: localizazzione
+		try {
 			Subject subject = subjectProvider.get();
 			subject.login(token);
-        } catch (UnknownAccountException uae) {
+		} catch (UnknownAccountException uae) {
 			setStatusMessage("Unknown Account");
-        } catch (IncorrectCredentialsException ice) {
+		} catch (IncorrectCredentialsException ice) {
 			setStatusMessage("Invalid_Login");
-        } catch (ExpiredCredentialsException ece) {
+		} catch (ExpiredCredentialsException ece) {
 			setStatusMessage("Account_Expired");
-        } catch (LockedAccountException lae) {
+		} catch (LockedAccountException lae) {
 			setStatusMessage("Account_Locked");
-        } catch (ExcessiveAttemptsException excess) {
+		} catch (ExcessiveAttemptsException excess) {
 			setStatusMessage("Too_Many_Login_Attempts");
-        } catch (DisabledAccountException dae) {
+		} catch (DisabledAccountException dae) {
 			setStatusMessage("Account_is_Disabled");
-        } catch (ConcurrentAccessException cae) {
+		} catch (ConcurrentAccessException cae) {
 			setStatusMessage("Account_Already_In_Use");
-        } catch (AuthenticationException ae) {
+		} catch (AuthenticationException ae) {
 			setStatusMessage("Generic_Authentication_Exception");
 		} finally {
 			submitButton.setEnabled(true);
-        }
-        // unexpected condition - error?
-        // an exception would be raised if login failed
-    }
+		}
+		// unexpected condition - error?
+		// an exception would be raised if login failed
+	}
 
-    public void setStatusMessage(String msg) {
-        statusMsgLabel.setValue(msg);
-    }
+	public void setStatusMessage(String msg) {
+		statusMsgLabel.setValue(msg);
+	}
 }
