@@ -23,18 +23,17 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 import org.apache.shiro.authc.*;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
-import uk.q3c.krail.core.shiro.LoginExceptionHandler;
 import uk.q3c.krail.core.shiro.SubjectProvider;
-import uk.q3c.krail.i18n.*;
 import uk.q3c.util.ID;
 
 import java.util.Optional;
 
 public class DefaultLoginView extends GridViewBase implements ClickListener {
 	private final Provider<Subject> subjectProvider;
-
 	
+
 	protected Label statusMsgLabel = new Label();
 	protected TextField usernameBox = new TextField();
 	protected Button submitButton = new Button();
@@ -102,7 +101,7 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 			Subject subject = subjectProvider.get();
 			subject.login(token);
 		} catch (UnknownAccountException uae) {
-			setStatusMessage("Unknown Account");
+			setStatusMessage("Unknown_Account");
 		} catch (IncorrectCredentialsException ice) {
 			setStatusMessage("Invalid_Login");
 		} catch (ExpiredCredentialsException ece) {
@@ -117,6 +116,11 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 			setStatusMessage("Account_Already_In_Use");
 		} catch (AuthenticationException ae) {
 			setStatusMessage("Generic_Authentication_Exception");
+		} catch (AuthorizationException e) {
+			setStatusMessage("Authorization_Exception");
+			throw e;
+		} catch (Exception e) {
+			throw new RuntimeException("Eccezione non gestita", e);
 		} finally {
 			submitButton.setEnabled(true);
 		}

@@ -13,6 +13,7 @@
 
 package uk.q3c.krail.core.shiro;
 
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
@@ -100,11 +101,8 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 				try {
 					navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				} catch (AuthorizationException e) {
-					if (previousNavigationStateBeforeUnathenticatedException != null) {
-						navigator.navigateTo(previousNavigationStateBeforeUnathenticatedException);
-					} else {
-						navigator.navigateTo(StandardPageKey.Private_Home);
-					}
+					//the user does not have the permission for the required page
+					event.getSubject().logout();
 					throw e;
 				} finally {
 					targetNavigationStateBeforeUnathenticatedException = null;
