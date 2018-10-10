@@ -32,7 +32,6 @@ import java.util.Optional;
 
 public class DefaultLoginView extends GridViewBase implements ClickListener {
 	private final Provider<Subject> subjectProvider;
-	
 
 	protected Label statusMsgLabel = new Label();
 	protected TextField usernameBox = new TextField();
@@ -65,8 +64,10 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 		statusMsgLabel.setValue("Please enter your username and password");
 
-		Label label = new Label();
-		vl.addComponent(label);
+		Component header = createHeader();
+		if (header != null) {
+			vl.addComponent(header);
+		}
 		vl.addComponent(usernameBox);
 		vl.addComponent(passwordBox);
 		vl.addComponent(submitButton);
@@ -79,6 +80,10 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 		getRootComponent().setRowExpandRatio(0, 1);
 		getRootComponent().setRowExpandRatio(2, 1);
+	}
+
+	protected Component createHeader() {
+		return null;
 	}
 
 	@Override
