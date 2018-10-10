@@ -9,9 +9,12 @@ import java.lang.annotation.Target;
 import uk.q3c.krail.core.view.KrailViewChangeEvent;
 
 /**
- * Can inject {@link KrailViewChangeEvent} or any {@link Parameter} annotated parameters
- * @author mpreti
- *
+ * The annotated method can have any of these parameters:
+ * <ul>
+ * <li>KrailViewChangeEvent</li>
+ * <li>any @Parametr annotated parameter</li>
+ * <li>any parameter injectable by guice</li>
+ * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
