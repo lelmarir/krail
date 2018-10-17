@@ -36,6 +36,7 @@ import uk.q3c.krail.core.guice.uiscope.UIScopeModule;
 import uk.q3c.krail.core.guice.vsscope.VaadinSessionScopeModule;
 import uk.q3c.krail.core.navigate.sitemap.SitemapModule;
 import uk.q3c.krail.core.services.ServiceManagerModule;
+import uk.q3c.krail.core.shiro.SecuritySessionModule;
 import uk.q3c.krail.core.shiro.ShiroVaadinModule;
 import uk.q3c.krail.core.shiro.StandardShiroModule;
 import uk.q3c.krail.core.user.UserModule;
@@ -134,6 +135,7 @@ public abstract class DefaultBindingManager
 
 		coreModules.add(getErrorModule());
 
+		coreModules.add(new SecuritySessionModule());
 		coreModules.add(getShiroModule());
 		coreModules.add(getShiroVaadinModule());
 		coreModules.add(new ShiroAopModule());

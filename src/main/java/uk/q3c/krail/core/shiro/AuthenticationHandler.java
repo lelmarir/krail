@@ -13,7 +13,6 @@
 
 package uk.q3c.krail.core.shiro;
 
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.vaadin.server.VaadinSession;
 
 @UIScoped
@@ -47,13 +45,10 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	private VaadinSession session;
 
 	@Inject
-	protected AuthenticationHandler(Navigator navigator, AuthenticationNotifier authenticationNotifier,
-			VaadinSessionProvider vaadinSessionProvider) {
+	protected AuthenticationHandler(Navigator navigator, VaadinSessionProvider vaadinSessionProvider) {
 		super();
 		this.navigator = navigator;
 		this.session = vaadinSessionProvider.get();
-		//FIXME: memory leak, non viene rimosso mai
-		authenticationNotifier.addListener(this);
 	}
 
 	protected void onUnauthenticatedException(NavigationState targetNavigationState,
@@ -91,7 +86,7 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
 		assert event.getSubject().isAuthenticated();
-		
+
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
 		session.accessSynchronously(() -> {
 			// they have logged in
@@ -101,13 +96,16 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 				try {
 					navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				} catch (AuthorizationException e) {
-					//the user does not have the permission for the required page
+					// the user does not have the permission for the required page
 					event.getSubject().logout();
 					throw e;
 				} finally {
 					targetNavigationStateBeforeUnathenticatedException = null;
 					previousNavigationStateBeforeUnathenticatedException = null;
 				}
+			}else {
+				//navigazione diretta alla pagina di login?
+				navigator.navigateTo(StandardPageKey.Private_Home);
 			}
 		});
 

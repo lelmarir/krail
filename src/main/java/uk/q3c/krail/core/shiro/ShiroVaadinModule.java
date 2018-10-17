@@ -3,17 +3,34 @@ package uk.q3c.krail.core.shiro;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.ShiroException;
 
-import uk.q3c.krail.core.guice.KrailRequestHandler;
-import uk.q3c.krail.core.guice.errors.ErrorHandler;
-import uk.q3c.krail.core.guice.uiscope.UIScoped;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinSession;
 
+import uk.q3c.krail.core.guice.KrailRequestHandler;
+import uk.q3c.krail.core.guice.errors.ErrorHandler;
+import uk.q3c.krail.core.guice.uiscope.UIScoped;
+import uk.q3c.krail.core.shiro.SecuritySessionModule.SessionProvider;
+import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
+
 public class ShiroVaadinModule extends AbstractModule {
+
+	private static class VaadinSessionProvider implements SessionProvider {
+		@Override
+		public SecuritySession get() {
+			VaadinSession session = VaadinSession.getCurrent();
+			if (session != null) {
+				return new VaadinSecuritySession(session);
+			} else {
+				return null;
+			}
+		}
+	}
+
+	private Multibinder<AuthenticationListener> authenticationListenersBinder;
 
 	public ShiroVaadinModule() {
 		super();
@@ -25,6 +42,8 @@ public class ShiroVaadinModule extends AbstractModule {
 		errorHandlersBinder.addBinding().to(UnauthorizedExceptionHandler.class);
 		errorHandlersBinder.addBinding().to(UnauthenticatedExceptionHandler.class);
 
+		authenticationListenersBinder = Multibinder.newSetBinder(binder(), AuthenticationListener.class);
+		
 		bindUnauthenticatedHandler();
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
@@ -32,16 +51,12 @@ public class ShiroVaadinModule extends AbstractModule {
 		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder.newSetBinder(binder(),
 				KrailRequestHandler.class);
 		krailRequestHandlerBinder.addBinding().to(MDCSubjectHandler.class);
-	}
 
-	@Provides
-	private SecuritySession provideSecuritySession(VaadinSessionProvider sessionProvider) {
-		VaadinSession session = sessionProvider.get();
-		if (session != null) {
-			return new VaadinSecuritySession(session);
-		} else {
-			return null;
-		}
+		SecuritySessionModule.addBinding().to(VaadinSessionProvider.class);
+	}
+	
+	public LinkedBindingBuilder<AuthenticationListener> addAuthenticationListenerBinding() {
+		return authenticationListenersBinder.addBinding();
 	}
 
 	@Provides
@@ -65,6 +80,7 @@ public class ShiroVaadinModule extends AbstractModule {
 	 */
 	protected void bindUnauthenticatedHandler() {
 		bind(UnauthenticatedExceptionHandler.class).to(AuthenticationHandler.class).in(UIScoped.class);
+		addAuthenticationListenerBinding().to(AuthenticationHandler.class);
 	}
 
 	/**

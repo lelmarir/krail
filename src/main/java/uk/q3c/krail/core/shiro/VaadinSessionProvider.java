@@ -12,8 +12,9 @@
  */
 package uk.q3c.krail.core.shiro;
 
-import com.vaadin.server.VaadinSession;
 import org.apache.shiro.subject.Subject;
+
+import com.vaadin.server.VaadinSession;
 
 /**
  * The provides an interface for an implementation to wrap the static method of obtaining the current VaadinSession,

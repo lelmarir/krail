@@ -84,6 +84,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Inject
 	private Provider<SecuritySession> sessionProvider;
+	@Inject
+	private Provider<Set<AuthenticationListener>> authenticationListenersProvider;
 
 	private LoadingCache<Object, Set<AuthenticationListener>> loginEventListeners;
 	/**
@@ -98,7 +100,9 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 					@Override
 					public Set<AuthenticationListener> load(Object key) throws Exception {
-						return Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
+						Set<AuthenticationListener> handlers = Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
+						handlers.addAll(authenticationListenersProvider.get());
+						return handlers;
 					}
 
 				});
@@ -181,7 +185,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session.getAttribute(SubjectSerializableWrapper.class.getName());
 			if (subjectWrapper == null) {
 				LOGGER.debug(
-						"VaadinSession is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
+						"session is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
 				subjectWrapper = new SubjectSerializableWrapper(new Subject.Builder().buildSubject());
 				session.setAttribute(SubjectSerializableWrapper.class.getName(), subjectWrapper);
 			}

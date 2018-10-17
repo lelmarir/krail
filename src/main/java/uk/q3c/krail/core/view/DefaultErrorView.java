@@ -149,8 +149,10 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 		while (loopCount > 0
 				&& UI.getCurrent().getWindows().iterator().hasNext()) {
 			try {
-				UI.getCurrent().getWindows().iterator().next().close();
-			} catch (Exception e) {
+				UI.getCurrent().access(() -> {
+					UI.getCurrent().getWindows().iterator().next().close();
+				});
+			} catch (Throwable e) {
 				;
 			}
 			loopCount--;

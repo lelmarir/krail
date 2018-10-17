@@ -25,7 +25,12 @@ import com.vaadin.ui.themes.ValoTheme;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
+
+import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
+import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.shiro.SubjectProvider;
+import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.util.ID;
 
 import java.util.Optional;
@@ -135,5 +140,14 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 	public void setStatusMessage(String msg) {
 		statusMsgLabel.setValue(msg);
+	}
+	
+	@BeforeInboundNavigation
+	private void beforeInboundNavigation(CancellableKrailViewChangeEvent event, Provider<Subject> subjectProvider, Navigator navigator) {
+		if(subjectProvider.get().isAuthenticated()) {
+			//navigazione diretta alla pagina di login?
+			navigator.navigateTo(StandardPageKey.Private_Home);
+			event.cancel();
+		}
 	}
 }

@@ -98,6 +98,7 @@ public class DefaultNavigator implements Navigator {
 	private final Provider<Subject> subjectProvider;
 	private final Sitemap sitemap;
 	private final ScopedUI ui;
+	private CancellableKrailViewChangeEvent lastCancellableNavigationEvent;
 	private NavigationState currentNavigationState;
 	private NavigationState previousNavigationState;
 	private final List<BeforeSecurityCheckListener> beforeSecurityCheckListener = new LinkedList<BeforeSecurityCheckListener>();
@@ -201,6 +202,12 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
+		
+		if(lastCancellableNavigationEvent != null) {
+			LOGGER.warn("navigateTo() invoked during another navigation process (probably by a 'before' listener): cancelling navigation, call CancellableKrailViewChangeEvent.cancel() to suppress this warning."); 
+			lastCancellableNavigationEvent.cancel();
+		}
+		
 		checkNotNull(navigationState);
 		checkNotNull(getCallbackHandler());
 
@@ -211,11 +218,12 @@ public class DefaultNavigator implements Navigator {
 			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
-
+		
 		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this, currentNavigationState, navigationState);
 
 		CancellableWrapper cancellable = new CancellableWrapper(event);
-
+		lastCancellableNavigationEvent = cancellable;
+		
 		fireBeforeSecurityCheck(cancellable);
 		if (cancellable.isCancelled()) {
 			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
@@ -252,9 +260,11 @@ public class DefaultNavigator implements Navigator {
 		fireViewBeforeInboundNavigationEvent(targetView, cancellable, getCallbackHandler());
 		if (cancellable.isCancelled()) {
 			LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
-					sourceView.getClass().getSimpleName());
+					targetView.getClass().getSimpleName());
 			return;
 		}
+		cancellable = null;
+		lastCancellableNavigationEvent = null;
 
 		checkViewRootComponentNotNull(targetView);
 

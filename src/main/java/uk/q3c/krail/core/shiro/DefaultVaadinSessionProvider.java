@@ -13,17 +13,15 @@
 package uk.q3c.krail.core.shiro;
 
 import com.vaadin.server.VaadinSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author David Sowerby 15 Sep 2013
  * @see VaadinSessionProvider
  */
 public class DefaultVaadinSessionProvider implements VaadinSessionProvider {
-    @Override
-    public VaadinSession get() {
-        return VaadinSession.getCurrent();
-    }
+	@Override
+	public VaadinSession get() {
+		return VaadinSession.getCurrent();
+	}
 
 }

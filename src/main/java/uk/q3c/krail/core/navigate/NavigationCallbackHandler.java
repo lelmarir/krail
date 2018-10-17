@@ -8,7 +8,7 @@ import uk.q3c.krail.core.view.KrailViewChangeEventImpl.CancellableWrapper;
 public interface NavigationCallbackHandler {
 
 	void beforeOutboundNavigationEvent(KrailView view,
-			CancellableWrapper cancellable);
+			CancellableKrailViewChangeEvent cancellable);
 
 	void beforeInboundNavigationEvent(KrailView view,
 			CancellableKrailViewChangeEvent cancellable);
