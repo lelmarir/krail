@@ -13,6 +13,10 @@
 
 package uk.q3c.krail.core.view;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vaadin.shared.ui.ContentMode;
@@ -64,8 +68,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 
 				VerticalLayout descriptionLayout = new VerticalLayout();
 				{
-					descriptionLayout.setDefaultComponentAlignment(
-							Alignment.MIDDLE_CENTER);
+					descriptionLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
 
 					descriptionLabel = new Label("Something went wrong");
 					{
@@ -81,8 +84,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 							if (previousNavigationState != null) {
 								navigatorProvider.get().navigateTo(previousNavigationState);
 							} else {
-								navigatorProvider.get().navigateTo(
-										StandardPageKey.Public_Home);
+								navigatorProvider.get().navigateTo(StandardPageKey.Public_Home);
 							}
 						}
 					});
@@ -104,15 +106,13 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 					descriptionLayout.addComponent(moreButton);
 				}
 				mainLayout.addComponent(descriptionLayout);
-				mainLayout.setComponentAlignment(descriptionLayout,
-						Alignment.MIDDLE_CENTER);
+				mainLayout.setComponentAlignment(descriptionLayout, Alignment.MIDDLE_CENTER);
 
 				textArea = new TextArea();
 				{
 					textArea.setSizeFull();
 					textArea.setVisible(false);
-					textArea.setValue(
-							"Error view has been called but no error has been set.  This should not happen");
+					textArea.setValue("Error view has been called but no error has been set.  This should not happen");
 					textArea.setReadOnly(true);
 				}
 				mainLayout.addComponent(textArea);
@@ -133,30 +133,32 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	}
 
 	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(
-			CancellableKrailViewChangeEvent event) {
+	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event) {
 		event.cancel();
 		event.getNavigator().navigateTo(StandardPageKey.Public_Home);
 	}
 
 	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(
-			CancellableKrailViewChangeEvent event,
+	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event,
 			@Parameter(value = ErrorView.ERROR_PARAMETER) Throwable error,
 			@Parameter(value = ErrorView.LOCALIZED_MESSAGE_PARAMETER, optional = true) String localizedMessage) {
+		
 		// try to close any opened windows
-		int loopCount = 10;
-		while (loopCount > 0
-				&& UI.getCurrent().getWindows().iterator().hasNext()) {
-			try {
-				UI.getCurrent().access(() -> {
-					UI.getCurrent().getWindows().iterator().next().close();
-				});
-			} catch (Throwable e) {
-				;
-			}
-			loopCount--;
+		Collection<Window> windows = UI.getCurrent().getWindows();
+		if (!windows.isEmpty()) {
+			UI.getCurrent().access(() -> {
+				// should iterate over a copy to avoid concurrent modification exceptions
+				ArrayList<Window> ww = new ArrayList<>(windows);
+				for (Window w : ww) {
+					try {
+						w.close();
+					} catch (Exception e) {
+						;// a window could refuse to close
+					}
+				}
+			});
 		}
+		
 		this.error = error;
 		if (error != null) {
 			textArea.setReadOnly(false);

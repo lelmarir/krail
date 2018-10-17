@@ -202,12 +202,13 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
-		
-		if(lastCancellableNavigationEvent != null) {
-			LOGGER.warn("navigateTo() invoked during another navigation process (probably by a 'before' listener): cancelling navigation, call CancellableKrailViewChangeEvent.cancel() to suppress this warning."); 
+
+		if (lastCancellableNavigationEvent != null) {
+			LOGGER.warn(
+					"navigateTo() invoked during another navigation process (probably by a 'before' listener): cancelling navigation, call CancellableKrailViewChangeEvent.cancel() to suppress this warning.");
 			lastCancellableNavigationEvent.cancel();
 		}
-		
+
 		checkNotNull(navigationState);
 		checkNotNull(getCallbackHandler());
 
@@ -218,53 +219,60 @@ public class DefaultNavigator implements Navigator {
 			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
-		
+
 		KrailViewChangeEvent event = new KrailViewChangeEventImpl(this, currentNavigationState, navigationState);
 
 		CancellableWrapper cancellable = new CancellableWrapper(event);
 		lastCancellableNavigationEvent = cancellable;
-		
-		fireBeforeSecurityCheck(cancellable);
-		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
-			return;
-		}
 
-		Subject subject = subjectProvider.get();
-		// will throw an exception if not authorized
-		checkAuthorization(navigationState, subject);
-
-		// if change is blocked revert to previous state
-		fireBeforeViewChange(cancellable);
-		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeViewChange");
-			return;
-		}
-
-		KrailView sourceView = getCurrentView();
-
-		// notify befre Outbound navigation to current view
-		if (sourceView != null) {
-			fireViewBeforeOutboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
+		KrailView sourceView;
+		KrailView targetView;
+		try {
+			fireBeforeSecurityCheck(cancellable);
 			if (cancellable.isCancelled()) {
-				LOGGER.debug("navigation canceled by the view {} in @BeforeOutboundNavigation",
-						sourceView.getClass().getSimpleName());
+				LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeSecurityCheck");
 				return;
 			}
-		}
 
-		LOGGER.debug("obtaining view instance for '{}'", navigationState);
-		KrailView targetView = navigationState.getView();
+			Subject subject = subjectProvider.get();
+			// will throw an exception if not authorized
+			checkAuthorization(navigationState, subject);
 
-		// notify before Inbound navigation to target view
-		fireViewBeforeInboundNavigationEvent(targetView, cancellable, getCallbackHandler());
-		if (cancellable.isCancelled()) {
-			LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
-					targetView.getClass().getSimpleName());
-			return;
+			// if change is blocked revert to previous state
+			fireBeforeViewChange(cancellable);
+			if (cancellable.isCancelled()) {
+				LOGGER.debug("navigation canceled by a KrailViewChangeListener beforeViewChange");
+				return;
+			}
+
+			sourceView = getCurrentView();
+
+			// notify befre Outbound navigation to current view
+			if (sourceView != null) {
+				fireViewBeforeOutboundNavigationEvent(sourceView, cancellable, getCallbackHandler());
+				if (cancellable.isCancelled()) {
+					LOGGER.debug("navigation canceled by the view {} in @BeforeOutboundNavigation",
+							sourceView.getClass().getSimpleName());
+					return;
+				}
+			}
+
+			LOGGER.debug("obtaining view instance for '{}'", navigationState);
+			targetView = navigationState.getView();
+
+			// notify before Inbound navigation to target view
+			fireViewBeforeInboundNavigationEvent(targetView, cancellable, getCallbackHandler());
+			if (cancellable.isCancelled()) {
+				LOGGER.debug("navigation canceled by the view {} in @BeforeInboundNavigation",
+						targetView.getClass().getSimpleName());
+				return;
+			}
+			cancellable = null;
+			// the navigation cant be canceled from now on, but we can start a new
+			// navigation
+		} finally {
+			lastCancellableNavigationEvent = null;
 		}
-		cancellable = null;
-		lastCancellableNavigationEvent = null;
 
 		checkViewRootComponentNotNull(targetView);
 
@@ -273,7 +281,7 @@ public class DefaultNavigator implements Navigator {
 		// @AfterOutboundNavigation alla vista corrente (ad esempio alla chiusura della
 		// sessione)
 
-		// now change the view
+		// now change the view (should not ever start a new navigation)
 		changeView(targetView);
 
 		if (sourceView != null) {

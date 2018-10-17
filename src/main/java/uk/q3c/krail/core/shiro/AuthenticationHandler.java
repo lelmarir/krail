@@ -31,6 +31,7 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import com.google.inject.Inject;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.UI;
 
 @UIScoped
 public class AuthenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
@@ -42,13 +43,13 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 	private NavigationState previousNavigationStateBeforeUnathenticatedException = null;
 
-	private VaadinSession session;
+	private UI ui;
 
 	@Inject
-	protected AuthenticationHandler(Navigator navigator, VaadinSessionProvider vaadinSessionProvider) {
+	protected AuthenticationHandler(Navigator navigator) {
 		super();
 		this.navigator = navigator;
-		this.session = vaadinSessionProvider.get();
+		this.ui = UI.getCurrent();
 	}
 
 	protected void onUnauthenticatedException(NavigationState targetNavigationState,
@@ -88,7 +89,7 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 		assert event.getSubject().isAuthenticated();
 
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
-		session.accessSynchronously(() -> {
+		ui.accessSynchronously(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {
 				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'",
