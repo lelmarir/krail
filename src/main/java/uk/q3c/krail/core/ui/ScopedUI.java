@@ -14,6 +14,8 @@ package uk.q3c.krail.core.ui;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,9 @@ import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
 import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
+import uk.q3c.krail.core.shiro.AuthenticationHandler;
+import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
+import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;
 import uk.q3c.krail.i18n.CurrentLocale;
@@ -75,10 +80,18 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	private Component screenLayout;
 	private UIScope uiScope;
 	private KrailView view;
+	
+	@Inject
+	private AuthenticationNotifier authenticationNotifier;
+	@Inject
+	@Nullable 
+	private AuthenticationHandler authenticationListener;
 
+	@Inject
 	protected ScopedUI() {
 		super();
 		viewDisplayContainer = new Panel();
+		
 	}
 
 	public UIKey getInstanceKey() {
@@ -91,12 +104,19 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 	protected void setScope(UIScope uiScope) {
 		this.uiScope = uiScope;
+		//FIXME: hack to register the authenticationListener only if the UI exists
+		if(authenticationListener != null) {
+			authenticationNotifier.addListener(authenticationListener);
+		}
 	}
 
 	@Override
 	public void detach() {
 		if (uiScope != null) {
 			uiScope.releaseScope(instanceKey);
+		}
+		if(authenticationListener != null) {
+			authenticationNotifier.removeListener(authenticationListener);
 		}
 		super.detach();
 	}

@@ -25,12 +25,11 @@ import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
-import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.FailedLoginEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.SuccesfulLoginEvent;
 import com.google.inject.Inject;
-import com.vaadin.server.VaadinSession;
+import com.google.inject.Provider;
 import com.vaadin.ui.UI;
 
 @UIScoped
@@ -38,17 +37,16 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
-	private final Navigator navigator;
+	@Inject
+	private Provider<Navigator> navigatorProvider;
+	private UI ui;
 
 	private NavigationState targetNavigationStateBeforeUnathenticatedException = null;
 	private NavigationState previousNavigationStateBeforeUnathenticatedException = null;
 
-	private UI ui;
-
 	@Inject
-	protected AuthenticationHandler(Navigator navigator) {
+	protected AuthenticationHandler() {
 		super();
-		this.navigator = navigator;
 		this.ui = UI.getCurrent();
 	}
 
@@ -56,9 +54,9 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 			UnauthenticatedException throwable) {
 		LOGGER.debug("onUnauthenticatedException(targetNavigationState={})", targetNavigationState);
 		this.targetNavigationStateBeforeUnathenticatedException = targetNavigationState;
-		this.previousNavigationStateBeforeUnathenticatedException = navigator.getCurrentNavigationState();
+		this.previousNavigationStateBeforeUnathenticatedException = navigatorProvider.get().getCurrentNavigationState();
 
-		navigator.navigateTo(StandardPageKey.Log_In);
+		navigatorProvider.get().navigateTo(StandardPageKey.Log_In);
 	}
 
 	@Override
@@ -95,7 +93,7 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 				LOGGER.debug("onSuccessfulLogin(), navigating to previous navigation state '{}'",
 						targetNavigationStateBeforeUnathenticatedException);
 				try {
-					navigator.navigateTo(targetNavigationStateBeforeUnathenticatedException);
+					navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				} catch (AuthorizationException e) {
 					// the user does not have the permission for the required page
 					event.getSubject().logout();
@@ -104,9 +102,9 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 					targetNavigationStateBeforeUnathenticatedException = null;
 					previousNavigationStateBeforeUnathenticatedException = null;
 				}
-			}else {
-				//navigazione diretta alla pagina di login?
-				navigator.navigateTo(StandardPageKey.Private_Home);
+			} else {
+				// navigazione diretta alla pagina di login?
+				navigatorProvider.get().navigateTo(StandardPageKey.Private_Home);
 			}
 		});
 
@@ -120,6 +118,6 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	@Override
 	public void onLogout(LogoutEvent event) {
 		LOGGER.info("logout(user={})", event.getSubject());
-		navigator.navigateTo(StandardPageKey.Log_Out);
+		navigatorProvider.get().navigateTo(StandardPageKey.Log_Out);
 	}
 }

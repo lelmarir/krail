@@ -80,7 +80,6 @@ public class ShiroVaadinModule extends AbstractModule {
 	 */
 	protected void bindUnauthenticatedHandler() {
 		bind(UnauthenticatedExceptionHandler.class).to(AuthenticationHandler.class).in(UIScoped.class);
-		addAuthenticationListenerBinding().to(AuthenticationHandler.class);
 	}
 
 	/**
