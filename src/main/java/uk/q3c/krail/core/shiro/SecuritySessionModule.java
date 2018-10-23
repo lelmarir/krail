@@ -37,8 +37,8 @@ public class SecuritySessionModule extends AbstractModule {
 			if (s != null) {
 				if (LOGGER.isDebugEnabled()) {
 					if (session != null) {
-						throw new IllegalStateException(
-								"More than one SessionProvider returned a session: " + session + " and " + s + "");
+						//FIXME: non dovrebbero esservi mai 2 sessioni, ma sembra che il thread arrivi sporco e quindi trovo anche la VaadinSession
+						LOGGER.error("More than one SessionProvider returned a session: " + session + " and " + s + "");
 					}
 					session = s;
 				} else {
