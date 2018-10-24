@@ -140,7 +140,7 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 
 	@BeforeInboundNavigation
 	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event,
-			@Parameter(value = ErrorView.ERROR_PARAMETER) Throwable error,
+			@Parameter(value = ErrorView.ERROR_PARAMETER, optional = true) Throwable error,
 			@Parameter(value = ErrorView.LOCALIZED_MESSAGE_PARAMETER, optional = true) String localizedMessage) {
 		
 		// try to close any opened windows
