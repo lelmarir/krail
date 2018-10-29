@@ -8,8 +8,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
 
 public abstract class VaadinUtils {
 
@@ -65,5 +68,42 @@ public abstract class VaadinUtils {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public static <T> Future<T> runWithUI(Supplier<T> function) {
+		return runWithUI(UI.getCurrent(), function);
+	}
+
+	public static <T> Future<T> runWithUI(Component holder, Supplier<T> function) {
+		return runWithUI(holder.getUI(), function);
+	}
+	
+	public static <T> Future<Void> runWithUI(Object holder, Runnable runnable) {
+		if(holder instanceof Component) {
+			return runWithUI((Component)holder, runnable);
+		}else {
+			throw new IllegalArgumentException();
+		}
+	}
+	
+	public static <T> Future<Void> runWithUI(Component holder, Runnable runnable) {
+		return runWithUI(holder.getUI(), () -> {
+			runnable.run();
+			return null;
+		});
+	}
+	
+	public static <T> Future<T> runWithUI(UI ui, Supplier<T> function) {
+		assert ui != null;
+		if(ui != ui.getCurrent()) {
+			final AtomicReference<T> result = new AtomicReference<T>(null);
+			Future<Void> future = ui.access(() -> {
+				result.set(function.get());
+			});
+			return new ConvertingFuture<>(future, v -> result.get());
+		}else {
+			return CompletableFuture.completedFuture(function.get());
+		}
+
 	}
 }
