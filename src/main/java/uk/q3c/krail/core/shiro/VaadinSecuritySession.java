@@ -36,7 +36,14 @@ public class VaadinSecuritySession implements SecuritySession {
 
 	@Override
 	public void setAttribute(String name, Object value) {
-		session.setAttribute(name, value);
+		try {
+			VaadinUtils.runInSession(session, s -> {
+				session.setAttribute(name, value);
+				return null;
+			}).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

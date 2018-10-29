@@ -91,7 +91,11 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 
 	private boolean handleError(ErrorEvent e) {
 		LinkedList<ErrorHandler> handlers = new LinkedList<>();
+		try {
 		handlers.addAll(errorHandlersProvider.get());
+		} catch (Throwable ex) {
+			LOGGER.error("Unable to get error handlers:", ex);
+		}
 
 		// li eseguo nell'ordine inverso
 		// FIXME: errorHandlers è un set, perche lo converto in lista e lo eseguo in

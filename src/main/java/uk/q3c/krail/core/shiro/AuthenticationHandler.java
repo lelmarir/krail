@@ -87,6 +87,10 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 		assert event.getSubject().isAuthenticated();
 
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
+		if(ui == null) {
+			LOGGER.warn("onSuccessfulLogin() con ui == null ({})", Thread.currentThread().getName()); 
+			return;
+		}
 		ui.accessSynchronously(() -> {
 			// they have logged in
 			if (targetNavigationStateBeforeUnathenticatedException != null) {

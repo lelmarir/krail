@@ -202,7 +202,9 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
-
+		LOGGER.trace("navigateTo({}, refresh={})", navigationState, refresh);
+		
+		
 		if (lastCancellableNavigationEvent != null) {
 			LOGGER.warn(
 					"navigateTo() invoked during another navigation process (probably by a 'before' listener): cancelling navigation, call CancellableKrailViewChangeEvent.cancel() to suppress this warning.");

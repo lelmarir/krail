@@ -131,17 +131,17 @@ public class DefaultErrorView extends ViewBase<Layout> implements ErrorView {
 	public Throwable getError() {
 		return error;
 	}
-
-	@BeforeInboundNavigation
-	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event) {
-		event.cancel();
-		event.getNavigator().navigateTo(StandardPageKey.Public_Home);
-	}
-
+	
 	@BeforeInboundNavigation
 	protected void beforeInboundNavigation(CancellableKrailViewChangeEvent event,
 			@Parameter(value = ErrorView.ERROR_PARAMETER, optional = true) Throwable error,
 			@Parameter(value = ErrorView.LOCALIZED_MESSAGE_PARAMETER, optional = true) String localizedMessage) {
+		
+		if(error == null && localizedMessage == null) {
+			event.cancel();
+			event.getNavigator().navigateTo(StandardPageKey.Public_Home);
+			return;
+		}
 		
 		// try to close any opened windows
 		Collection<Window> windows = UI.getCurrent().getWindows();
