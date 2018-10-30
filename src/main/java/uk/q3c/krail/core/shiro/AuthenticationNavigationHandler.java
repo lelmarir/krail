@@ -33,7 +33,7 @@ import com.google.inject.Provider;
 import com.vaadin.ui.UI;
 
 @UIScoped
-public class AuthenticationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
+public class AuthenticationNavigationHandler implements UnauthenticatedExceptionHandler, AuthenticationListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
 
@@ -45,9 +45,12 @@ public class AuthenticationHandler implements UnauthenticatedExceptionHandler, A
 	private NavigationState previousNavigationStateBeforeUnathenticatedException = null;
 
 	@Inject
-	protected AuthenticationHandler() {
+	protected AuthenticationNavigationHandler() {
 		super();
 		this.ui = UI.getCurrent();
+		if(ui == null) {
+			throw new IllegalStateException("creato AuthenticationHandler con ui == null: puo succedere se viene istanziato durante la creazione dell'ui, usare un Provider");
+		}
 	}
 
 	protected void onUnauthenticatedException(NavigationState targetNavigationState,

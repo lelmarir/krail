@@ -43,7 +43,7 @@ import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
 import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
-import uk.q3c.krail.core.shiro.AuthenticationHandler;
+import uk.q3c.krail.core.shiro.AuthenticationNavigationHandler;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.q3c.krail.core.view.KrailView;
@@ -80,18 +80,19 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	private Component screenLayout;
 	private UIScope uiScope;
 	private KrailView view;
-	
+
 	@Inject
 	private AuthenticationNotifier authenticationNotifier;
 	@Inject
-	@Nullable 
-	private AuthenticationHandler authenticationListener;
+	@Nullable
+	private Provider<AuthenticationNavigationHandler> authenticationListenerProvider;
+	private AuthenticationNavigationHandler authenticationListener;
 
 	@Inject
 	protected ScopedUI() {
 		super();
 		viewDisplayContainer = new Panel();
-		
+
 	}
 
 	public UIKey getInstanceKey() {
@@ -104,21 +105,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 	protected void setScope(UIScope uiScope) {
 		this.uiScope = uiScope;
-		//FIXME: hack to register the authenticationListener only if the UI exists
-		if(authenticationListener != null) {
-			authenticationNotifier.addListener(authenticationListener);
-		}
-	}
-
-	@Override
-	public void detach() {
-		if (uiScope != null) {
-			uiScope.releaseScope(instanceKey);
-		}
-		if(authenticationListener != null) {
-			authenticationNotifier.removeListener(authenticationListener);
-		}
-		super.detach();
 	}
 
 	@Override
@@ -187,11 +173,28 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 		currentLocale.readFromEnvironment();
 		currentLocale.addListener(this);
 
+		// FIXME: hack to register the authenticationListener only if the UI exists
+		authenticationListener = authenticationListenerProvider.get();
+		if (authenticationListener != null) {
+			authenticationNotifier.addListener(authenticationListener);
+		}
+
 		doLayout();
 
 		// FIXME: non dovrei chiamare a mano init(), dovrebbe essere eseguito come
-		// @PostConstruct, a eventuali errori causano un loop
+		// @PostConstruct, ma eventuali errori causano un loop
 		navigator.init();
+	}
+
+	@Override
+	public void detach() {
+		if (uiScope != null) {
+			uiScope.releaseScope(instanceKey);
+		}
+		if (authenticationListener != null) {
+			authenticationNotifier.removeListener(authenticationListener);
+		}
+		super.detach();
 	}
 
 	/**
