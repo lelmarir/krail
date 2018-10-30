@@ -1,7 +1,11 @@
 package uk.q3c.krail.core.shiro.loginevent;
 
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
+
+import com.vaadin.ui.UI;
 
 public interface AuthenticationEvent {
 	
@@ -17,10 +21,14 @@ public interface AuthenticationEvent {
 	public static interface FailedLoginEvent extends AuthenticationEvent {
 
 		AuthenticationException getException();
+
+		AuthenticationToken getToken();
 		
 	}
 	
 	public static interface LogoutEvent extends AuthenticationEvent {
+
+		PrincipalCollection getLoggedOutSubjectPrincipals();
 		
 	}
 	
@@ -46,4 +54,8 @@ public interface AuthenticationEvent {
 
 	Subject getSubject();
 
+	/**
+	 * The UI that has generated the event
+	 */
+	UI getSourceUI();
 }

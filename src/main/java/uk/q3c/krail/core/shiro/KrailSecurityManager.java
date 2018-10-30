@@ -27,6 +27,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.vaadin.ui.UI;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -125,7 +127,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	private void fireSuccessfulLoginEvent(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
-		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(subject, token, info);
+		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(UI.getCurrent(), subject, token, info);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onSuccess(event);
@@ -139,15 +141,15 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	private void fireFailedLoginEvent(AuthenticationToken token, AuthenticationException ae, Subject subject) {
-		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(subject, token, ae);
+		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(UI.getCurrent(), subject, token, ae);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onFailure(event);
 		}
 	}
 
-	private void fireLogoutEvent(Subject subject) {
-		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(subject);
+	private void fireLogoutEvent(Subject subject, PrincipalCollection loggedOutSubjectPrincipals) {
+		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(UI.getCurrent(), subject, loggedOutSubjectPrincipals);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onLogout(event);
@@ -167,8 +169,9 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 				securityManager) {
 			@Override
 			public void logout() {
+				PrincipalCollection oldPrincipals = this.principals;
 				super.logout();
-				fireLogoutEvent(this);
+				fireLogoutEvent(this, oldPrincipals);
 			}
 		};
 	}

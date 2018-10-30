@@ -203,8 +203,7 @@ public class DefaultNavigator implements Navigator {
 
 	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
 		LOGGER.trace("navigateTo({}, refresh={})", navigationState, refresh);
-		
-		
+
 		if (lastCancellableNavigationEvent != null) {
 			LOGGER.warn(
 					"navigateTo() invoked during another navigation process (probably by a 'before' listener): cancelling navigation, call CancellableKrailViewChangeEvent.cancel() to suppress this warning.");
@@ -217,7 +216,7 @@ public class DefaultNavigator implements Navigator {
 		// stop unnecessary changes, but also to prevent navigation aware
 		// components from causing a loop by responding to a change of URI (they
 		// should suppress events when they do, but may not)
-		if (refresh == false && !isDifferentState(navigationState)) {
+		if (!refresh && !isDifferentState(navigationState)) {
 			LOGGER.debug("fragment unchanged, no navigation required");
 			return;
 		}
@@ -324,7 +323,12 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	private boolean isDifferentState(NavigationState navigationState) {
-		return !navigationState.equals(currentNavigationState);
+		try {
+			return !navigationState.equals(currentNavigationState);
+		} catch (Throwable t) {
+			LOGGER.warn("isDifferentState should not throw any exeptions, but threw '{}': ", t.getClass(), t);
+			throw t;
+		}
 	}
 
 	private void checkViewRootComponentNotNull(KrailView view) {

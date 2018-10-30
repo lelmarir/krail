@@ -3,26 +3,28 @@ package uk.q3c.krail.core.shiro.loginevent;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
-public abstract class AbstractAuthenticationEvent implements
-		AuthenticationEvent {
+import com.vaadin.ui.UI;
 
-	public static class SuccesfulLoginEventImpl extends
-			AbstractAuthenticationEvent implements SuccesfulLoginEvent {
-		public SuccesfulLoginEventImpl(Subject subject,
-				AuthenticationToken token, AuthenticationInfo info) {
-			super(subject);
+public abstract class AbstractAuthenticationEvent implements AuthenticationEvent {
+
+	public static class SuccesfulLoginEventImpl extends AbstractAuthenticationEvent implements SuccesfulLoginEvent {
+		public SuccesfulLoginEventImpl(UI sourceUI, Subject subject, AuthenticationToken token,
+				AuthenticationInfo info) {
+			super(sourceUI, subject);
 		}
 	}
 
-	public static class FailedLoginEventImpl extends
-			AbstractAuthenticationEvent implements FailedLoginEvent {
+	public static class FailedLoginEventImpl extends AbstractAuthenticationEvent implements FailedLoginEvent {
 		private final AuthenticationException exception;
+		private final AuthenticationToken token;
 
-		public FailedLoginEventImpl(Subject subject, AuthenticationToken token,
+		public FailedLoginEventImpl(UI sourceUI, Subject subject, AuthenticationToken token,
 				AuthenticationException ae) {
-			super(subject);
+			super(sourceUI, subject);
+			this.token = token;
 			this.exception = ae;
 		}
 
@@ -30,23 +32,43 @@ public abstract class AbstractAuthenticationEvent implements
 		public AuthenticationException getException() {
 			return exception;
 		}
+		
+		@Override
+		public AuthenticationToken getToken() {
+			return token;
+		}
 	}
-	
+
 	public static class LogoutEventImpl extends AbstractAuthenticationEvent implements LogoutEvent {
-		public LogoutEventImpl(Subject subject) {
-			super(subject);
-		}		
+		private final PrincipalCollection loggedOutSubjectPrincipals;
+
+		public LogoutEventImpl(UI sourceUI, Subject subject, PrincipalCollection loggedOutSubjectPrincipals) {
+			super(sourceUI, subject);
+			this.loggedOutSubjectPrincipals = loggedOutSubjectPrincipals;
+		}
+
+		@Override
+		public PrincipalCollection getLoggedOutSubjectPrincipals() {
+			return loggedOutSubjectPrincipals;
+		}
 	}
 
-	private Subject subject;
+	private final Subject subject;
+	private final UI sourceUI;
 
-	public AbstractAuthenticationEvent(Subject subject) {
+	public AbstractAuthenticationEvent(UI sourceUI, Subject subject) {
 		this.subject = subject;
+		this.sourceUI = sourceUI;
 	}
 
 	@Override
 	public Subject getSubject() {
 		return subject;
+	}
+
+	@Override
+	public UI getSourceUI() {
+		return sourceUI;
 	}
 
 }

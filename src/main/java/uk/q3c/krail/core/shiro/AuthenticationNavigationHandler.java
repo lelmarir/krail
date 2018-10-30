@@ -15,6 +15,7 @@ package uk.q3c.krail.core.shiro;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,9 @@ public class AuthenticationNavigationHandler implements UnauthenticatedException
 	protected AuthenticationNavigationHandler() {
 		super();
 		this.ui = UI.getCurrent();
-		if(ui == null) {
-			throw new IllegalStateException("creato AuthenticationHandler con ui == null: puo succedere se viene istanziato durante la creazione dell'ui, usare un Provider");
+		if (ui == null) {
+			throw new IllegalStateException(
+					"creato AuthenticationHandler con ui == null: puo succedere se viene istanziato durante la creazione dell'ui, usare un Provider");
 		}
 	}
 
@@ -87,11 +89,15 @@ public class AuthenticationNavigationHandler implements UnauthenticatedException
 	 */
 	@Override
 	public void onSuccess(SuccesfulLoginEvent event) {
+		if (event.getSourceUI() != ui) {
+			// this event is generated form another UI in the session: nothing to do
+			return;
+		}
 		assert event.getSubject().isAuthenticated();
 
 		LOGGER.info("onSuccessfulLogin(user={})", event.getSubject());
-		if(ui == null) {
-			LOGGER.warn("onSuccessfulLogin() con ui == null ({})", Thread.currentThread().getName()); 
+		if (ui == null) {
+			LOGGER.warn("onSuccessfulLogin() con ui == null ({})", Thread.currentThread().getName());
 			return;
 		}
 		ui.accessSynchronously(() -> {
@@ -103,6 +109,7 @@ public class AuthenticationNavigationHandler implements UnauthenticatedException
 					navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
 				} catch (AuthorizationException e) {
 					// the user does not have the permission for the required page
+					LOGGER.info("The user does not have the permission for the required page: will be logged-out");
 					event.getSubject().logout();
 					throw e;
 				} finally {
@@ -119,12 +126,26 @@ public class AuthenticationNavigationHandler implements UnauthenticatedException
 
 	@Override
 	public void onFailure(FailedLoginEvent event) {
-		LOGGER.info("onFailedLogin(user={}, exception={})", event.getSubject(), event.getException().getMessage());
+		// FIXME: questo log viene fatto per ogni UI, esistendo un
+		// AuthenticationNavigationHandler per ogni UI, forse sarebbe meglio spsotarlo
+		// in un listener legato alla sessione
+		LOGGER.info("onFailedLogin(token={}, exception={})", event.getToken(), event.getException().getMessage());
 	}
 
 	@Override
 	public void onLogout(LogoutEvent event) {
-		LOGGER.info("logout(user={})", event.getSubject());
-		navigatorProvider.get().navigateTo(StandardPageKey.Log_Out);
+		// FIXME: questo log viene fatto per ogni UI, esistendo un
+				// AuthenticationNavigationHandler per ogni UI, forse sarebbe meglio spsotarlo
+				// in un listener legato alla sessione
+		LOGGER.info("logout(user={})", event.getLoggedOutSubjectPrincipals());
+		// this or another UI has logged out
+		Navigator navigator = navigatorProvider.get();
+		try {
+			navigator.getCurrentNavigationState().getSitemapNode().getAccesControlRule()
+					.checkAuthorization(event.getSubject());
+		} catch (AuthorizationException e) {
+			// the user is no loger authorized for this page, must navigatre away
+			navigator.navigateTo(StandardPageKey.Log_Out);
+		}
 	}
 }
