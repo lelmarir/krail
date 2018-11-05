@@ -14,6 +14,7 @@ package uk.q3c.krail.core.guice.errors;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -29,6 +30,7 @@ import uk.q3c.krail.core.navigate.Navigator;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import com.vaadin.server.DefaultErrorHandler;
 
 /**
@@ -60,6 +62,16 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		Throwable throwable = event.getThrowable();
 
 		boolean handled = false;
+		
+		LinkedList<ErrorHandler> handlers;
+		try {
+			handlers = new LinkedList<>();
+			handlers.addAll(errorHandlersProvider.get());
+		} catch (ProvisionException ex) {
+			LOGGER.error("Unable to get error handlers, navigating to the error page:", ex);
+			navigatorProvider.get().navigateToErrorView(event.getThrowable());
+			return;
+		}
 
 		List<Throwable> list = new ArrayList<Throwable>();
 		while (handled == false && throwable != null) {
@@ -69,7 +81,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			}
 			list.add(throwable);
 
-			handled = handleError(new ErrorEvent(throwable));
+			handled = handleError(new ErrorEvent(throwable), handlers);
 			if (handled == true) {
 				break;
 			}
@@ -82,21 +94,14 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 
 		if (handled == false) {
-			LOGGER.error("Unable to handle the error: navigating to the error page, \n"
-					+ "handlers: {}", errorHandlersProvider.get(), event.getThrowable());
-			
+			LOGGER.error("Unable to handle the error: navigating to the error page, \n" + "handlers: {}",
+					errorHandlersProvider.get(), event.getThrowable());
+
 			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 		}
 	}
 
-	private boolean handleError(ErrorEvent e) {
-		LinkedList<ErrorHandler> handlers = new LinkedList<>();
-		try {
-		handlers.addAll(errorHandlersProvider.get());
-		} catch (Throwable ex) {
-			LOGGER.error("Unable to get error handlers:", ex);
-		}
-
+	private boolean handleError(ErrorEvent e, List<ErrorHandler> handlers) {
 		// li eseguo nell'ordine inverso
 		// FIXME: errorHandlers è un set, perche lo converto in lista e lo eseguo in
 		// ordine inverso? tanto saranno in un ordine casuale...

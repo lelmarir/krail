@@ -82,7 +82,7 @@ public abstract class VaadinUtils {
 		if(holder instanceof Component) {
 			return runWithUI((Component)holder, runnable);
 		}else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("The holder must be a Component ("+ holder +" of type "+ holder.getClass() +")");
 		}
 	}
 	
