@@ -68,7 +68,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			handlers = new LinkedList<>();
 			handlers.addAll(errorHandlersProvider.get());
 		} catch (ProvisionException ex) {
-			LOGGER.error("Unable to get error handlers, navigating to the error page:", ex);
+			LOGGER.error("Unable to get error handlers (cause:{}), navigating to the error page, while handling:", ex.getMessage(), throwable);
 			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 			return;
 		}
