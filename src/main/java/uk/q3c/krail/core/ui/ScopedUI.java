@@ -149,6 +149,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 
 		ErrorHandler errorHandler = errorHandlerProvider.get();
 		setErrorHandler(errorHandler);
+		//TODO: errorHandler è legato alla UI, è corretto usarlo anche per la sessione?
 		session.setErrorHandler(errorHandler);
 
 		Navigator navigator = navigatorProvider.get();

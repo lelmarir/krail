@@ -476,8 +476,8 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateToErrorView(final Throwable error, String localizedMessage) {
-		LOGGER.debug("A {} Error has been thrown, reporting via the Error View: {}", error.getClass().getName(),
-				localizedMessage, error);
+		LOGGER.trace("A {} Error has been thrown, reporting via the Error View: {} - {}", error.getClass().getName(),
+				localizedMessage, error.getMessage());
 
 		navigateTo(ErrorView.buildNavigationTarget(error, localizedMessage));
 	}
