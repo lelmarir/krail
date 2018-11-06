@@ -10,7 +10,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinSession;
 
-import uk.q3c.krail.core.guice.KrailRequestHandler;
+import uk.q3c.krail.core.guice.KrailRequestInterceptor;
 import uk.q3c.krail.core.guice.errors.ErrorHandler;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.shiro.SecuritySessionModule.SessionProvider;
@@ -48,13 +48,17 @@ public class ShiroVaadinModule extends AbstractModule {
 		bindUnauthorisedHandler();
 		bindLoginExceptionsHandler();
 
-		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder.newSetBinder(binder(),
-				KrailRequestHandler.class);
-		krailRequestHandlerBinder.addBinding().to(MDCSubjectHandler.class);
+		Multibinder<KrailRequestInterceptor> krailRequestHandlerBinder = Multibinder.newSetBinder(binder(),
+				KrailRequestInterceptor.class);
+		bindMDCHandler(krailRequestHandlerBinder);
 
 		SecuritySessionModule.addBinding().to(VaadinSessionProvider.class);
 	}
 	
+	protected void bindMDCHandler(Multibinder<KrailRequestInterceptor> krailRequestHandlerBinder) {
+		krailRequestHandlerBinder.addBinding().to(DefaultMDCHandler.class);
+	}
+
 	public LinkedBindingBuilder<AuthenticationListener> addAuthenticationListenerBinding() {
 		return authenticationListenersBinder.addBinding();
 	}

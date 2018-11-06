@@ -12,7 +12,6 @@
  */
 package uk.q3c.krail.core.guice;
 
-import uk.q3c.krail.core.shiro.MDCSubjectHandler;
 import uk.q3c.krail.core.ui.ScopedUIProvider;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.vaadin.server.CustomizedSystemMessages;
 import com.vaadin.server.DeploymentConfiguration;
@@ -34,6 +32,7 @@ import com.vaadin.server.SystemMessagesInfo;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinResponse;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinServletService;
 import com.vaadin.server.VaadinSession;
@@ -47,7 +46,7 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 	@Inject
 	private static ScopedUIProvider uiProvider;
 	@Inject
-	private static Set<KrailRequestHandler> requestHandlers;
+	private static Set<KrailRequestInterceptor> requestInterceptors;
 
 	// will not be instantiated by guice
 	public BaseServlet() {
@@ -61,8 +60,7 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 		getService().setSystemMessagesProvider(new SystemMessagesProvider() {
 
 			@Override
-			public SystemMessages getSystemMessages(
-					SystemMessagesInfo systemMessagesInfo) {
+			public SystemMessages getSystemMessages(SystemMessagesInfo systemMessagesInfo) {
 				// disabilita il messaggio di errore e ricarica immediatamente
 				// la pagina
 				CustomizedSystemMessages messages = new CustomizedSystemMessages();
@@ -78,46 +76,39 @@ public class BaseServlet extends VaadinServlet implements SessionInitListener {
 	}
 
 	@Override
-	protected VaadinServletService createServletService(
-			DeploymentConfiguration deploymentConfiguration)
+	protected VaadinServletService createServletService(DeploymentConfiguration deploymentConfiguration)
 			throws ServiceException {
 
-		VaadinServletService service = new VaadinServletService(this,
-				deploymentConfiguration) {
+		VaadinServletService service = new VaadinServletService(this, deploymentConfiguration) {
 
 			@Override
-			protected List<RequestHandler> createRequestHandlers()
-					throws ServiceException {
-				List<RequestHandler> handlers = super.createRequestHandlers();
-				for (KrailRequestHandler handler : requestHandlers) {
-					handlers.add(handler);
-					handler.init();
+			protected List<RequestHandler> createRequestHandlers() throws ServiceException {
+				for (KrailRequestInterceptor interceptor : requestInterceptors) {
+					interceptor.init();
 				}
-				return handlers;
+				return super.createRequestHandlers();
 			}
 
 			@Override
-			public void requestStart(VaadinRequest request,
-					VaadinResponse response) {
-				for (KrailRequestHandler handler : requestHandlers) {
+			public void requestStart(VaadinRequest request, VaadinResponse response) {
+				super.requestStart(request, response);
+				for (KrailRequestInterceptor handler : requestInterceptors) {
 					handler.requestStart(request, response);
 				}
-				super.requestStart(request, response);
 			}
 
 			@Override
-			public void requestEnd(VaadinRequest request,
-					VaadinResponse response, VaadinSession session) {
-				super.requestEnd(request, response, session);
-				for (KrailRequestHandler handler : requestHandlers) {
+			public void requestEnd(VaadinRequest request, VaadinResponse response, VaadinSession session) {
+				for (KrailRequestInterceptor handler : requestInterceptors) {
 					handler.requestEnd(request, response, session);
 				}
+				super.requestEnd(request, response, session);
 			}
 
 			@Override
 			public void destroy() {
-				for (KrailRequestHandler handler : requestHandlers) {
-					handler.destroy();
+				for (KrailRequestInterceptor interceptor : requestInterceptors) {
+					interceptor.destroy();
 				}
 				super.destroy();
 			}

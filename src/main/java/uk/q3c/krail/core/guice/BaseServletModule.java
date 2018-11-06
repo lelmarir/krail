@@ -26,8 +26,8 @@ public abstract class BaseServletModule extends ServletModule {
 	@Override
 	protected void configureServlets() {
 		//in case there are no krailRequestHandler, to create an empty set
-		Multibinder<KrailRequestHandler> krailRequestHandlerBinder = Multibinder
-				.newSetBinder(binder(), KrailRequestHandler.class);
+		Multibinder<KrailRequestInterceptor> krailRequestHandlerBinder = Multibinder
+				.newSetBinder(binder(), KrailRequestInterceptor.class);
 		bindRequestHandlers(krailRequestHandlerBinder);
 
 		// BaseServlet will not be instantiated by guice
@@ -35,7 +35,7 @@ public abstract class BaseServletModule extends ServletModule {
 	}
 
 	protected void bindRequestHandlers(
-			Multibinder<KrailRequestHandler> multibinder) {
+			Multibinder<KrailRequestInterceptor> multibinder) {
 		;
 	}
 }
