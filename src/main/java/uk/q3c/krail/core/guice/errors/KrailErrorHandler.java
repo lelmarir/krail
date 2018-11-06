@@ -78,11 +78,14 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 	public void error(com.vaadin.server.ErrorEvent event) {
 		UI ui = UI.getCurrent();
 		if (event instanceof ConnectorErrorEvent) {
-			UI connectorUI= findUI(((ConnectorErrorEvent) event).getConnector());
-			if(ui != null && ui != connectorUI) {
-				LOGGER.warn("UI.getCurrent() != event.getConnector().getUI(): {} != {}", ui, connectorUI);
+			UI connectorUI = findUI(((ConnectorErrorEvent) event).getConnector());
+			if (connectorUI != null) {
+				if (LOGGER.isDebugEnabled() && ui != null && ui != connectorUI) {
+					LOGGER.warn("UI.getCurrent() != event.getConnector().getUI(): {} != {}", ui, connectorUI);
+					ui = connectorUI;
+				}
+				ui = connectorUI;
 			}
-			ui = connectorUI;
 		}
 		if (ui != null) {
 			ui.accessSynchronously(() -> {
