@@ -5,12 +5,13 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.UI;
 
 public interface AuthenticationEvent {
 	
 	public static interface AuthenticationNotifier {
-		void addListener(AuthenticationListener listener);
+		Registration addListener(AuthenticationListener listener);
 		void removeListener(AuthenticationListener listener);
 	}
 	

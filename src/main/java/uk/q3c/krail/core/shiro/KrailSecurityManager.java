@@ -27,6 +27,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.UI;
 
 import org.apache.shiro.authc.AuthenticationException;
@@ -267,11 +268,13 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	@Override
-	public void addListener(AuthenticationListener listener) {
+	public Registration addListener(AuthenticationListener listener) {
 		getCurrentSessionAuthenticationListeners().add(listener);
+		return () -> {
+			removeListener(listener);
+		};
 	}
 
-	@Override
 	public void removeListener(AuthenticationListener listener) {
 		getCurrentSessionAuthenticationListeners().remove(listener);
 	}
