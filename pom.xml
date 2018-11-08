@@ -83,12 +83,15 @@
 			<version>1.17.5</version>
 			<scope>compile</scope>
 		</dependency>
+		
+		<!-- LOGGING -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
 			<scope>compile</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>

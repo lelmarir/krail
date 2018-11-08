@@ -18,17 +18,22 @@ public class ServiceManagerModule extends AbstractModule {
 		Set<Service> services = Collections.emptySet();
 	}
 
+	private static boolean inizialized = false;
+	private static ServiceManager instance;
+
 	@Override
 	protected void configure() {
-
+		//NOOP
 	}
 
 	@Provides
 	private ServiceManager providesServiceManager(ServicesHolder services) {
-		if (services.services != null && !services.services.isEmpty()) {
-			return new ServiceManager(services.services);
-		} else {
-			return null;
+		if (!inizialized) {
+			if (services.services != null && !services.services.isEmpty()) {
+				ServiceManagerModule.instance = new ServiceManager(services.services);
+			}
+			ServiceManagerModule.inizialized = true;
 		}
+		return instance;
 	}
 }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.ServletContextEvent;
 
@@ -52,11 +53,10 @@ import com.google.inject.servlet.ServletModule;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorMode;
 
-public abstract class DefaultBindingManager
-		extends GuiceServletContextListener {
+public abstract class DefaultBindingManager extends GuiceServletContextListener {
+	private static final int SERVICES_STOP_TIMEOUT_SECONDS = 30;
 	protected static Injector injector;
-	private static Logger log = LoggerFactory
-			.getLogger(DefaultBindingManager.class);
+	private static Logger log = LoggerFactory.getLogger(DefaultBindingManager.class);
 
 	private String basePackage = "";
 	private Reflections basePackageReflections;
@@ -107,8 +107,8 @@ public abstract class DefaultBindingManager
 		bridgeJULToSLF4J();
 
 		return LifecycleInjector.builder().usingBasePackages(getBasePackage())
-				.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
-				.withModules(getModules()).build().createInjector();
+				.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS).withModules(getModules()).build()
+				.createInjector();
 	}
 
 	private void bridgeJULToSLF4J() {
@@ -178,11 +178,8 @@ public abstract class DefaultBindingManager
 
 	public Reflections getBasePackageReflections() {
 		if (basePackageReflections == null) {
-			basePackageReflections = new Reflections(basePackage,
-					new Scanner[] { 
-							new TypeAnnotationsScanner(),
-							new SubTypesScanner(),
-							new MethodAnnotationsScanner() });
+			basePackageReflections = new Reflections(basePackage, new Scanner[] { new TypeAnnotationsScanner(),
+					new SubTypesScanner(), new MethodAnnotationsScanner() });
 		}
 		return basePackageReflections;
 	}
@@ -323,11 +320,11 @@ public abstract class DefaultBindingManager
 	public void setAutomaticStaticInjection(boolean automaticStaticInjection) {
 		this.automaticStaticInjection = automaticStaticInjection;
 	}
-	
+
 	public boolean isAutomaticFactoryBinging() {
 		return automaticFactoryBinging;
 	}
-	
+
 	public void setAutomaticFactoryBinging(boolean automaticFactoryBinging) {
 		this.automaticFactoryBinging = automaticFactoryBinging;
 	}
@@ -335,8 +332,7 @@ public abstract class DefaultBindingManager
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		super.contextInitialized(servletContextEvent);
-		ServiceManager servicesManager = getInjector()
-				.getInstance(ServiceManager.class);
+		ServiceManager servicesManager = getInjector().getInstance(ServiceManager.class);
 		if (servicesManager != null) {
 			servicesManager.startAsync();
 			servicesManager.awaitHealthy();
@@ -349,14 +345,21 @@ public abstract class DefaultBindingManager
 		try {
 			Injector injector = getInjector(false);
 			if (injector != null) {
-				ServiceManager serviceManager = injector
-						.getInstance(ServiceManager.class);
-				if(serviceManager != null) {
-				serviceManager.stopAsync();
-				log.debug("Waiting for services to stop...");
-				serviceManager.awaitStopped(60, TimeUnit.SECONDS);
-				log.debug("all service stopped.");
-				}else {
+				ServiceManager serviceManager = injector.getInstance(ServiceManager.class);
+				if (serviceManager != null) {
+					serviceManager.stopAsync();
+					log.debug("Waiting for services to stop...");
+					try {
+						serviceManager.awaitStopped(SERVICES_STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+					} catch (TimeoutException e) {
+						log.error("services failed to stop within the timeout ({} seconds): \n{}",
+								SERVICES_STOP_TIMEOUT_SECONDS, serviceManager.servicesByState());
+						throw new RuntimeException("services failed to stop within the timeout ("
+								+ SERVICES_STOP_TIMEOUT_SECONDS + " seconds): \n" + serviceManager.servicesByState(),
+								e);
+					}
+					log.debug("all service stopped.");
+				} else {
 					log.debug("No service manager present");
 				}
 			}
