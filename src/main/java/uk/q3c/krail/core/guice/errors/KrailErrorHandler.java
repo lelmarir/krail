@@ -136,7 +136,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 
 		if (handled == false) {
 			LOGGER.error("Unable to handle the error: navigating to the error page, \n" + "handlers: {}",
-					uiErrorHandlersProvider, event.getThrowable());
+					handlers, event.getThrowable());
 
 			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 		}

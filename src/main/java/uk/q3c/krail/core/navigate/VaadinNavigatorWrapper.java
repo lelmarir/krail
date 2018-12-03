@@ -133,8 +133,7 @@ public class VaadinNavigatorWrapper extends Navigator{
 				ViewChangeEvent e = new ViewChangeEvent(VaadinNavigatorWrapper.this,
 						event.getSourceNavigationState().getView(),
 						event.getTargetNavigationState().getView(),
-						event.getTargetNavigationState().getView()
-								.getViewTitleComponet().getTitle(),
+						event.getTargetNavigationState().getView().getTitle(),
 						event.getTargetNavigationState().parameters()
 								.toString());
 				listener.beforeViewChange(e);
@@ -147,8 +146,7 @@ public class VaadinNavigatorWrapper extends Navigator{
 				ViewChangeEvent e = new ViewChangeEvent(VaadinNavigatorWrapper.this,
 						event.getSourceNavigationState().getView(),
 						event.getTargetNavigationState().getView(),
-						event.getTargetNavigationState().getView()
-								.getViewTitleComponet().getTitle(),
+						event.getTargetNavigationState().getView().getTitle(),
 						event.getTargetNavigationState().parameters()
 								.toString());
 				listener.afterViewChange(e);

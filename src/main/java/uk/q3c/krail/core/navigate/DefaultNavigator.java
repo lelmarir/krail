@@ -326,7 +326,8 @@ public class DefaultNavigator implements Navigator {
 		try {
 			return !navigationState.equals(currentNavigationState);
 		} catch (Throwable t) {
-			LOGGER.warn("isDifferentState should not throw any exeptions, but threw '{}': ", t.getClass(), t);
+			LOGGER.warn("isDifferentState({}) (currentState={}) should not throw any exeptions, but threw '{}': ",
+					navigationState, currentNavigationState, t.getClass(), t);
 			throw t;
 		}
 	}
@@ -429,13 +430,13 @@ public class DefaultNavigator implements Navigator {
 
 	protected void changeView(KrailView view) {
 		// set default view title from annotation
-		if (view.getViewTitle() == null || view.getViewTitle().isEmpty()) {
+		if (view.getTitle() == null || view.getTitle().isEmpty()) {
 			// solo se non è gia presente un titolo
 			View viewAnnotation = DefaultNavigator.getAnnotation(view.getClass(), View.class);
 			if (viewAnnotation != null) {
 				if (viewAnnotation.title().length > 0) {
 					// TODO: localizazione
-					view.getViewTitleComponet().setTitel(viewAnnotation.title()[0]);
+					view.getTitleComponet().setTitel(viewAnnotation.title()[0]);
 				}
 			}
 		}

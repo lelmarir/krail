@@ -68,14 +68,14 @@ public interface KrailView extends View {
 		return getRootComponent();
 	}
 
-	public ViewTitleComponent getViewTitleComponet();
+	public ViewTitleComponent getTitleComponet();
 
-	default String getViewTitle() {
-		return getViewTitleComponet().getTitle();
+	default String getTitle() {
+		return getTitleComponet().getTitle();
 	}
 
 	default void setViewTitle(String title) {
-		getViewTitleComponet().setTitel(title);
+		getTitleComponet().setTitel(title);
 	}
 
 }

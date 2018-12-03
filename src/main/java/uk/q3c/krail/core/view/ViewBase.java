@@ -77,7 +77,7 @@ public abstract class ViewBase<R extends Component> implements KrailView {
 	}
 
 	@Override
-	public ViewTitleComponent getViewTitleComponet() {
+	public ViewTitleComponent getTitleComponet() {
 		if (viewTitleComponent == null) {
 			viewTitleComponent = new ViewTitleLabel();
 		}

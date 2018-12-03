@@ -30,7 +30,7 @@ public abstract class VerticalViewBase extends VerticalLayout implements KrailVi
 	}
 
 	@Override
-	public ViewTitleComponent getViewTitleComponet() {
+	public ViewTitleComponent getTitleComponet() {
 		if (viewTitleComponent == null) {
 			viewTitleComponent = new ViewBase.ViewTitleLabel();
 		}
