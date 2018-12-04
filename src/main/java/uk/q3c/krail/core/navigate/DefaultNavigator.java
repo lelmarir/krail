@@ -342,7 +342,7 @@ public class DefaultNavigator implements Navigator {
 				if (LOGGER.isDebugEnabled()) {
 					if (rootComponent instanceof Layout && ((Layout) rootComponent).getComponentCount() > 0) {
 						LOGGER.warn(
-								"It is advisable to creare the view layout components only after attach() or afterNavigationInbound()");
+								"It is advisable to creare the view layout components only after attach() or afterNavigationInbound(): view={}", view);
 					}
 				}
 			}
