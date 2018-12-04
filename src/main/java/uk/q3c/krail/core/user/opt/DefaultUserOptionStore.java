@@ -65,11 +65,7 @@ public class DefaultUserOptionStore implements UserOptionStore {
     synchronized public <T> Optional<T> load(T sampleValue, String layerId, String consumerClassName, String key,
                                              String qualifiers) {
         Object result = map.get(compositeKey(layerId, consumerClassName, key, qualifiers));
-        try {
-            return Optional.of((T) result);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable((T) result);
 
         }
 
