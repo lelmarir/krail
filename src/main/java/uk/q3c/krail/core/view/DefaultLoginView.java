@@ -85,6 +85,8 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 		getRootComponent().setRowExpandRatio(0, 1);
 		getRootComponent().setRowExpandRatio(2, 1);
+		
+		usernameBox.focus();
 	}
 
 	protected Component createHeader() {
