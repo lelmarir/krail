@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.slf4j.Logger;
@@ -88,9 +89,15 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 			}
 		}
 		if (ui != null) {
-			ui.accessSynchronously(() -> {
-				handleErrror(event);
-			});
+			try {
+				ui.accessSynchronously(() -> {
+					handleErrror(event);
+				});
+			} catch (Throwable e) {
+				LOGGER.error("Errore durante la gestione di un altra eccezione: {}\nSuppressed Exception:\n",
+						ExceptionUtils.getStackTrace(e), ExceptionUtils.getStackTrace(event.getThrowable()));
+
+			}
 		} else {
 			// non ho una UI al momento (l'errore proviene da un thread in background?)
 			// TODO: dovri far gestire l'errore a tutte le UI della sessione
@@ -135,8 +142,8 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 
 		if (handled == false) {
-			LOGGER.error("Unable to handle the error: navigating to the error page, \n" + "handlers: {}",
-					handlers, event.getThrowable());
+			LOGGER.error("Unable to handle the error: navigating to the error page, \n" + "handlers: {}", handlers,
+					event.getThrowable());
 
 			navigatorProvider.get().navigateToErrorView(event.getThrowable());
 		}
