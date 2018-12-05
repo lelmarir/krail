@@ -107,14 +107,13 @@ public class AuthenticationNavigationHandler implements UnauthenticatedException
 						targetNavigationStateBeforeUnathenticatedException);
 				try {
 					navigatorProvider.get().navigateTo(targetNavigationStateBeforeUnathenticatedException);
+					targetNavigationStateBeforeUnathenticatedException = null;
+					previousNavigationStateBeforeUnathenticatedException = null;
 				} catch (AuthorizationException e) {
-					// the user does not have the permission for the required page
+					// the user has just logged in and does not have the permission for the required page
 					LOGGER.info("The user does not have the permission for the required page: will be logged-out");
 					event.getSubject().logout();
 					throw e;
-				} finally {
-					targetNavigationStateBeforeUnathenticatedException = null;
-					previousNavigationStateBeforeUnathenticatedException = null;
 				}
 			} else {
 				// navigazione diretta alla pagina di login?

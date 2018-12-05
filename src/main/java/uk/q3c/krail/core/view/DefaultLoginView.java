@@ -67,6 +67,7 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 		submitButton.setClickShortcut(KeyCode.ENTER);
 		submitButton.addClickListener(this);
 
+		statusMsgLabel.setSizeFull();
 		statusMsgLabel.setValue("Please enter your username and password");
 
 		Component header = createHeader();
@@ -130,7 +131,6 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 			setStatusMessage("Generic_Authentication_Exception");
 		} catch (AuthorizationException e) {
 			setStatusMessage("Authorization_Exception");
-			throw e;
 		} catch (Exception e) {
 			throw new RuntimeException("Eccezione non gestita", e);
 		} finally {
@@ -142,6 +142,7 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 
 	public void setStatusMessage(String msg) {
 		statusMsgLabel.setValue(msg);
+		statusMsgLabel.setStyleName(ValoTheme.LABEL_FAILURE);
 	}
 	
 	@BeforeInboundNavigation
