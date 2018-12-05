@@ -94,7 +94,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 					handleErrror(event);
 				});
 			} catch (Throwable e) {
-				LOGGER.error("Errore durante la gestione di un altra eccezione: {}\nSuppressed Exception:\n",
+				LOGGER.error("Errore durante la gestione di un altra eccezione: {}\nSuppressed Exception:\n{}",
 						ExceptionUtils.getStackTrace(e), ExceptionUtils.getStackTrace(event.getThrowable()));
 
 			}
