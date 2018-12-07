@@ -35,6 +35,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Connector;
 import com.vaadin.ui.UI;
 
@@ -64,6 +65,15 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		return null;
 	}
 
+	private static void access(UI ui, Runnable runnable) {
+		assert ui != null;
+		if (ui == UI.getCurrent() && ui.getSession() == VaadinSession.getCurrent() && ui.getSession().hasLock()) {
+			runnable.run();
+		} else {
+			ui.access(runnable);
+		}
+	}
+
 	@Inject
 	private Provider<Set<ErrorHandler>> uiErrorHandlersProvider;
 	@Inject
@@ -90,7 +100,7 @@ public class KrailErrorHandler extends DefaultErrorHandler {
 		}
 		if (ui != null) {
 			try {
-				ui.accessSynchronously(() -> {
+				access(ui, () -> {
 					handleErrror(event);
 				});
 			} catch (Throwable e) {

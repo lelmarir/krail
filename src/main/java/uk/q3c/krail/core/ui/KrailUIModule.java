@@ -60,6 +60,7 @@ public abstract class KrailUIModule extends AbstractModule {
 
 	protected void bindNavigator() {
 		bind(Navigator.class).to(DefaultNavigator.class).in(UIScoped.class);
+		//FIXME
 		requestStaticInjection(ParametersImpl.class);
 	}
 

@@ -202,6 +202,7 @@ public class DefaultNavigator implements Navigator {
 	}
 
 	public void navigateTo(NavigationState navigationState, boolean refresh) throws AuthorizationException {
+		assert ui == UI.getCurrent();
 		LOGGER.trace("navigateTo({}, refresh={})", navigationState, refresh);
 
 		if (lastCancellableNavigationEvent != null) {
