@@ -41,6 +41,7 @@ import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
 import uk.q3c.krail.core.navigate.DefaultNavigator;
 import uk.q3c.krail.core.navigate.Navigator;
+import uk.q3c.krail.core.navigate.SafeVaadinNavigatorWrapper;
 import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
 import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.shiro.AuthenticationNavigationHandler;
@@ -159,7 +160,7 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 			super.setNavigator((com.vaadin.navigator.Navigator) navigator);
 		} else if (navigator instanceof DefaultNavigator) {
 			log.debug("The injected nagigator has been wrapped in VaadinNavigatorWrapper");
-			super.setNavigator(new VaadinNavigatorWrapper((DefaultNavigator) navigator));
+			super.setNavigator(new SafeVaadinNavigatorWrapper((DefaultNavigator) navigator));
 		} else {
 			super.setNavigator(null);
 			log.warn("The injected navigator is not a sumblass of com.vaadin.navigator.Navigator");
