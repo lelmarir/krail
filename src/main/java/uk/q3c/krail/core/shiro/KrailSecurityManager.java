@@ -58,6 +58,8 @@ import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.LogoutEvent;
 @Singleton
 public class KrailSecurityManager extends DefaultSecurityManager implements AuthenticationNotifier {
 
+	public static final String SYSTEM_USER_PRINCIPAL = "SYSTEM";
+
 	private static class SubjectSerializableWrapper implements Serializable {
 
 		private String sessionId;
@@ -96,6 +98,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	 */
 	private InheritableThreadLocal<Subject> threadLocalSubject = new InheritableThreadLocal<>();
 
+	private Subject systemSubject;
+
 	public KrailSecurityManager(Collection<Realm> realms) {
 		super(realms);
 		this.loginEventListeners = CacheBuilder.newBuilder().weakKeys()
@@ -103,7 +107,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 					@Override
 					public Set<AuthenticationListener> load(Object key) throws Exception {
-						Set<AuthenticationListener> handlers = Collections.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
+						Set<AuthenticationListener> handlers = Collections
+								.newSetFromMap(new WeakHashMap<AuthenticationListener, Boolean>());
 						handlers.addAll(authenticationListenersProvider.get());
 						return handlers;
 					}
@@ -121,14 +126,15 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	@Override
 	protected void onSuccessfulLogin(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
-		
+
 		super.onSuccessfulLogin(token, info, subject);
 		setSubject(subject);
 		fireSuccessfulLoginEvent(token, info, subject);
 	}
 
 	private void fireSuccessfulLoginEvent(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
-		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(UI.getCurrent(), subject, token, info);
+		SuccesfulLoginEventImpl event = new AbstractAuthenticationEvent.SuccesfulLoginEventImpl(UI.getCurrent(),
+				subject, token, info);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onSuccess(event);
@@ -142,7 +148,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	private void fireFailedLoginEvent(AuthenticationToken token, AuthenticationException ae, Subject subject) {
-		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(UI.getCurrent(), subject, token, ae);
+		FailedLoginEvent event = new AbstractAuthenticationEvent.FailedLoginEventImpl(UI.getCurrent(), subject, token,
+				ae);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onFailure(event);
@@ -150,7 +157,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 	}
 
 	private void fireLogoutEvent(Subject subject, PrincipalCollection loggedOutSubjectPrincipals) {
-		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(UI.getCurrent(), subject, loggedOutSubjectPrincipals);
+		LogoutEvent event = new AbstractAuthenticationEvent.LogoutEventImpl(UI.getCurrent(), subject,
+				loggedOutSubjectPrincipals);
 		ArrayList<AuthenticationListener> list = new ArrayList<>(getCurrentSessionAuthenticationListeners());
 		for (AuthenticationListener l : list) {
 			l.onLogout(event);
@@ -183,10 +191,11 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			LOGGER.debug("returning subject from ThreadLocalVariable: {}", subject);
 			return subject;
 		}
-		
+
 		SecuritySession session = sessionProvider.get();
 		if (session != null) {
-			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session.getAttribute(SubjectSerializableWrapper.class.getName());
+			SubjectSerializableWrapper subjectWrapper = (SubjectSerializableWrapper) session
+					.getAttribute(SubjectSerializableWrapper.class.getName());
 			if (subjectWrapper == null) {
 				LOGGER.debug(
 						"session is valid, but does not have a stored Subject, creating a new Subject (will be stored now)");
@@ -196,7 +205,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			subject = subjectWrapper.get();
 			return subject;
 		}
-		
+
 		throw new IllegalStateException("No threadLocal subject and no session!");
 	}
 
@@ -213,9 +222,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	// TODO:use @RunAs annotation instead
 	public void runAsSubject(Subject subject, Runnable runnable) {
-		if(LOGGER.isDebugEnabled()) {
-			if(this.threadLocalSubject.get() != null) {
-				LOGGER.warn("A use is already set in the thread local: you should not nest runAsSubject calls (or this is a bug)");
+		if (LOGGER.isDebugEnabled()) {
+			if (this.threadLocalSubject.get() != null) {
+				LOGGER.warn(
+						"A use is already set in the thread local: you should not nest runAsSubject calls (or this is a bug)");
 			}
 		}
 		this.threadLocalSubject.set(subject);
@@ -227,8 +237,8 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			this.threadLocalSubject.set(null);
 		}
 	}
-	
-	private Subject systemSubject() {
+
+	private Subject createSystemSubject() {
 		SubjectContext context = new DefaultSubjectContext();
 		context.setAuthenticated(true);
 		context.setAuthenticationToken(null);
@@ -236,7 +246,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 			@Override
 			public PrincipalCollection getPrincipals() {
-				return new SimplePrincipalCollection("SYSTEM", "SYSTEM");
+				return new SimplePrincipalCollection(SYSTEM_USER_PRINCIPAL, SYSTEM_USER_PRINCIPAL);
 			}
 
 			@Override
@@ -247,9 +257,16 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 		context.setAuthenticationInfo(info);
 		return createSubject(context);
 	}
-	
+
+	public Subject getSystemSubject() {
+		if (systemSubject == null) {
+			systemSubject = createSystemSubject();
+		}
+		return systemSubject;
+	}
+
 	public void runAsSystem(Runnable runnable) {
-		runAsSubject(systemSubject(), runnable);
+		runAsSubject(getSystemSubject(), runnable);
 	}
 
 	/**

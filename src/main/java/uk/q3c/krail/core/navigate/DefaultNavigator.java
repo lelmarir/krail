@@ -162,7 +162,7 @@ public class DefaultNavigator implements Navigator {
 
 	@Override
 	public void navigateTo(String fragment) throws InvalidURIException {
-		LOGGER.debug("Navigating to fragment: {}", fragment);
+		LOGGER.trace("Navigating to fragment: {}", fragment);
 
 		// set up the navigation state
 		NavigationState navigationState = sitemap.buildNavigationStateFor(fragment);
