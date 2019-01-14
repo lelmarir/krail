@@ -29,14 +29,14 @@ import org.apache.shiro.subject.Subject;
 import uk.q3c.krail.core.navigate.BeforeInboundNavigation;
 import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.sitemap.StandardPageKey;
-import uk.q3c.krail.core.shiro.SubjectProvider;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
 import uk.q3c.util.ID;
 
 import java.util.Optional;
 
 public class DefaultLoginView extends GridViewBase implements ClickListener {
-	private final Provider<Subject> subjectProvider;
+	@Inject
+	private Provider<Subject> subjectProvider;
 
 	protected Label statusMsgLabel = new Label();
 	protected TextField usernameBox = new TextField();
@@ -44,10 +44,12 @@ public class DefaultLoginView extends GridViewBase implements ClickListener {
 	protected PasswordField passwordBox = new PasswordField();
 
 	@Inject
-	protected DefaultLoginView(SubjectProvider subjectProvider) {
+	protected DefaultLoginView() {
 		super();
-		this.subjectProvider = subjectProvider;
-
+	}
+	
+	@Override
+	protected void build() {
 		getRootComponent().setColumns(3);
 		getRootComponent().setRows(3);
 		getRootComponent().setSizeFull();

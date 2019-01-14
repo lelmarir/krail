@@ -72,6 +72,10 @@ public abstract class ViewBase<R extends Component> implements KrailView {
 		return rootComponent;
 	}
 
+	protected void build() {
+		;
+	}
+
 	public void setRootComponent(R rootComponent) {
 		this.rootComponent = rootComponent;
 	}

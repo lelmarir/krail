@@ -32,21 +32,38 @@ import com.vaadin.ui.declarative.DesignContext;
 import elemental.json.JsonObject;
 
 public abstract class LayoutViewBase<T extends Layout> extends ViewBase<T> {
-	
+
+	private boolean layoutBuilt = false;
+
 	public LayoutViewBase() {
 		super();
 	}
-	
+
 	public LayoutViewBase(T layout) {
 		this();
 		setRootComponent(layout);
+	}
+
+	@Override
+	public T getRootComponent() {
+		if(!layoutBuilt) {
+			layoutBuilt = true;
+			build();
+		}
+		return super.getRootComponent();
+	}
+	
+	@Override
+	public void setRootComponent(T rootComponent) {
+		this.layoutBuilt = false;
+		super.setRootComponent(rootComponent);
 	}
 	
 	public T getLayout() {
 		return getRootComponent();
 	}
 
-	//delegates
+	// delegates
 
 	public Iterator<Component> iterator() {
 		return getLayout().iterator();
@@ -72,18 +89,15 @@ public abstract class LayoutViewBase<T extends Layout> extends ViewBase<T> {
 		getLayout().removeAllComponents();
 	}
 
-	public Registration addComponentAttachListener(
-			ComponentAttachListener listener) {
+	public Registration addComponentAttachListener(ComponentAttachListener listener) {
 		return getLayout().addComponentAttachListener(listener);
 	}
 
-	public void replaceComponent(Component oldComponent,
-			Component newComponent) {
+	public void replaceComponent(Component oldComponent, Component newComponent) {
 		getLayout().replaceComponent(oldComponent, newComponent);
 	}
 
-	public void removeComponentAttachListener(
-			ComponentAttachListener listener) {
+	public void removeComponentAttachListener(ComponentAttachListener listener) {
 		getLayout().removeComponentAttachListener(listener);
 	}
 
@@ -95,13 +109,11 @@ public abstract class LayoutViewBase<T extends Layout> extends ViewBase<T> {
 		return getLayout().getComponentIterator();
 	}
 
-	public Registration addComponentDetachListener(
-			ComponentDetachListener listener) {
+	public Registration addComponentDetachListener(ComponentDetachListener listener) {
 		return getLayout().addComponentDetachListener(listener);
 	}
 
-	public void removeComponentDetachListener(
-			ComponentDetachListener listener) {
+	public void removeComponentDetachListener(ComponentDetachListener listener) {
 		getLayout().removeComponentDetachListener(listener);
 	}
 
@@ -253,8 +265,8 @@ public abstract class LayoutViewBase<T extends Layout> extends ViewBase<T> {
 		return getLayout().isEnabled();
 	}
 
-	public boolean handleConnectorRequest(VaadinRequest request,
-			VaadinResponse response, String path) throws IOException {
+	public boolean handleConnectorRequest(VaadinRequest request, VaadinResponse response, String path)
+			throws IOException {
 		return getLayout().handleConnectorRequest(request, response, path);
 	}
 
@@ -345,5 +357,5 @@ public abstract class LayoutViewBase<T extends Layout> extends ViewBase<T> {
 	public void removeListener(Listener listener) {
 		getLayout().removeListener(listener);
 	}
-	
+
 }
