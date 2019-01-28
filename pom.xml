@@ -7,7 +7,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.bonfiglioli</groupId>
 	<artifactId>krail</artifactId>
-	<version>0.9.82-SNAPSHOT</version>
+	<version>0.10.1-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
 
 	<licenses>
@@ -99,7 +99,7 @@
 			<version>1.17.5</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- LOGGING -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -107,7 +107,7 @@
 			<version>1.7.21</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>

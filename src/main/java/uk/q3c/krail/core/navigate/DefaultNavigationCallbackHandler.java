@@ -208,7 +208,7 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public void afterInbounNavigationEvent(KrailView view, KrailViewChangeEvent event) {
 		try {
@@ -413,6 +413,15 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 		Method method = entry.getKey();
 		Object[] args = entry.getValue();
 		method.setAccessible(true);
-		method.invoke(view, args);
+		try {
+			method.invoke(view, args);
+		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else {
+				throw e;
+			}
+		}
 	}
 }
