@@ -15,6 +15,7 @@ package uk.q3c.krail.core.navigate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import com.vaadin.server.Page;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 
 import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.navigate.sitemap.NavigationState;
@@ -81,6 +83,13 @@ public class DefaultNavigator implements Navigator {
 			clazz = clazz.getSuperclass();
 		}
 		return null;
+	}
+
+	public static void closeAllWindows() {
+		for (Window w : new ArrayList<>(UI.getCurrent().getWindows())) {
+			LOGGER.warn("Window '{}' removed.", w);
+			UI.getCurrent().removeWindow(w);
+		}
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNavigator.class);
@@ -283,6 +292,9 @@ public class DefaultNavigator implements Navigator {
 		// @AfterOutboundNavigation alla vista corrente (ad esempio alla chiusura della
 		// sessione)
 
+		//prima di cambiare pagina non dovrebero esserci Windows aperte
+		closeAllWindows();
+		
 		// now change the view (should not ever start a new navigation)
 		changeView(targetView);
 

@@ -14,8 +14,6 @@ package uk.q3c.krail.core.ui;
 
 import java.util.Locale;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +25,13 @@ import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
 
+import jdk.internal.jline.internal.Nullable;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -44,7 +40,6 @@ import uk.q3c.krail.core.navigate.Navigator;
 import uk.q3c.krail.core.navigate.VaadinNavigatorWrapper;
 import uk.q3c.krail.core.navigate.sitemap.annotations.ViewLayout;
 import uk.q3c.krail.core.shiro.AuthenticationNavigationHandler;
-import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationListener;
 import uk.q3c.krail.core.shiro.loginevent.AuthenticationEvent.AuthenticationNotifier;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewHolder;

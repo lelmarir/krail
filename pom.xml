@@ -19,9 +19,9 @@
 	</licenses>
 
 	<properties>
-		<vaadin.version>8.3.3</vaadin.version>
-		<vaadin.plugin.version>8.3.3</vaadin.plugin.version>
-		<guice.version>4.2.0</guice.version>
+		<vaadin.version>8.6.4</vaadin.version>
+		<vaadin.plugin.version>8.6.4</vaadin.plugin.version>
+		<guice.version>4.2.2</guice.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -43,6 +43,16 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.ws</groupId>
+			<artifactId>jaxws-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
@@ -58,6 +68,12 @@
 			<artifactId>guice</artifactId>
 			<version>${guice.version}</version>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>jsr305</artifactId>
+					<groupId>com.google.code.findbugs</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject.extensions</groupId>
