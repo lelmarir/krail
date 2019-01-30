@@ -222,11 +222,10 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 
 	// TODO:use @RunAs annotation instead
 	public void runAsSubject(Subject subject, Runnable runnable) {
-		if (LOGGER.isDebugEnabled()) {
-			if (this.threadLocalSubject.get() != null) {
-				LOGGER.warn(
-						"A use is already set in the thread local: you should not nest runAsSubject calls (or this is a bug)");
-			}
+		Subject oldSubject = this.threadLocalSubject.get();
+		if (oldSubject != null) {
+			LOGGER.warn(
+					"A use is already set in the thread local: you should not nest runAsSubject calls (or this is a bug)");
 		}
 		this.threadLocalSubject.set(subject);
 		MDC.put("subject", subject.toString());
@@ -234,7 +233,7 @@ public class KrailSecurityManager extends DefaultSecurityManager implements Auth
 			runnable.run();
 		} finally {
 			MDC.remove("subject");
-			this.threadLocalSubject.set(null);
+			this.threadLocalSubject.set(oldSubject);
 		}
 	}
 
