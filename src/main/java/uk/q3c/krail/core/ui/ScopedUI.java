@@ -31,7 +31,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
 
-import jdk.internal.jline.internal.Nullable;
 import uk.q3c.krail.core.guice.uiscope.UIKey;
 import uk.q3c.krail.core.guice.uiscope.UIScope;
 import uk.q3c.krail.core.guice.uiscope.UIScoped;
@@ -79,7 +78,6 @@ public abstract class ScopedUI extends UI implements KrailViewHolder, LocaleChan
 	@Inject
 	private AuthenticationNotifier authenticationNotifier;
 	@Inject
-	@Nullable
 	private Provider<AuthenticationNavigationHandler> authenticationListenerProvider;
 	private AuthenticationNavigationHandler authenticationListener;
 
