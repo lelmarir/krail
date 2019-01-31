@@ -15,7 +15,7 @@ public interface SitemapNode {
 	 * Construct the fragment, using the uriPattern of this node and replacing parameters
 	 * @param viewInstance 
 	 */
-	String buildFragment(KrailView viewInstance, Parameters parameters) throws IllegalArgumentException;
+	String buildFragment(NavigationState navigationState) throws IllegalArgumentException;
 
 	NavigationState buildNavigationState(String fragment);
 

@@ -22,5 +22,5 @@ public interface NavigationState extends Serializable {
 
 	SitemapNode getSitemapNode();
 	
-	KrailView getView();
+	KrailView getViewInstance();
 }

@@ -269,7 +269,7 @@ public class DefaultNavigator implements Navigator {
 			}
 
 			LOGGER.debug("obtaining view instance for '{}'", navigationState);
-			targetView = navigationState.getView();
+			targetView = navigationState.getViewInstance();
 
 			// notify before Inbound navigation to target view
 			fireViewBeforeInboundNavigationEvent(targetView, cancellable, getCallbackHandler());

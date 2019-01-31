@@ -107,8 +107,8 @@ public abstract class AbstractNode implements SitemapNode {
 	@Override
 	public abstract NavigationState buildNavigationState(Parameters params);
 
-	public String buildFragment(KrailView viewInstance, Parameters parameters) {
-		return buildFragment(viewInstance, rawUriPattern, parameters, false).toString();
+	public String buildFragment(NavigationState navigationState) {
+		return buildFragment(navigationState, rawUriPattern, false).toString();
 	}
 
 	/**
@@ -121,7 +121,7 @@ public abstract class AbstractNode implements SitemapNode {
 	 *            they are null) a empty sring will be returned
 	 * @return
 	 */
-	private CharSequence buildFragment(KrailView viewInstance, CharSequence pattern, Parameters parameters, boolean optional) {
+	private CharSequence buildFragment(NavigationState navigationState, CharSequence pattern, boolean optional) {
 		boolean foundNotNullParameter = false;
 
 		int lastAppendPosition = 0;
@@ -130,7 +130,7 @@ public abstract class AbstractNode implements SitemapNode {
 		while (m.find()) {
 			CharSequence before = pattern.subSequence(lastAppendPosition, m.start());
 			sb.append(before);
-			CharSequence optionalFragment = buildFragment(viewInstance, m.group(1), parameters, true);
+			CharSequence optionalFragment = buildFragment(navigationState, m.group(1), true);
 			if (optionalFragment.length() > 0) {
 				foundNotNullParameter = true;
 			}
@@ -146,7 +146,7 @@ public abstract class AbstractNode implements SitemapNode {
 		while (m.find()) {
 			CharSequence before = pattern.subSequence(lastAppendPosition, m.start());
 			sb.append(before);
-			String value = parameters.getAsString(m.group(1), viewInstance);
+			String value = navigationState.parameters().getAsString(m.group(1), navigationState.getViewInstance());
 			if (value != null) {
 				foundNotNullParameter = true;
 			}

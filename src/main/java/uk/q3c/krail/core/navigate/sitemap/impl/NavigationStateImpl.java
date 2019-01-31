@@ -26,7 +26,7 @@ public class NavigationStateImpl implements NavigationState {
 
 	@Override
 	public String getFragment() {
-		return node.buildFragment(getView(), parameters);
+		return node.buildFragment(this);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class NavigationStateImpl implements NavigationState {
 	}
 
 	@Override
-	public KrailView getView() {
+	public KrailView getViewInstance() {
 		if (viewInstance == null) {
 			viewInstance = buildViewInstance();
 		}

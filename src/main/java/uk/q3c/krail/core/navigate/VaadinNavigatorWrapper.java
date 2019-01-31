@@ -131,9 +131,9 @@ public class VaadinNavigatorWrapper extends Navigator{
 			@Override
 			public void beforeViewChange(KrailViewChangeEvent event) {
 				ViewChangeEvent e = new ViewChangeEvent(VaadinNavigatorWrapper.this,
-						event.getSourceNavigationState().getView(),
-						event.getTargetNavigationState().getView(),
-						event.getTargetNavigationState().getView().getTitle(),
+						event.getSourceNavigationState().getViewInstance(),
+						event.getTargetNavigationState().getViewInstance(),
+						event.getTargetNavigationState().getViewInstance().getTitle(),
 						event.getTargetNavigationState().parameters()
 								.toString());
 				listener.beforeViewChange(e);
@@ -144,9 +144,9 @@ public class VaadinNavigatorWrapper extends Navigator{
 			@Override
 			public void afterViewChange(KrailViewChangeEvent event) {
 				ViewChangeEvent e = new ViewChangeEvent(VaadinNavigatorWrapper.this,
-						event.getSourceNavigationState().getView(),
-						event.getTargetNavigationState().getView(),
-						event.getTargetNavigationState().getView().getTitle(),
+						event.getSourceNavigationState().getViewInstance(),
+						event.getTargetNavigationState().getViewInstance(),
+						event.getTargetNavigationState().getViewInstance().getTitle(),
 						event.getTargetNavigationState().parameters()
 								.toString());
 				listener.afterViewChange(e);
