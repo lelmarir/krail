@@ -34,7 +34,11 @@ public class BrowserCookie {
 	}
 
 	private static String encode(String value) throws UnsupportedEncodingException {
-		return URLEncoder.encode(value, "UTF-8");
+		if (value == null) {
+			return "";
+		} else {
+			return URLEncoder.encode(value, "UTF-8");
+		}
 	}
 
 	private static String decode(String string) throws UnsupportedEncodingException {
@@ -65,7 +69,7 @@ public class BrowserCookie {
 		StringBuilder sb = new StringBuilder("document.cookie = \"");
 
 		try {
-			sb.append(encode(key)+"="+encode(value));
+			sb.append(encode(key) + "=" + encode(value));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -82,6 +86,10 @@ public class BrowserCookie {
 		sb.append("\"");
 
 		JavaScript.getCurrent().execute(sb.toString());
+	}
+	
+	public static void removeCookie(String key) {
+		setCookie(key, null, LocalDateTime.of(1970, 1, 1, 0, 0));
 	}
 
 	public static void getCookieValueAsync(String key, final Callback callback) {
@@ -114,18 +122,14 @@ public class BrowserCookie {
 	 * Binds a HasValue&lt;V&gt; to a cookie that lives for a month. The cookies
 	 * value is updated via a ValueChangeListener.
 	 *
-	 * @param <V>
-	 *            The value-type of the HasValue&lt;&gt;
-	 * @param field
-	 *            The HasValue&lt;V&gt; that gets bound.
-	 * @param name
-	 *            The name of the cookie
-	 * @param cb
-	 *            A BrowserCookie.Callback that gets called with the actual value of
-	 *            the cookie. The value is guaranteed to be not null.
+	 * @param       <V> The value-type of the HasValue&lt;&gt;
+	 * @param field The HasValue&lt;V&gt; that gets bound.
+	 * @param name  The name of the cookie
+	 * @param cb    A BrowserCookie.Callback that gets called with the actual value
+	 *              of the cookie. The value is guaranteed to be not null.
 	 *
-	 * @throws IllegalArgumentException
-	 *             if field or name are null or if name is empty.
+	 * @throws IllegalArgumentException if field or name are null or if name is
+	 *                                  empty.
 	 */
 	public static <V> void bindValueToCookie(HasValue<V> field, String name, Callback cb) {
 		if (Objects.isNull(name) || name.isEmpty()) {
@@ -151,13 +155,11 @@ public class BrowserCookie {
 	 * cookies value is updated via a ValueChangeListener. Its crrent value is
 	 * copied into the HasValue&lt;String&gt;.
 	 *
-	 * @param field
-	 *            The HasValue&lt;String&gt; that gets bound.
-	 * @param name
-	 *            The name of the cookie
+	 * @param field The HasValue&lt;String&gt; that gets bound.
+	 * @param name  The name of the cookie
 	 *
-	 * @throws IllegalArgumentException
-	 *             if field or name are null or if name is empty.
+	 * @throws IllegalArgumentException if field or name are null or if name is
+	 *                                  empty.
 	 */
 	public static void bindValueToCookie(HasValue<String> field, String name) {
 		if (Objects.isNull(name) || name.isEmpty()) {
