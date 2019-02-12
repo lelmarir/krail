@@ -46,7 +46,7 @@ public class BrowserCookie {
 	}
 
 	public static void setCookie(String key, String value) throws RuntimeException {
-		setCookie(key, value, "/", LocalDateTime.now().plusYears(10l));
+		setCookie(key, value, null, LocalDateTime.now().plusYears(10l));
 	}
 
 	public static void setCookie(String key, String value, LocalDateTime expirationTime) {
