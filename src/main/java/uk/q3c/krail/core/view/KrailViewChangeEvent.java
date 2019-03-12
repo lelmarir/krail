@@ -15,5 +15,9 @@ public interface KrailViewChangeEvent {
 	Navigator getNavigator();
 	NavigationState getSourceNavigationState();
 	NavigationState getTargetNavigationState();
+	
+	default void updateUriFragment() {
+		getNavigator().updateUriFragment();
+	}
 
 }

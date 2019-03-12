@@ -1,6 +1,7 @@
 package uk.q3c.krail.core.navigate.sitemap.impl;
 
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,12 +114,11 @@ public abstract class AbstractNode implements SitemapNode {
 
 	/**
 	 * 
-	 * @param viewInstance 
+	 * @param viewInstance
 	 * @param pattern
 	 * @param parameters
-	 * @param optional
-	 *            if true and no parameters are replaced in the pattern (becouse
-	 *            they are null) a empty sring will be returned
+	 * @param optional     if true and no parameters are replaced in the pattern
+	 *                     (becouse they are null) a empty sring will be returned
 	 * @return
 	 */
 	private CharSequence buildFragment(NavigationState navigationState, CharSequence pattern, boolean optional) {
@@ -130,11 +130,15 @@ public abstract class AbstractNode implements SitemapNode {
 		while (m.find()) {
 			CharSequence before = pattern.subSequence(lastAppendPosition, m.start());
 			sb.append(before);
-			CharSequence optionalFragment = buildFragment(navigationState, m.group(1), true);
-			if (optionalFragment.length() > 0) {
-				foundNotNullParameter = true;
+			try {
+				CharSequence optionalFragment = buildFragment(navigationState, m.group(1), true);
+				if (optionalFragment.length() > 0) {
+					foundNotNullParameter = true;
+				}
+				sb.append(optionalFragment);
+			} catch (NoSuchElementException e) {
+				// canot be build, but it is optional, so will be ignoed
 			}
-			sb.append(optionalFragment);
 			lastAppendPosition = m.end();
 		}
 		sb.append(pattern.subSequence(lastAppendPosition, pattern.length()));
