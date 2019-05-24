@@ -20,12 +20,16 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.multibindings.Multibinder;
+
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.RedirectNode;
 import uk.q3c.krail.core.navigate.sitemap.DefaultSitemap.ViewNode;
 import uk.q3c.krail.core.navigate.sitemap.annotations.AnnotationSitemapLoader;
 import uk.q3c.krail.core.navigate.sitemap.impl.AbstractNode;
 import uk.q3c.krail.core.navigate.sitemap.impl.ParametersImpl;
-import uk.q3c.krail.core.view.DefaultErrorView;
 import uk.q3c.krail.core.view.DefaultLoginView;
 import uk.q3c.krail.core.view.DefaultLogoutView;
 import uk.q3c.krail.core.view.DefaultPrivateHomeView;
@@ -33,15 +37,9 @@ import uk.q3c.krail.core.view.DefaultPublicHomeView;
 import uk.q3c.krail.core.view.ErrorView;
 import uk.q3c.util.TableBuilder;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.multibindings.Multibinder;
-
 public class SitemapModule extends AbstractModule {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(SitemapModule.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapModule.class);
 
 	private static class SitemapProvider implements Provider<Sitemap> {
 
@@ -55,8 +53,7 @@ public class SitemapModule extends AbstractModule {
 				loader.configure(sitemap);
 			}
 
-			sitemap.addView("error", ErrorView.class).setAccesControlRule(
-					AccesControl.PUBLIC);
+			sitemap.addView("error", ErrorView.class).setAccesControlRule(AccesControl.PUBLIC);
 
 			setMissingStandardViews(sitemap);
 
@@ -78,9 +75,8 @@ public class SitemapModule extends AbstractModule {
 			{
 				TableBuilder tabeBuilder = new TableBuilder();
 				for (Entry<String, AbstractNode> node : nodes.entrySet()) {
-					tabeBuilder.addRow("   ", "/" + node.getKey(), "  to  ",
-							format(node.getValue()), "  in  ", node
-									.getValue().getAccesControlRule().toString());
+					tabeBuilder.addRow("   ", "/" + node.getKey(), "  to  ", format(node.getValue()), "  in  ",
+							node.getValue().getAccesControlRule().toString());
 				}
 				sb.append(tabeBuilder.toString() + "\n");
 			}
@@ -88,14 +84,12 @@ public class SitemapModule extends AbstractModule {
 			sb.append("Standard Pages:" + "\n");
 			{
 				TableBuilder tabeBuilder = new TableBuilder();
-				for (Entry<StandardPageKey, SitemapNode> sp : sitemap
-						.getStandardViews().entrySet()) {
-					tabeBuilder.addRow("   ", sp.getKey().toString(), "  to  ",
-							format(sp.getValue()));
+				for (Entry<StandardPageKey, SitemapNode> sp : sitemap.getStandardViews().entrySet()) {
+					tabeBuilder.addRow("   ", sp.getKey().toString(), "  to  ", format(sp.getValue()));
 				}
 				sb.append(tabeBuilder.toString() + "\n");
 			}
-			sb.append("-----------------------------------------" +  "\n");
+			sb.append("-----------------------------------------" + "\n");
 			LOGGER.info(sb.toString());
 		}
 
@@ -118,32 +112,28 @@ public class SitemapModule extends AbstractModule {
 
 		private void setMissingStandardViews(Sitemap sitemap) {
 			if (sitemap.getStandardView(StandardPageKey.Public_Home) == null) {
-				ViewNode node = sitemap
-						.addView("", DefaultPublicHomeView.class);
+				ViewNode node = sitemap.addView("", DefaultPublicHomeView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
 				sitemap.setStandardView(StandardPageKey.Public_Home, node);
 			}
 			if (sitemap.getStandardView(StandardPageKey.Private_Home) == null) {
-				ViewNode node = sitemap.addView("private",
-						DefaultPrivateHomeView.class);
+				ViewNode node = sitemap.addView("private", DefaultPrivateHomeView.class);
 				node.setAccesControlRule(AccesControl.AUTHENTICATED);
 				sitemap.setStandardView(StandardPageKey.Private_Home, node);
 			}
 			if (sitemap.getStandardView(StandardPageKey.Log_In) == null) {
-				ViewNode node = sitemap
-						.addView("login", DefaultLoginView.class);
+				ViewNode node = sitemap.addView("login", DefaultLoginView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
 				sitemap.setStandardView(StandardPageKey.Log_In, node);
 			}
 			if (sitemap.getStandardView(StandardPageKey.Log_Out) == null) {
-				ViewNode node = sitemap.addView("logout",
-						DefaultLogoutView.class);
+				ViewNode node = sitemap.addView("logout", DefaultLogoutView.class);
 				node.setAccesControlRule(AccesControl.PUBLIC);
 				sitemap.setStandardView(StandardPageKey.Log_Out, node);
 			}
 		}
 	}
-	
+
 	private final Reflections basePackageReflections;
 
 	public SitemapModule(String basePackage) {
@@ -154,33 +144,23 @@ public class SitemapModule extends AbstractModule {
 		super();
 		this.basePackageReflections = basePackageReflections;
 	}
-	
+
 	@Override
 	protected void configure() {
-		Multibinder<SitemapLoader> sitemapLoadersBinder = Multibinder
-				.newSetBinder(binder(), SitemapLoader.class);
+		Multibinder<SitemapLoader> sitemapLoadersBinder = Multibinder.newSetBinder(binder(), SitemapLoader.class);
 
 		bindLoaders(sitemapLoadersBinder);
 
-		bind(Sitemap.class).toProvider(SitemapProvider.class)
-				.asEagerSingleton();
-		//FIXME: static injection
+		bind(Sitemap.class).toProvider(SitemapProvider.class).asEagerSingleton();
+		// FIXME: static injection
 		requestStaticInjection(ParametersImpl.class);
 
-		bindErrorView();
-	}
-
-	/**
-	 * Override to provide a custom implementation of the ErrorView
-	 */
-	protected void bindErrorView() {
-		bind(ErrorView.class).to(DefaultErrorView.class);
 	}
 
 	/**
 	 * Overide this to chaange the default used SitemapLoader
-	 * (AnnotationSitemapLoader that will scann all the classpath) or add
-	 * others: <br>
+	 * (AnnotationSitemapLoader that will scann all the classpath) or add others:
+	 * <br>
 	 * <br>
 	 * <code>
 	 * 	super.bindLoaders(sitemapLoadersBinder); //to keep the Default Loader
@@ -188,8 +168,7 @@ public class SitemapModule extends AbstractModule {
 	 * </code>
 	 */
 	protected void bindLoaders(Multibinder<SitemapLoader> sitemapLoadersBinder) {
-		sitemapLoadersBinder.addBinding().toInstance(
-				new AnnotationSitemapLoader(basePackageReflections));
+		sitemapLoadersBinder.addBinding().toInstance(new AnnotationSitemapLoader(basePackageReflections));
 	}
 
 }
