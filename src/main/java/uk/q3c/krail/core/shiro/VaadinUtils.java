@@ -6,7 +6,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -51,6 +50,7 @@ public abstract class VaadinUtils {
 
 	public static <T> Future<T> runInSession(VaadinSession session, Function<VaadinSession, T> function)
 			throws InterruptedException, ExecutionException {
+		assert session != null;
 		final AtomicReference<T> result = new AtomicReference<T>(null);
 		if(!session.hasLock()) {
 			Future<Void> future = session.access(() -> {
