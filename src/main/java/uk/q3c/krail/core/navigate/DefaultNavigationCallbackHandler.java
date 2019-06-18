@@ -14,10 +14,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,6 @@ import uk.q3c.krail.core.navigate.parameters.Parameters;
 import uk.q3c.krail.core.view.KrailView;
 import uk.q3c.krail.core.view.KrailViewChangeEvent;
 import uk.q3c.krail.core.view.KrailViewChangeEvent.CancellableKrailViewChangeEvent;
-import uk.q3c.krail.core.view.KrailViewChangeEventImpl.CancellableWrapper;
 import uk.q3c.util.ReversedList;
 
 public class DefaultNavigationCallbackHandler implements NavigationCallbackHandler {
@@ -99,7 +98,10 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 		if (type instanceof Class) {
 			return ((Class<?>) type).isAssignableFrom(clazz);
 		} else if (type instanceof ParameterizedType) {
-			return false;
+			// FIXME: è potenzialmente sbagliato (isAssignableFrom(List<String>,
+			// List<Integer>) == true), ma forse i controlli in compilazioen impediscono che
+			// questa situazione si possa verificare. da analizzare meglio
+			return isAssignableFrom(((ParameterizedType) type).getRawType(), clazz);
 		} else {
 			throw new IllegalArgumentException("not implemented: " + type + " (" + type.getClass() + ")");
 		}
