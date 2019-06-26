@@ -273,6 +273,10 @@ public class DefaultNavigationCallbackHandler implements NavigationCallbackHandl
 			parametersLoop: for (int i = 0; i < parametersTypes.length; i++) {
 				Parameter parameterAnnotation;
 				if (event != null && isAssignableFrom(parametersTypes[i], event.getClass())) {
+					if (getAnnotation(parametersAnnotations[i], Parameter.class) != null) {
+						throw new IllegalStateException(
+								"parameter {} of type {} mathc for the injection of the event, but it is also annotated as @Parameter");
+					}
 					args[i] = event;
 					LOGGER.trace("parameter {} of type {} -> CancellableKrailViewChangeEvent", i, parametersTypes[i]);
 				} else if ((parameterAnnotation = getAnnotation(parametersAnnotations[i], Parameter.class)) != null) {
