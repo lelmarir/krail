@@ -90,7 +90,7 @@ public class SitemapModule extends AbstractModule {
 				sb.append(tabeBuilder.toString() + "\n");
 			}
 			sb.append("-----------------------------------------" + "\n");
-			LOGGER.info(sb.toString());
+			LOGGER.debug("{}", sb);
 		}
 
 		private String format(SitemapNode node) {
