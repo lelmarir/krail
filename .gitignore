@@ -22,3 +22,5 @@ README.md~
 /src/resources/test
 sh.exe.stackdump
 /target/
+/pom.xml.releaseBackup
+/release.properties
